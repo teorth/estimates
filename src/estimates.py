@@ -334,20 +334,14 @@ class Ordering:
         return new_expressions
 
     def order_simplify(self, expr):
-        """Simplifies an expression using the ordering hypotheses."""
+        """Simplifies an expression using the ordering hypotheses, e.g., simplifying max(X,Y) to Y if we know X <~ Y."""
 #        print(f"Attempting to simplify {expr} using the ordering hypotheses {self}.")
         if isinstance(expr, Variable):
             return expr
         elif isinstance(expr, Constant):
             return one
         elif isinstance(expr, Add):
-            left = self.order_simplify(expr.left)
-            right = self.order_simplify(expr.right)
-            if self.can_prove(left <= right):
-                return right
-            if self.can_prove(right <= left):
-                return left
-            return Max(left, right)
+            return self.order_simplify(max(expr.left, expr.right))  # outsource processing of Add to max  
         elif isinstance(expr, Mul):
             left = self.order_simplify(expr.left)
             right = self.order_simplify(expr.right)
@@ -368,6 +362,7 @@ class Ordering:
                 return one
             return Power(base, expr.exponent)
         elif isinstance(expr, Max):
+# TODO: concatenate any maxima in the operands to create a single maximum
             new_operands = self.maximal_elements( {self.order_simplify(op) for op in expr.operands} )
             if len(new_operands) == 0:
                 return one
@@ -375,6 +370,7 @@ class Ordering:
                 return new_operands.pop()
             return Max(*new_operands)
         elif isinstance(expr, Min):
+# TODO: concatenate any minima in the operands to create a single minimum
             new_operands = self.minimal_elements( {self.order_simplify(op) for op in expr.operands} )
             if len(new_operands) == 0:
                 return one
@@ -477,10 +473,12 @@ class Assumptions:
         """Checks if a statement can be proven from the assumptions."""
         print(f"Checking if we can bound {expr1} by {expr2} from the given axioms.")
 
+        # start collecting all the case splittings we will use.  First we collect the expressions that would require splittings appearing in the bound to be proven, as well as the ambient assumptions.
         base_splits = splittings(expr1 <= expr2)
         for assumption in self.assumptions:
             base_splits.update(splittings(assumption))
         
+        # For each such expression (which may be a max or min), we collect the cases that would be required to prove the bound.
         cases = []
         for split in base_splits:
             if isinstance(split, Max):
@@ -488,6 +486,7 @@ class Assumptions:
             elif isinstance(split, Min):
                 cases.append(cases_min(*split.operands))
 
+        # we also allow for the assumptions to contain some forced splittings.
         for split in self.splits:
             cases.append(split)
 
@@ -500,12 +499,12 @@ class Assumptions:
             if len(cases) > 0:
                 print(f"Trying case: {axioms}")
             ordering = Ordering()
-# TODO: simplify the hypotheses before adding them to the ordering
-            for assumption in self.assumptions:
-                ordering.add(assumption)
             for ax in axioms:
                 for statement in ax:
                     ordering.add(statement)
+# TODO: simplify the hypotheses before adding them to the ordering
+            for assumption in self.assumptions:
+                ordering.add(assumption)
             if not ordering.can_bound(expr1, expr2):
                 return False
 
