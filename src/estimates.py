@@ -39,12 +39,13 @@ class Expression:
         raise NotImplementedError("Must implement __str__ in subclasses")
     def __repr__(self):
         return str(self)
-    def clean(self): # removes constants
+    def clean(self): # treats all constants as a single object `one` (in particular, all constants become equal) 
         if isinstance(self, Constant):
             return one
         else:
             return self
 
+# Variable is our class for non-negative quantities, defined up to an order of magnitude
 class Variable(Expression):
     def __init__(self, name):
         self.name = name
@@ -126,6 +127,8 @@ class Constant(Expression):
 
 one = Constant(1)  # need a global constant here for equality checks (other instances of Constant(1) might not be equal to one.  Perhaps there is a more pythonic way to do this?)
 
+# TODO: add support for products of any finite number of terms (not just two)
+
 # return a dictionary where the keys are the terms in the expression and the values are the exponents in which they appear
 def monomials(expr):
     """Returns a dictionary of monomials in the expression with their exponents."""
@@ -193,6 +196,7 @@ class Statement:
     def __repr__(self):
         return str(self)
 
+# we cannot use `expr1 == expr2` to denote comparability, because we need to reserve the equality symbol for several other purposes.
 def comparable(expr1, expr2):
     """Returns a statement that compares two expressions."""
     if isinstance(expr1, Expression) and isinstance(expr2, Expression):
@@ -237,6 +241,8 @@ def expressions(statements):
 # define all the splittings associated to max(args)
 def cases_max(*args):
     cases = []
+    if len(args) < 2:
+        return cases
     for expr in args:
         ordering = []
         for other_expr in args:
@@ -248,6 +254,8 @@ def cases_max(*args):
 # define all splittings associated to min(args)
 def cases_min(*args):
     cases = []
+    if len(args) < 2:
+        return cases
     for expr in args:
         ordering = []
         for other_expr in args:
@@ -256,9 +264,10 @@ def cases_min(*args):
         cases.append(ordering)
     return cases
 
-# define all splittings associated to a Littlewood-Paley constraint (sum to zero)
+# define all splittings associated to a Littlewood-Paley constraint (sum to zero).  In such a context, two of the variables are comparable, and the others are bounded by the first two.
 def cases_lp(args):
     cases = []
+    assert len(args) == 1, "Error: Littlewood-Paley constraints cannot involve just one variable."
     for expr1, expr2 in itertools.combinations(args, 2):
         ordering = [comparable(expr1,expr2)]
         for other_expr in args:
@@ -291,7 +300,7 @@ class Ordering:
             case _:
                 raise ValueError(f"Unknown operator: {statement.op}")
 
-# sees of a statement can be directly proven from the hypotheses and transitivity
+# sees if a statement can be directly proven from the hypotheses and transitivity
     def can_prove(self, statement):
         match statement.op:
             case '<~':
