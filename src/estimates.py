@@ -412,7 +412,7 @@ class Ordering:
                 print(f"Bound was proven true by multiplying the following hypotheses :")
                 for (u,v), var in w.items():
                     if var.value() > 0:
-                        print(f"{u} <= {v} raised to power {var.value()}")
+                        print(f"{u} <~ {v} raised to power {var.value()}")
             else:
                 print("This is trivial.")
             return True

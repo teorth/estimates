@@ -19,19 +19,19 @@ We will split into the following cases:
 Trying case: ([a <~ b], [b <~ a])
 Simplify to proving (b * (a ** -1)) >= 1.
 Bound was proven true by multiplying the following hypotheses :
-a <= b raised to power 1.0
+a <~ b raised to power 1.0
 Trying case: ([a <~ b], [a <~ b])
 Simplify to proving (b * (a ** -1)) >= 1.
 Bound was proven true by multiplying the following hypotheses :
-a <= b raised to power 1.0
+a <~ b raised to power 1.0
 Trying case: ([b <~ a], [b <~ a])
 Simplify to proving (a * (b ** -1)) >= 1.
 Bound was proven true by multiplying the following hypotheses :
-b <= a raised to power 1.0
+b <~ a raised to power 1.0
 Trying case: ([b <~ a], [a <~ b])
 Simplify to proving (b * (a ** -1)) >= 1.
 Bound was proven true by multiplying the following hypotheses :
-a <= b raised to power 1.0
+a <~ b raised to power 1.0
 Bound was proven true in all cases!
 ```
 
@@ -51,19 +51,19 @@ We will split into the following cases:
 Trying case: ([b <~ a, c <~ a],)
 Simplify to proving (((a ** 0.6666666666666667) * (b ** -0.3333333333333333)) * (c ** -0.3333333333333333)) >= 1.
 Bound was proven true by multiplying the following hypotheses :
-b <= a raised to power 0.33333333
-c <= a raised to power 0.33333333
+b <~ a raised to power 0.33333333
+c <~ a raised to power 0.33333333
 Trying case: ([a <~ b, c <~ b],)
 Simplify to proving (((b ** 0.6666666666666667) * (a ** -0.3333333333333333)) * (c ** -0.3333333333333333)) >= 1.
 Bound was proven true by multiplying the following hypotheses :
-a <= b raised to power 0.33333333
-c <= b raised to power 0.33333333
+a <~ b raised to power 0.33333333
+c <~ b raised to power 0.33333333
 Trying case: ([a <~ c, b <~ c],)
 Simplify to proving (((c ** 0.6666666666666667) * (a ** -0.3333333
 333333333)) * (b ** -0.3333333333333333)) >= 1.
 Bound was proven true by multiplying the following hypotheses :
-a <= c raised to power 0.33333333
-b <= c raised to power 0.33333333
+a <~ c raised to power 0.33333333
+b <~ c raised to power 0.33333333
 Bound was proven true in all cases!
 ```
 One can add initial hypotheses.  For instance, to show that $ac \lesssim bd$ whenever $a \lesssim b \lesssim c \lesssim d$, the code
@@ -73,9 +73,9 @@ One can add initial hypotheses.  For instance, to show that $ac \lesssim bd$ whe
     c = Variable("c")
     d = Variable("d")
     assumptions = Assumptions()
-    assumptions.add(a <= b)
-    assumptions.add(b <= c)
-    assumptions.add(c <= d)
+    assumptions.add(a <~ b)
+    assumptions.add(b <~ c)
+    assumptions.add(c <~ d)
     assumptions.can_bound(a * c, b * d)
 ```
 will produce
@@ -86,8 +86,8 @@ Adding assumption: c <~ d
 Checking if we can bound (a * c) by (b * d) from the given axioms.
 Simplify to proving (((b * d) * (a ** -1)) * (c ** -1)) >= 1.
 Bound was proven true by multiplying the following hypotheses :
-a <= b raised to power 1.0
-c <= d raised to power 1.0
+a <~ b raised to power 1.0
+c <~ d raised to power 1.0
 Bound was proven true in all cases!
 ```
 Of course, sometimes the hypotheses are not sufficient to establish the claim, for instance $a \lesssim b \lesssim c \lesssim d$ does not imply $ad \lesssim bc$.  Indeed, running
@@ -97,9 +97,9 @@ Of course, sometimes the hypotheses are not sufficient to establish the claim, f
     c = Variable("c")
     d = Variable("d")
     assumptions = Assumptions()
-    assumptions.add(a <= b)
-    assumptions.add(b <= c)
-    assumptions.add(c <= d)
+    assumptions.add(a <~ b)
+    assumptions.add(b <~ c)
+    assumptions.add(c <~ d)
     assumptions.can_bound(a * d, b * c)
 ```
 gives
