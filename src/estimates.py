@@ -1,6 +1,7 @@
 import networkx as nx
 import pulp
 import itertools
+from itertools import product
 
 # Symbolic expression classes for order of magnitude estimates (where we only care about magnitudes up to a constant factor)
 
@@ -157,20 +158,20 @@ def monomial_simplify(expr):
         return Statement(left, expr.op, right)
     else:
         first = True
+        result = Constant(1)
         for key, value in monomials(expr).items():
+            if value == 0:
+                factor = Constant(1)
+            elif value == 1:
+                factor = key
+            else:
+                factor = key ** value
             if first:
-                if value == 1:
-                    result = key
-                else:
-                    result = key ** value
+                result = factor
                 first = False
             else:
-                if value == 1:
-                    result = result * key
-                else:
-                    result = result * (key ** value)
-        return result if not first else Constant(1)
-
+                result = result * factor
+        return result  
 
 # Statements are formal assertions involving expressions X, Y, such as X \lesssim Y, X \sim Y, or X \gtrsim Y.
 # 
@@ -248,7 +249,7 @@ def cases_min(*args):
     return cases
 
 # define all splittings associated to a Littlewood-Paley constraint (sum to zero)
-def cases_lp(*args):
+def cases_lp(args):
     cases = []
     for expr1, expr2 in itertools.combinations(args, 2):
         ordering = [comparable(expr1,expr2)]
@@ -259,14 +260,18 @@ def cases_lp(*args):
     return cases
 
 
-# we store hypotheses as a directed graph, where an edge from A to B means A is bounded by a constant times B
-class Hypotheses:
+# An Ordering directed graph, where an edge from A to B means A is bounded by a constant times B
+class Ordering:
     def __init__(self):
         self.graph = nx.DiGraph()
+        self.statements = set()
 
+    def __str__(self):
+        return(str(self.statements))
+         
     """Assumes a statement, adding it to the directed graph of of hypotheses."""
     def add(self, statement):
-        print(f"Adding statement: {statement}")
+        self.statements.add(statement)
         match statement.op:
             case '<~':
                 self.graph.add_edge(statement.left, statement.right)
@@ -292,19 +297,23 @@ class Hypotheses:
     def maximal_elements(self, expressions):
         """Returns the potentially maximal elements in a set of expressions."""
         new_expressions = expressions.copy()
-        for expr in expressions:
-            for other_expr in expressions:
-                if expr != other_expr and self.can_prove(expr <= other_expr):
-                    new_expressions.discard(expr)
+        for expr1, expr2 in itertools.combinations(expressions, 2):
+            if expr1 in new_expressions and expr2 in new_expressions:
+                if self.can_prove(expr1 <= expr2):
+                    new_expressions.discard(expr1)
+                elif self.can_prove(expr2 <= expr1):
+                    new_expressions.discard(expr2)
         return new_expressions
     
     def minimal_elements(self, expressions):
         """Returns the potentially minimal elements in a set of expressions."""
         new_expressions = expressions.copy()
-        for expr in expressions:
-            for other_expr in expressions:
-                if expr != other_expr and self.can_prove(other_expr <= expr):
-                    new_expressions.discard(expr)
+        for expr1, expr2 in itertools.combinations(expressions, 2):
+            if expr1 in new_expressions and expr2 in new_expressions:
+                if self.can_prove(expr1 <= expr2):
+                    new_expressions.discard(expr2)
+                elif self.can_prove(expr2 <= expr1):
+                    new_expressions.discard(expr1)
         return new_expressions
 
     def order_simplify(self, expr):
@@ -312,7 +321,7 @@ class Hypotheses:
         if isinstance(expr, Variable):
             return expr
         elif isinstance(expr, Constant):
-            return expr
+            return Constant(1) # normalize constant to 1
         elif isinstance(expr, Add):
             left = self.order_simplify(expr.left)
             right = self.order_simplify(expr.right)
@@ -320,26 +329,35 @@ class Hypotheses:
                 return right
             if self.can_prove(right <= left):
                 return left
-            return Add(left, right)
+            return Max(left, right)
         elif isinstance(expr, Mul):
             left = self.order_simplify(expr.left)
             right = self.order_simplify(expr.right)
+            if isinstance(left, Constant):
+                return right
+            if isinstance(right, Constant):
+                return left
             return Mul(left, right)
         elif isinstance(expr, Div):
             left = self.order_simplify(expr.left)
             right = self.order_simplify(expr.right)
+            if isinstance(right, Constant):
+                return left
             return Div(left, right)
         elif isinstance(expr, Power):
             base = self.order_simplify(expr.base)
-            exponent = self.order_simplify(expr.exponent)
-            return Power(base, exponent)
+            return Power(base, expr.exponent)
         elif isinstance(expr, Max):
             new_operands = self.maximal_elements( {self.order_simplify(op) for op in expr.operands} )
+            if len(new_operands) == 0:
+                return Constant(1)
             if len(new_operands) == 1:
                 return new_operands.pop()
             return Max(*new_operands)
         elif isinstance(expr, Min):
             new_operands = self.minimal_elements( {self.order_simplify(op) for op in expr.operands} )
+            if len(new_operands) == 0:
+                return Constant(1)
             if len(new_operands) == 1:
                 return new_operands.pop()
             return Min(*new_operands)
@@ -353,7 +371,7 @@ class Hypotheses:
 # tests if one can prove expr1 <~ expr2 using the hypotheses
     def can_bound(self, expr1, expr2):
         expr = self.order_simplify(expr2/expr1)
-        print(f"Simplify to proving {monomial_simplify(expr)} >= 1")
+        print(f"Simplify to proving {monomial_simplify(expr)} >= 1.")
         terms = monomials(expr)
         for key, _ in terms.items():
             self.graph.add_node(key)  # Ensure all variables are nodes in the graph
@@ -375,15 +393,93 @@ class Hypotheses:
         silent_solver = pulp.PULP_CBC_CMD(msg=False)
         prob.solve(silent_solver)
         if pulp.LpStatus[prob.status] == 'Optimal':
-            print("Bound was proven true by multiplying the following hypotheses:")
-            for (u,v), var in w.items():
-                if var.value() > 0:
-                    print(f"{u} <= {v} raised to power {var.value()}")
+            if pulp.value(prob.objective) > 0:
+                print(f"Bound was proven true by multiplying the following hypotheses :")
+                for (u,v), var in w.items():
+                    if var.value() > 0:
+                        print(f"{u} <= {v} raised to power {var.value()}")
+            else:
+                print("This is trivial.")
             return True
         else:  
             print("Unable to verify bound.")
             return False
  
+# Collect all the terms in a given expression that require splitting into cases
+def splittings(expr):
+    if isinstance(expr, (Variable, Constant)):
+        return set()
+    elif isinstance(expr, Add):
+        splits = splittings(expr.left).union(splittings(expr.right))
+        splits.add(Max(expr.left, expr.right))
+        return splits
+    elif isinstance(expr, (Mul, Div)):
+        return splittings(expr.left).union(splittings(expr.right))
+    elif isinstance(expr, Power):
+        return splittings(expr.base).union(splittings(expr.exponent))
+    elif isinstance(expr, (Max,Min)):
+        splits = set()
+        for operand in expr.operands:
+            splits.update(splittings(operand))
+        splits.add(expr)
+        return splits
+    elif isinstance(expr, Statement):
+        left_splits = splittings(expr.left)
+        right_splits = splittings(expr.right)
+        return left_splits.union(right_splits)
+    else:
+        raise TypeError(f"Unsupported expression type: {type(expr)}")
+
+class Assumptions:
+    def __init__(self):
+        self.assumptions = []
+        self.lp_assumptions = []
+    
+    def add(self, statement):
+        print(f"Adding assumption: {statement}")
+        self.assumptions.append(statement)
+
+    def add_lp(self, *lp_statement):
+        print(f"Adding Littlewood-Paley assumption that expressions of magnitudes {lp_statement} can sum to zero.")
+        self.lp_assumptions.append(lp_statement)
+
+    def can_bound(self, expr1, expr2):
+        """Checks if a statement can be proven from the assumptions."""
+        print(f"Checking if we can bound {expr1} by {expr2} from the given axioms.")
+
+        splits = splittings(expr1 <= expr2)
+        for assumption in self.assumptions:
+            splits.update(splittings(assumption))
+        
+        cases = []
+        for split in splits:
+            if isinstance(split, Max):
+                cases.append(cases_max(*split.operands))
+            elif isinstance(split, Min):
+                cases.append(cases_min(*split.operands))
+
+        for lp in self.lp_assumptions:
+            cases.append(cases_lp(lp))
+
+        print("We will split into the following cases:")
+        for case in cases:
+            print(case)
+
+        for axioms in product(*cases):
+            print(f"Trying case: {axioms}")
+            ordering = Ordering()
+# TODO: simplify the hypotheses before adding them to the ordering
+            for assumption in self.assumptions:
+                ordering.add(assumption)
+            for ax in axioms:
+                for statement in ax:
+                    ordering.add(statement)
+            if not ordering.can_bound(expr1, expr2):
+                return False
+
+        print("Bound was proven true in all cases!")
+        return True
+
 
 # Example usage
 N_1 = Variable("N_1")
@@ -391,13 +487,18 @@ N_2 = Variable("N_2")
 N_3 = Variable("N_3")
 N_4 = Variable("N_4")
 
-axioms = Hypotheses()
-axioms.add(N_1 <= N_2)
-axioms.add(N_2 <= N_3)
-axioms.add(N_2 <= N_4)
+#axioms = Ordering()
+#axioms.add(N_1 <= N_2)
+#axioms.add(N_2 <= N_3)
+#axioms.add(N_2 <= N_4)
+#print(axioms)
 
-print(cases_max(N_1, N_2, N_3, N_4))
-print(cases_min(N_1, N_2, N_3, N_4))
-print(cases_lp(N_1, N_2, N_3, N_4))
+assumptions = Assumptions()
+
+assumptions.can_bound((N_1*N_2*N_3)**(1/3), max(N_1,N_2,N_3))
+
+#print(cases_max(N_1, N_2, N_3, N_4))
+#print(cases_min(N_1, N_2, N_3, N_4))
+#print(cases_lp(N_1, N_2, N_3, N_4))
 
 # axioms.can_bound(N_1*N_1, N_3*N_4)
