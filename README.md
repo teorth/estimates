@@ -73,9 +73,9 @@ One can add initial hypotheses.  For instance, to show that $ac \lesssim bd$ whe
     c = Variable("c")
     d = Variable("d")
     assumptions = Assumptions()
-    assumptions.add(a <~ b)
-    assumptions.add(b <~ c)
-    assumptions.add(c <~ d)
+    assumptions.add(a <= b)
+    assumptions.add(b <= c)
+    assumptions.add(c <= d)
     assumptions.can_bound(a * c, b * d)
 ```
 will produce
@@ -97,9 +97,9 @@ Of course, sometimes the hypotheses are not sufficient to establish the claim, f
     c = Variable("c")
     d = Variable("d")
     assumptions = Assumptions()
-    assumptions.add(a <~ b)
-    assumptions.add(b <~ c)
-    assumptions.add(c <~ d)
+    assumptions.add(a <= b)
+    assumptions.add(b <= c)
+    assumptions.add(c <= d)
     assumptions.can_bound(a * d, b * c)
 ```
 gives
