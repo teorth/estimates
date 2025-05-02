@@ -39,6 +39,11 @@ class Expression:
         raise NotImplementedError("Must implement __str__ in subclasses")
     def __repr__(self):
         return str(self)
+    def clean(self): # removes constants
+        if isinstance(self, Constant):
+            return one
+        else:
+            return self
 
 class Variable(Expression):
     def __init__(self, name):
@@ -71,6 +76,7 @@ class Div(Expression):
         return f"({self.left} / {self.right})"
 
 class Power(Expression):
+# TODO: typecheck that exponent is a constant
     def __init__(self, base, exponent):
         self.base = base
         self.exponent = exponent
@@ -118,6 +124,8 @@ class Constant(Expression):
             return str(int(self.value))
         return str(self.value)
 
+one = Constant(1)  # need a global constant here for equality checks (other instances of Constant(1) might not be equal to one.  Perhaps there is a more pythonic way to do this?)
+
 # return a dictionary where the keys are the terms in the expression and the values are the exponents in which they appear
 def monomials(expr):
     """Returns a dictionary of monomials in the expression with their exponents."""
@@ -158,10 +166,10 @@ def monomial_simplify(expr):
         return Statement(left, expr.op, right)
     else:
         first = True
-        result = Constant(1)
+        result = one
         for key, value in monomials(expr).items():
             if value == 0:
-                factor = Constant(1)
+                factor = one
             elif value == 1:
                 factor = key
             else:
@@ -274,12 +282,12 @@ class Ordering:
         self.statements.add(statement)
         match statement.op:
             case '<~':
-                self.graph.add_edge(statement.left, statement.right)
+                self.graph.add_edge(statement.left.clean(), statement.right.clean())
             case '>~':
-                self.graph.add_edge(statement.right, statement.left)
+                self.graph.add_edge(statement.right.clean(), statement.left.clean())
             case '~':
-                self.graph.add_edge(statement.left, statement.right)
-                self.graph.add_edge(statement.right, statement.left)
+                self.graph.add_edge(statement.left.clean(), statement.right.clean())
+                self.graph.add_edge(statement.right.clean(), statement.left.clean())
             case _:
                 raise ValueError(f"Unknown operator: {statement.op}")
 
@@ -287,12 +295,12 @@ class Ordering:
     def can_prove(self, statement):
         match statement.op:
             case '<~':
-                return nx.has_path(self.graph, statement.left, statement.right)
+                return nx.has_path(self.graph, statement.left.clean(), statement.right.clean())
             case '>~':
-                return nx.has_path(self.graph, statement.right, statement.left)
+                return nx.has_path(self.graph, statement.right.clean(), statement.left.clean())
             case '~':
-                return (nx.has_path(self.graph, statement.left, statement.right) and
-                        nx.has_path(self.graph, statement.right, statement.left)) 
+                return (nx.has_path(self.graph, statement.left.clean(), statement.right.clean()) and
+                        nx.has_path(self.graph, statement.right.clean(), statement.left.clean())) 
 
     def maximal_elements(self, expressions):
         """Returns the potentially maximal elements in a set of expressions."""
@@ -318,10 +326,11 @@ class Ordering:
 
     def order_simplify(self, expr):
         """Simplifies an expression using the ordering hypotheses."""
+#        print(f"Attempting to simplify {expr} using the ordering hypotheses {self}.")
         if isinstance(expr, Variable):
             return expr
         elif isinstance(expr, Constant):
-            return Constant(1) # normalize constant to 1
+            return one
         elif isinstance(expr, Add):
             left = self.order_simplify(expr.left)
             right = self.order_simplify(expr.right)
@@ -346,18 +355,20 @@ class Ordering:
             return Div(left, right)
         elif isinstance(expr, Power):
             base = self.order_simplify(expr.base)
+            if isinstance(base, Constant):
+                return one
             return Power(base, expr.exponent)
         elif isinstance(expr, Max):
             new_operands = self.maximal_elements( {self.order_simplify(op) for op in expr.operands} )
             if len(new_operands) == 0:
-                return Constant(1)
+                return one
             if len(new_operands) == 1:
                 return new_operands.pop()
             return Max(*new_operands)
         elif isinstance(expr, Min):
             new_operands = self.minimal_elements( {self.order_simplify(op) for op in expr.operands} )
             if len(new_operands) == 0:
-                return Constant(1)
+                return one
             if len(new_operands) == 1:
                 return new_operands.pop()
             return Min(*new_operands)
@@ -365,11 +376,14 @@ class Ordering:
             left = self.order_simplify(expr.left)
             right = self.order_simplify(expr.right)
             return Statement(left, expr.op, right)
+        elif isinstance(expr, (int, float)):
+            return one
         else:
             raise TypeError(f"Unsupported expression type: {type(expr)}")
 
 # tests if one can prove expr1 <~ expr2 using the hypotheses
     def can_bound(self, expr1, expr2):
+#        print(f"Attempting to bound {expr1} by {expr2} using {self}.")
         expr = self.order_simplify(expr2/expr1)
         print(f"Simplify to proving {monomial_simplify(expr)} >= 1.")
         terms = monomials(expr)
@@ -384,11 +398,12 @@ class Ordering:
         # Dummy objective: minimize total weight
         prob += pulp.lpSum(w)
         
-        # Constraints for each term in the expression
+        # Constraints for each term in the expression, except one
         for v in self.graph.nodes():
-            inflow = pulp.lpSum(w[u, v] for u, v in self.graph.in_edges(v))
-            outflow = pulp.lpSum(w[v, u] for v, u in self.graph.out_edges(v))
-            prob += (inflow - outflow == terms.get(v, 0), f"FlowBalance_{v}")
+            if not v == one:
+                inflow = pulp.lpSum(w[u, v] for u, v in self.graph.in_edges(v))
+                outflow = pulp.lpSum(w[v, u] for v, u in self.graph.out_edges(v))
+                prob += (inflow - outflow == terms.get(v, 0), f"FlowBalance_{v}")
         
         silent_solver = pulp.PULP_CBC_CMD(msg=False)
         prob.solve(silent_solver)
@@ -427,13 +442,15 @@ def splittings(expr):
         left_splits = splittings(expr.left)
         right_splits = splittings(expr.right)
         return left_splits.union(right_splits)
+    elif isinstance(expr, (int, float)):
+        return set()
     else:
         raise TypeError(f"Unsupported expression type: {type(expr)}")
 
 class Assumptions:
     def __init__(self):
         self.assumptions = []
-        self.lp_assumptions = []
+        self.splits = []
     
     def add(self, statement):
         print(f"Adding assumption: {statement}")
@@ -441,25 +458,29 @@ class Assumptions:
 
     def add_lp(self, *lp_statement):
         print(f"Adding Littlewood-Paley assumption that expressions of magnitudes {lp_statement} can sum to zero.")
-        self.lp_assumptions.append(lp_statement)
+        self.splits.append(cases_lp(lp_statement))
+
+    def split_at(self, expr1, expr2):
+        print(f"Force a case split at {expr1} == {expr2}.")
+        self.splits.append([[expr1 <= expr2], [expr2 <= expr1]])
 
     def can_bound(self, expr1, expr2):
         """Checks if a statement can be proven from the assumptions."""
         print(f"Checking if we can bound {expr1} by {expr2} from the given axioms.")
 
-        splits = splittings(expr1 <= expr2)
+        base_splits = splittings(expr1 <= expr2)
         for assumption in self.assumptions:
-            splits.update(splittings(assumption))
+            base_splits.update(splittings(assumption))
         
         cases = []
-        for split in splits:
+        for split in base_splits:
             if isinstance(split, Max):
                 cases.append(cases_max(*split.operands))
             elif isinstance(split, Min):
                 cases.append(cases_min(*split.operands))
 
-        for lp in self.lp_assumptions:
-            cases.append(cases_lp(lp))
+        for split in self.splits:
+            cases.append(split)
 
         if len(cases) > 0:
             print("We will split into the following cases:")
