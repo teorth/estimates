@@ -461,12 +461,14 @@ class Assumptions:
         for lp in self.lp_assumptions:
             cases.append(cases_lp(lp))
 
-        print("We will split into the following cases:")
-        for case in cases:
-            print(case)
+        if len(cases) > 0:
+            print("We will split into the following cases:")
+            for case in cases:
+                print(case)
 
         for axioms in product(*cases):
-            print(f"Trying case: {axioms}")
+            if len(cases) > 0:
+                print(f"Trying case: {axioms}")
             ordering = Ordering()
 # TODO: simplify the hypotheses before adding them to the ordering
             for assumption in self.assumptions:
@@ -480,25 +482,3 @@ class Assumptions:
         print("Bound was proven true in all cases!")
         return True
 
-
-# Example usage
-N_1 = Variable("N_1")
-N_2 = Variable("N_2")
-N_3 = Variable("N_3")
-N_4 = Variable("N_4")
-
-#axioms = Ordering()
-#axioms.add(N_1 <= N_2)
-#axioms.add(N_2 <= N_3)
-#axioms.add(N_2 <= N_4)
-#print(axioms)
-
-assumptions = Assumptions()
-
-assumptions.can_bound((N_1*N_2*N_3)**(1/3), max(N_1,N_2,N_3))
-
-#print(cases_max(N_1, N_2, N_3, N_4))
-#print(cases_min(N_1, N_2, N_3, N_4))
-#print(cases_lp(N_1, N_2, N_3, N_4))
-
-# axioms.can_bound(N_1*N_1, N_3*N_4)
