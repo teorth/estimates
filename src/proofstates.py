@@ -195,22 +195,28 @@ def simp_all(proof_state):
 
 ProofState.simp_all = simp_all
 
-A = Proposition("A")
-B = Proposition("B")
-C = Proposition("C")
-D = Proposition("D")
-E = Proposition("E")
 
-proof_state = ProofState()
 
-goal = Goal(And(A,B,D))
-goal.add_hypothesis(Or(C,E))
-goal.add_hypothesis(And(B,C))
-goal.add_hypothesis(Or(C,D))
-proof_state.add_goal(goal)
+def tactic_examples():
+    A = Proposition("A")
+    B = Proposition("B")
+    C = Proposition("C")
+    D = Proposition("D")
+    E = Proposition("E")
 
-print(proof_state)
+    proof_state = ProofState()
 
-proof_state.simp_all()
+    goal = Goal(And(A,B,D))
+    goal.add_hypothesis(Or(C,E))
+    goal.add_hypothesis(And(B,C))
+    goal.add_hypothesis(Or(C,D))
+    proof_state.add_goal(goal)
 
-print(proof_state)
+    print(proof_state)
+
+    proof_state.simp_all()
+
+    print(proof_state)
+
+
+tactic_examples()

@@ -1,17 +1,7 @@
-class Statement:
+from type import *
+
+class Statement(Type):
     """A class representing a logical statement."""
-    def __hash__(self):
-        return id(self)    
-    def __str__(self):
-        return self.name
-    def __repr__(self):
-        return str(self)
-    def defeq(self, other): 
-        """Check if two statements are definitionally equal (but not necessarily the same object).  Can be overridden.  This should be the default equality check for statements."""
-        return self is other
-    def appears_in(self, hypotheses):
-        """Check if the statement appears in a set of hypotheses (up to defeq)."""
-        return any(self.defeq(hypothesis) for hypothesis in hypotheses)
     def negate(self):
         """Negate the statement.  Can be overridden."""
         return Not(self)
@@ -19,21 +9,7 @@ class Statement:
         """Simplify the statement.  Can be overridden.  Can use the hypotheses in the `hypotheses` to simplify."""
         if self.appears_in(hypotheses):
             return Bool(True)
-        else:
-            return self
-
-
-def add_nodup(statements, statement):
-    """ Add a statement to a set of statements, if it is not defeq to any existing statement. """
-    if not(statement.appears_in(statements)):
-        statements.add(statement)
-    return statements
-
-def defeq_set( statements1, statements2):
-    """Check if two sets of statements are equal (up to defeq)."""
-    if len(statements1) != len(statements2):
-        return False
-    return all(any(s1.defeq(s2) for s2 in statements2) for s1 in statements1)
+        return self
 
 class Proposition(Statement):
     """A class representing an atomic proposition."""
@@ -52,6 +28,8 @@ class Or(Statement):
         """Negate the disjunction by negating each disjunct and combining with AND."""
         return And(*(d.negate() for d in self.disjuncts))
     def simp(self, hypotheses=set()):
+        if self.appears_in(hypotheses):
+            return Bool(True)
         new_disjuncts = set()
         """Simplify the disjunction by flattening nested ORs and removing duplicates."""
         for disjunct in self.disjuncts:
@@ -86,6 +64,8 @@ class And(Statement):
         """Negate the conjunction by negating each conjunct and combining with OR."""
         return Or(*(c.negate() for c in self.conjuncts))
     def simp(self, hypotheses=set()):
+        if self.appears_in(hypotheses):
+            return Bool(True)
         new_conjuncts = set()
         """Simplify the conjunction by flattening nested ANDs and removing duplicates."""
         for conjunct in self.conjuncts:
@@ -120,6 +100,8 @@ class Not(Statement):
         """Negate the negation to get the original operand."""
         return self.operand
     def simp(self, hypotheses=set()):
+        if self.appears_in(hypotheses):
+            return Bool(True)
         return self.operand.simp(hypotheses).negate()
     def __str__(self):
         return f"NOT {self.operand}"
