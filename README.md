@@ -5,9 +5,11 @@ A project to develop a framework to automatically (or semi-automatically) prove 
 - [Blog post explaining the project](https://terrytao.wordpress.com/2025/05/01/a-proof-of-concept-tool-to-verify-estimates/)
 
 
-A crude working prototype of the code has already been written; a somewhat more sophisticated second attempt (creating a pseudo proof assistant environment) is currently in development.
+A crude working prototype of the code has [already been written](https://github.com/teorth/estimates/tree/main/src/first%20attempt); a somewhat more sophisticated second attempt (creating a pseudo proof assistant environment) is currently in development.
 
 ## First attempt (crude working prototype)
+
+Working Python code for this prototype can be found in [this directory](https://github.com/teorth/estimates/tree/main/src/first%20attempt).  It requires the `networkx` and `pulp` Python packages.
 
 Initially we will focus on proving bounds involving positive quantities (up to constants) via (inefficient) brute force case splitting.
 
