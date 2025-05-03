@@ -4,14 +4,13 @@ A project to develop a framework to automatically (or semi-automatically) prove 
 
 - [Blog post explaining the project](https://terrytao.wordpress.com/2025/05/01/a-proof-of-concept-tool-to-verify-estimates/)
 
-
 A proof-of-concept prototype of the code has [already been written](https://github.com/teorth/estimates/tree/main/src/first%20attempt); a somewhat more sophisticated second attempt (creating a pseudo proof assistant environment) is currently in development.
 
 ## First attempt (proof-of-concept prototype)
 
 Working Python code for this prototype can be found in [this directory](https://github.com/teorth/estimates/tree/main/src/first%20attempt).  It requires the `networkx` and `pulp` Python packages.
 
-Initially we will focus on proving bounds involving positive quantities (up to constants) via (inefficient) brute force case splitting.
+Initially we will focus on proving bounds involving positive quantities (up to multiplicative constants) via (inefficient) brute force case splitting.
 
 Example: to prove that $\min(a,b) \lesssim \max(a,b)$ for all positive $a,b$, run the following code
 
