@@ -1,5 +1,7 @@
 from statements import *
 from expressions import *
+from linprog import *
+
 
 # An estimate is a comparison between two expressions that is of one of the following forms:
 
@@ -86,7 +88,7 @@ def estimate_examples():
     b = Variable("b")
     c = Variable("c")
 
-    X = a+b <= a+a
+    X = (a+b*c)**2 <= a+a
 
     print(X)
 

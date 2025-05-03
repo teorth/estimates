@@ -153,4 +153,4 @@ def feasbility_examples():
     verbose_feasibility(inequalities2)    
 
 
-feasbility_examples()
+# feasbility_examples()

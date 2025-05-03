@@ -163,7 +163,9 @@ class Mul(Expression):
             return set_defeq(self.factors, other.factors)
         return False
     def simp(self, hypotheses=set()):
-        """Simplify the product by flattening nested products."""
+        """Simplify the product in several steps."""
+        
+        # First, flatten nested products and delete constants.
         new_factors = []
         for factor in self.factors:
             factor = factor.simp(hypotheses)
@@ -175,7 +177,7 @@ class Mul(Expression):
             else:
                 new_factors.append(factor)
 
-        # Next, gather terms
+        # Next, gather terms (up to defeq) and combine exponents for powers.
         terms = {}
         for factor in new_factors:
             if isinstance(factor, Power):
