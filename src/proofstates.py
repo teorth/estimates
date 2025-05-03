@@ -235,4 +235,4 @@ def tactic_examples():
     print(proof_state)
 
 
-tactic_examples()
+# tactic_examples()

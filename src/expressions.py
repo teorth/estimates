@@ -81,7 +81,7 @@ class Max(Expression):
         self.operands = {ensure_expr(operand) for operand in operands}
     def defeq(self, other):
         if isinstance(other, Max):
-            return defeq_set(self.operands, other.operands)
+            return set_defeq(self.operands, other.operands)
         return False
     def simp(self, hypotheses=set()):
         """Simplify the max expression by flattening nested max's and removing duplicates."""
@@ -90,9 +90,9 @@ class Max(Expression):
             op = op.simp(hypotheses)
             if isinstance(op, Max):
                 for sub_op in op.operands:
-                    add_nodup(new_operands, sub_op)
+                    sub_op.add_to(new_operands)
             else:
-                add_nodup(new_operands, op)
+                op.add_to(new_operands)
         assert len(new_operands) > 0, "Max must have at least one operand after simplification."
         if len(new_operands) == 1:
             return new_operands.pop()
@@ -113,7 +113,7 @@ class Min(Expression):
         self.operands = {ensure_expr(operand) for operand in operands}
     def defeq(self, other):
         if isinstance(other, Min):
-            return defeq_set(self.operands, other.operands)
+            return set_defeq(self.operands, other.operands)
         return False
     def simp(self, hypotheses=set()):
         """Simplify the min expression by flattening nested mins and removing duplicates."""
@@ -122,9 +122,9 @@ class Min(Expression):
             op = op.simp(hypotheses)
             if isinstance(op, Min):
                 for sub_op in op.operands:
-                    add_nodup(new_operands, sub_op)
+                    sub_op.add_to(new_operands)
             else:
-                add_nodup(new_operands, op)
+                op.add_to(new_operands)
         assert len(new_operands) > 0, "Min must have at least one operand after simplification."
         if len(new_operands) == 1:
             return new_operands.pop()
@@ -144,7 +144,7 @@ class Add(Expression):
         self.summands = {ensure_expr(summand) for summand in summands}
     def defeq(self, other):
         if isinstance(other, Add):
-            return defeq_set(self.summands, other.summands)
+            return set_defeq(self.summands, other.summands)
         return False
     def simp(self, hypotheses=set()):
         """For orders of magnitude, one can turn a sum into a max."""
@@ -159,7 +159,7 @@ class Mul(Expression):
         self.factors = [ensure_expr(factor) for factor in factors]
     def defeq(self, other):
         if isinstance(other, Mul):
-            return defeq_set(self.factors, other.factors)
+            return set_defeq(self.factors, other.factors)
         return False
     def simp(self, hypotheses=set()):
         """Simplify the product by flattening nested products."""
@@ -228,13 +228,16 @@ class Power(Expression):
         return f"({self.base} ^ {self.exponent})"
 
 
-# Example usage of the Expression, Variable, Constant, Max, and Min classes
+def expression_examples():
+    """Example usage of the Expression, Variable, Constant, Max, and Min classes"""
 
-a = Variable("a")
-b = Variable("b")
-c = Variable("c")
-d = Variable("d")
-x = 3*(a**2)*b*2/a
+    a = Variable("a")
+    b = Variable("b")
+    c = Variable("c")
+    d = Variable("d")
+    x = 3*(a**2)*min(max(a,c),b,c,max(c,c),max(a,min(c,c)))*2/a
 
-print(x)
-print(x.simp())  # Should simplify to max(a, b, c) if no duplicates
+    print(x)
+    print(x.simp()) 
+    
+expression_examples()
