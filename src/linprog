@@ -52,52 +52,95 @@ def ineq_variables(inequalities):
         vars.update(inequality.variables())
     return vars
 
-def is_infeasible(inequalities):
-    """ Test via dual linear programming if a list of inequalities is infeasible """
+def feasibility(inequalities):
+    """ Test via dual linear programming if a list of inequalities is feasible, outputting a certificate in both cases. """
 
+# collect the primal variables
+    variables = ineq_variables(inequalities)
+
+#   First we test for feasibility.
+
+    s = Solver()
+
+# create a dictionary of real z3 variables for each inequality variable
+    z3_variables = {var: Real(var) for var in variables}
+
+# add the constraint for each inequality
+    for ineq in inequalities:
+        match ineq.sense:
+            case 'leq':
+                s.add(Sum(*[z3_variables[var] * coeff for var, coeff in ineq.coeffs.items()]) <= ineq.rhs)
+            case 'lt':
+                s.add(Sum(*[z3_variables[var]* coeff for var, coeff in ineq.coeffs.items()]) < ineq.rhs)
+            case 'geq':
+                s.add(Sum(*[z3_variables[var] * coeff for var, coeff in ineq.coeffs.items()]) >= ineq.rhs)
+            case 'gt':
+                s.add(Sum(*[z3_variables[var] * coeff for var, coeff in ineq.coeffs.items()]) > ineq.rhs)
+            case 'eq':
+                s.add(Sum(*[z3_variables[var] * coeff for var, coeff in ineq.coeffs.items()]) == ineq.rhs)
+
+# solve
+    if s.check() == sat:
+        m = s.model()
+        return False, {var: m[z3_variables[var]] for var in variables}
+
+#   Now we test for infeasibility.
 
     # create a z3 variable for each inequality
     dual_vars = {ineq: Real(ineq.ineq_name()) for ineq in inequalities}
 
-    s = Solver()
+    dual_s = Solver()
 
     # add a non-negativity constraint for each dual variable 
     for ineq in inequalities:
         match ineq.sense:
             case 'leq' | 'lt':
-                s.add(dual_vars[ineq] <= 0)
+                dual_s.add(dual_vars[ineq] <= 0)
             case 'geq' | 'gt':
-                s.add(dual_vars[ineq] >= 0)
-
-    # collect the primal variables
-    variables = ineq_variables(inequalities)
+                dual_s.add(dual_vars[ineq] >= 0)
 
     # each primal variable generates a constraint on the dual variables
     for var in variables:
-        s.add(Sum(*[dual_vars[ineq] * ineq.coeffs.get(var, 0) for ineq in inequalities]) == 0)
+        dual_s.add(Sum(*[dual_vars[ineq] * ineq.coeffs.get(var, 0) for ineq in inequalities]) == 0)
 
     # sum of the final coefficients must be non-positive
     final_sum = Sum(*[dual_vars[ineq] * ineq.rhs for ineq in inequalities]) 
     
-    s.add(final_sum >= 0)
+    dual_s.add(final_sum >= 0)
 
     # also normalize the sum of the final coefficients, plus the gt dual variables, minus the lt dual variables, to 1
     sum_lt_vars = Sum(*[dual_vars[ineq] for ineq in inequalities if ineq.sense == 'lt'])
     sum_gt_vars = Sum(*[dual_vars[ineq] for ineq in inequalities if ineq.sense == 'gt'])
-    s.add(final_sum + sum_gt_vars - sum_lt_vars == 1)
+    dual_s.add(final_sum + sum_gt_vars - sum_lt_vars == 1)
 
-    if s.check() == sat:
-        print("Infeasible by summing the following:")
-        m = s.model()
-        for ineq, v in dual_vars.items():
-            print(f"{ineq} multiplied by {m[v]}")
-        return True
+    if dual_s.check() == sat:
+        m = dual_s.model()
+        return True, {ineq:m[v] for ineq, v in dual_vars.items()}
     else:
-        print("Feasible")    
-        return False 
+        raise ValueError("Farkas lemma violation!  Problem is neither feasible nor infeasible.")
+
+def verbose_feasibility(inequalities):
+    """ Test via dual linear programming if a list of inequalities is feasible, outputting a certificate in both cases. """
+    print("Checking feasibility of the following inequalities:")
+    for ineq in inequalities:
+        print(ineq)
+
+    outcome, dict = feasibility(inequalities)
+    if outcome:
+        print("Infeasible with the following values:")
+        for ineq, coeff in dict.items():
+            print(f"{ineq} multiplied by {coeff}")
+    else:
+        print("Feasible with the following values:")
+        for var, value in dict.items():
+            print(f"{var} = {value}")
+
 
 inequalities = set()
 inequalities.add(Inequality({'x1': 1, 'x2': 0}, 3, 'leq'))
 inequalities.add(Inequality({'x1': 0, 'x2': 1}, 2, 'leq'))
 inequalities.add(Inequality({'x1': 1, 'x2': 1}, 5, 'geq'))
-is_infeasible(inequalities)     
+verbose_feasibility(inequalities)    
+
+# for ineq, coeff in dict.items():
+ #   print(f"{ineq} multiplied by {coeff}") 
