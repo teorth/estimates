@@ -1,127 +1,6 @@
-# Basic classes for statements, goals, and proof states
+from statements import *
 
-class Statement:
-    """A class representing a logical statement."""
-    def __hash__(self):
-        return id(self)    
-    def __str__(self):
-        return self.name
-    def __repr__(self):
-        return str(self)
-    def eq(self, other): 
-        """Check if two statements are equal (but not necessarily the same object).  Can be overridden."""
-        return self is other
-    
-    def negate(self):
-        """Negate the statement.  Can be overridden."""
-        return Not(self)
-    
-    def simp(self, goal=None):
-        """Simplify the statement.  Can be overridden.  Can use the hypotheses in the goal to simplify."""
-        return self
-    
-class Proposition(Statement):
-    """A class representing an atomic proposition."""
-    def __init__(self, name):
-        self.name = name
-
-class Or(Statement):
-    """A class representing a disjunction (OR) of statements."""
-    def __init__(self, *disjuncts):
-        self.disjuncts = disjuncts
-    def eq(self, other):
-        if isinstance(other, Or):
-            return set(self.disjuncts) == set(other.disjuncts)
-        return False
-    def negate(self):
-        """Negate the disjunction by negating each disjunct and combining with AND."""
-        return And(*(d.negate() for d in self.disjuncts))
-    def simp(self, goal=None):
-        new_disjuncts = set()
-        """Simplify the disjunction by flattening nested ORs and removing duplicates."""
-        for disjunct in self.disjuncts:
-            disjunct = disjunct.simp(goal)
-            if isinstance(disjunct, Or):
-                new_disjuncts.update(disjunct.disjuncts)
-            elif isinstance(disjunct, Bool):
-                if disjunct.bool_value:
-                    return Bool(True)
-            else:
-                new_disjuncts.add(disjunct)
-        if len(new_disjuncts) == 0:
-            return Bool(False)
-        elif len(new_disjuncts) == 1:
-            return new_disjuncts.pop()
-        else:
-            return Or(*new_disjuncts)
-    def __str__(self):
-        inner = " OR ".join(str(op) for op in self.disjuncts)
-        return f"({inner})"
-
-class And(Statement):
-    """A class representing a conjunction (AND) of statements."""
-    def __init__(self, *conjuncts):
-        self.conjuncts = conjuncts
-    def eq(self, other):
-        if isinstance(other, And):
-            return set(self.conjuncts) == set(other.conjuncts)
-        return False
-    def negate(self):
-        """Negate the conjunction by negating each conjunct and combining with OR."""
-        return Or(*(c.negate() for c in self.conjuncts))
-    def simp(self, goal=None):
-        new_conjuncts = set()
-        """Simplify the conjunction by flattening nested ANDs and removing duplicates."""
-        for conjunct in self.conjuncts:
-            conjunct = conjunct.simp(goal)
-            if isinstance(conjunct, And):
-                new_conjuncts.update(conjunct.conjuncts)
-            elif isinstance(conjunct, Bool):
-                if not conjunct.bool_value:
-                    return Bool(False)
-            else:
-                new_conjuncts.add(conjunct)
-        if len(new_conjuncts) == 0:
-            return Bool(True)
-        elif len(new_conjuncts) == 1:
-            return new_conjuncts.pop()
-        else:
-            return And(*new_conjuncts)
-    def __str__(self):
-        inner = " AND ".join(str(op) for op in self.conjuncts)
-        return f"({inner})"
-
-class Not(Statement):
-    """A class representing a negation of a statement."""
-    def __init__(self, operand):
-        self.operand = operand
-    def eq(self, other):
-        if isinstance(other, Not):
-            return self.operand == other.operand
-        return False
-    def negate(self):
-        """Negate the negation to get the original operand."""
-        return self.operand
-    def simp(self, goal=None):
-        return self.operand.simp(goal).negate()
-    def __str__(self):
-        return f"NOT {self.operand}"
-
-class Bool(Statement):
-    """A class representing a boolean value (True or False)."""
-    def __init__(self, bool_value):
-        self.bool_value = bool_value
-    def eq(self, other):
-        if isinstance(other, Bool):
-            return self.bool_value == other.bool_value
-        return False
-    def negate(self):
-        """Negate the boolean value."""
-        return Bool(not self.bool_value)
-    def __str__(self):
-        return str(self.bool_value).upper()
-
-
+# Basic classes for goals and proof states
 
 # A goal consists of a collection of hypotheses and a desired conclusion.
 class Goal:
@@ -132,34 +11,34 @@ class Goal:
     def match_hypothesis(self, statement):
         """Check if a statement matches any of the hypotheses in the goal. If so, return the matching hypothesis (which may be a different object from the original statement)"""
         for hypothesis in self.hypotheses:
-            if hypothesis.eq(statement):
+            if hypothesis.defeq(statement):
                 return hypothesis
         return None
 
     def add_hypothesis(self, hypotheses):
         """Add one or more hypotheses to the goal."""
-        if isinstance(hypotheses, set):
-            self.hypotheses.update(hypotheses)
+        if isinstance(hypotheses, Statement):
+            if self.match_hypothesis(hypotheses) is None:
+                self.hypotheses.add(hypotheses)
+        elif isinstance(hypotheses, set):
+            for hypothesis in hypotheses:
+                self.add_hypothesis(hypothesis)  # Recursively add each hypothesis
         else:
-            self.hypotheses.add(hypotheses)
+            raise ValueError(f"Cannot add {hypotheses} to hypotheses: must be a Statement or a set of Statements.")
 
     def remove_hypothesis(self, hypothesis):
         """Remove a hypothesis from the goal."""
-        if hypothesis in self.hypotheses:
-            self.hypotheses.remove(hypothesis)
+        match = self.match_hypothesis(hypothesis)
+        if not match == None:
+            self.hypotheses.remove(match)
         else:
             raise ValueError(f"Hypothesis {hypothesis} not found in the goal.")
 
     def replace_hypothesis(self, old_hypothesis, new_hypotheses):
         """Replace an old hypothesis with one or more new hypotheses."""
-        if old_hypothesis in self.hypotheses:
-            self.hypotheses.remove(old_hypothesis)
-            if isinstance(new_hypotheses, set):
-                self.hypotheses.update(new_hypotheses)
-            else:
-                self.hypotheses.add(new_hypotheses)
-        else:
-            raise ValueError(f"Hypothesis {old_hypothesis} not found in the goal.")
+        self.remove_hypothesis(old_hypothesis)
+        for new_hypothesis in new_hypotheses:
+            self.add_hypothesis(new_hypothesis)
 
     def replace_conclusion(self, new_conclusion):
         """Replace the conclusion of the goal."""
@@ -170,7 +49,7 @@ class Goal:
 
 
 # A proof state consists of a set of goals.  The first goal is the current goal.
-class Proof_state:
+class ProofState:
     def __init__(self, goals=None):
         self.goals = goals if goals is not None else set()
 
@@ -201,6 +80,10 @@ class Proof_state:
             print("Current goal solved!")
         self.goals.pop()
 
+    def pop(self):
+        """ Pop the current goal from the proof state."""
+        return self.goals.pop()
+
     def solved(self):
         """Check if all goals are solved."""
         return len(self.goals) == 0
@@ -227,16 +110,20 @@ def by_contra(proof_state):
     goal.replace_conclusion(Bool(False))  # The goal is now to obtain a contradiction
     print(f"Assume for contradiction that {conclusion} fails.")
 
-Proof_state.by_contra = by_contra
+ProofState.by_contra = by_contra
 
 
 
 def split(proof_state, statement=None):
-    """Split a goal into several sub-goals based on a statement, or split a hypothesis into several subhypotheses."""
+    """A tactic to split a goal into several sub-goals based on a statement, or split a hypothesis into several subhypotheses."""
     if statement is None:
         conclusion = proof_state.current_conclusion()
         if isinstance(conclusion, And):
-            return # to be implemented
+            print(f"Splitting conclusion {conclusion} into subgoals {conclusion.conjuncts}.")
+            goal = proof_state.pop()
+            for conjunct in conclusion.conjuncts:
+                new_goal = Goal(conclusion=conjunct, hypotheses=goal.hypotheses.copy())
+                proof_state.add_goal(new_goal)
         else:
             raise ValueError("Don't know how to split the conclusion {conclusion}.")
     else:
@@ -245,15 +132,21 @@ def split(proof_state, statement=None):
         if hypothesis == None:
             raise ValueError(f"Statement {statement} not found in current hypotheses {proof_state.current_hypotheses()}.")
         if isinstance(hypothesis, And):
-            print(f"Splitting hypothesis {hypothesis} into {hypothesis.conjuncts}.")
+            print(f"Expanding hypothesis {hypothesis} into {hypothesis.conjuncts}.")
             # Replace the statement with its conjuncts in the hypotheses
-            proof_state.current_goal().replace_hypothesis(hypothesis, hypothesis.conjuncts)
+            goal.replace_hypothesis(hypothesis, hypothesis.conjuncts)
         elif isinstance(statement, Or):
-            return # to be implemented
+            print(f"Splitting hypothesis {hypothesis} into cases.")
+            goal.remove_hypothesis(hypothesis)
+            proof_state.pop()
+            for disjunct in statement.disjuncts:
+                new_goal = Goal(conclusion=goal.conclusion, hypotheses=goal.hypotheses.copy())
+                new_goal.add_hypothesis(disjunct)
+                proof_state.add_goal(new_goal)
         else:
             raise ValueError(f"Don't know how to split the hypothesis {hypothesis}.")
 
-Proof_state.split = split
+ProofState.split = split
 
 
 
@@ -262,13 +155,20 @@ B = Proposition("B")
 C = Proposition("C")
 D = Proposition("D")
 
-proof_state = Proof_state()
+proof_state = ProofState()
 
-proof_state.add_goal(Goal(conclusion=A, hypotheses={B, And(C,D)}))
-
+goal = Goal(And(A,D))
+goal.add_hypothesis(Or(C,D))
+goal.add_hypothesis(B)
+goal.add_hypothesis(Or(C,D))
+proof_state.add_goal(goal)
 
 print(proof_state)
 
-proof_state.split(And(C,D))
+proof_state.split(Or(C,D))
+
+print(proof_state)
+
+proof_state.split()
 
 print(proof_state)
