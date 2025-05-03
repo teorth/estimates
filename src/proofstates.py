@@ -106,7 +106,12 @@ class ProofState:
             n += 1
         return str
 
-
+def begin_proof( conclusion, hypotheses=set()):
+    """Begin a proof with a given conclusion and hypotheses."""
+    goal = Goal(conclusion, hypotheses)
+    proof_state = ProofState(goals={goal})
+    print(f"Starting proof with goal: {goal}")
+    return proof_state
 
 
 #### TACTICS ####
@@ -204,16 +209,8 @@ def tactic_examples():
     D = Proposition("D")
     E = Proposition("E")
 
-    proof_state = ProofState()
-
-    goal = Goal(And(A,B,D))
-    goal.add_hypothesis(Or(C,E))
-    goal.add_hypothesis(And(B,C))
-    goal.add_hypothesis(Or(C,D))
-    proof_state.add_goal(goal)
-
-    print(proof_state)
-
+    proof_state = begin_proof( And(A,B,D), { Or(C,E), And(B,C), Or(C,D) } )
+    
     proof_state.simp_all()
 
     print(proof_state)

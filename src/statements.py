@@ -22,7 +22,7 @@ class Or(Statement):
         self.disjuncts = disjuncts
     def defeq(self, other):
         if isinstance(other, Or):
-            return defeq_set(self.disjuncts, other.disjuncts)
+            return set_defeq(self.disjuncts, other.disjuncts)
         return False
     def negate(self):
         """Negate the disjunction by negating each disjunct and combining with AND."""
@@ -36,12 +36,12 @@ class Or(Statement):
             disjunct = disjunct.simp(hypotheses)
             if isinstance(disjunct, Or):
                 for d in disjunct.disjuncts:
-                    add_nodup(new_disjuncts, d)
+                    d.add_to(new_disjuncts)
             elif isinstance(disjunct, Bool):
                 if disjunct.bool_value:
-                    return Bool(True)
+                    return Bool(True)  # True OR anything is True, while False OR anything is the other thing
             else:
-                add_nodup(new_disjuncts,disjunct)
+                disjunct.add_to(new_disjuncts)
         if len(new_disjuncts) == 0:
             return Bool(False)
         elif len(new_disjuncts) == 1:
@@ -58,7 +58,7 @@ class And(Statement):
         self.conjuncts = conjuncts
     def defeq(self, other):
         if isinstance(other, And):
-            return defeq_set(self.conjuncts, other.conjuncts)
+            return set_defeq(self.conjuncts, other.conjuncts)
         return False
     def negate(self):
         """Negate the conjunction by negating each conjunct and combining with OR."""
@@ -72,12 +72,12 @@ class And(Statement):
             conjunct = conjunct.simp(hypotheses)
             if isinstance(conjunct, And):
                 for c in conjunct.conjuncts:
-                    add_nodup(new_conjuncts, c)
+                    c.add_to(new_conjuncts)
             elif isinstance(conjunct, Bool):
                 if not conjunct.bool_value:
-                    return Bool(False)
+                    return Bool(False) # False AND anything is False, while True AND anything is the other thing
             else:
-                add_nodup(new_conjuncts, conjunct)
+                conjunct.add_to(new_conjuncts)
         if len(new_conjuncts) == 0:
             return Bool(True)
         elif len(new_conjuncts) == 1:
