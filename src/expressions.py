@@ -57,6 +57,7 @@ class Variable(Expression):
     """A variable magnitude."""
     def __init__(self, name):
         self.name = name
+        self.operands = []
 
 class Constant(Expression):
     """A constant magnitude."""
@@ -64,6 +65,7 @@ class Constant(Expression):
         assert isinstance(value, (int, float)), "Constant value must be an int or float."
         assert value > 0, "Constant value must be positive."
         self.value = value
+        self.operands = []
     def defeq(self, other):
         """Check if two constants are definitionally equal (i.e., have the same value)."""
         if isinstance(other, Constant):
@@ -143,6 +145,7 @@ class Add(Expression):
     def __init__(self, *summands):
         assert len(summands) > 0, "Add must have at least one summand."
         self.summands = [ensure_expr(summand) for summand in summands]
+        self.operands = self.summands  
     def defeq(self, other):
         if isinstance(other, Add):
             return set_defeq(self.summands, other.summands)
@@ -158,6 +161,7 @@ class Mul(Expression):
     """The formal product of a set of expressions."""
     def __init__(self, *factors):
         self.factors = [ensure_expr(factor) for factor in factors]
+        self.operands = self.factors  
     def defeq(self, other):
         if isinstance(other, Mul):
             return set_defeq(self.factors, other.factors)
@@ -213,6 +217,7 @@ class Div(Expression):
     def __init__(self, numerator, denominator):
         self.numerator = ensure_expr(numerator)
         self.denominator = ensure_expr(denominator)
+        self.operands = [self.numerator, self.denominator]  
     def defeq(self, other):
         if isinstance(other, Div):
             return self.numerator.defeq(other.numerator) and self.denominator.defeq(other.denominator)
@@ -227,6 +232,7 @@ class Power(Expression):
     """The formal power of an expression raised to an exponent.  To use exact arithmetic, exponents must be rational. """
     def __init__(self, base, exponent):
         self.base = ensure_expr(base)
+        self.operands = [self.base]  # For compatibility with Max/Min
         if isinstance(exponent, int):
             self.exponent = Fraction(exponent, 1)  # Convert integer exponent to Fraction
         elif isinstance(exponent, Fraction):
@@ -257,16 +263,8 @@ def sqrt(expr):
     return Power(expr, Fraction(1, 2))
 Expression.sqrt = sqrt  # Add a convenience method to Expression
 
-def expression_examples():
-    """Example usage of the Expression, Variable, Constant, Max, and Min classes"""
+def bracket(expr):
+    """ The "Japanese bracket" <x> = (1 + |x|^2)^{1/2} """
+    return sqrt(Add(Constant(1), Power(expr, 2)))
+Expression.bracket = bracket  # Add a convenience method to Expression
 
-    a = Variable("a")
-    b = Variable("b")
-    c = Variable("c")
-    d = Variable("d")
-    x = (sqrt(a+b+c)*(a+b)*sqrt(max(a,c,b))/(d*max(a,b)))**2
-
-    print(x)
-    print(x.simp()) 
-    
-# expression_examples()

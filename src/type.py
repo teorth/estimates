@@ -92,7 +92,10 @@ class MutableType(Concept):
         else:
             raise ValueError(f"MutableType must be initialized with a Type or MutableType, not {type}.")
     def __str__(self):
-        return str(self.type)
+        return str(self.immutable()) # Use the string representation of the immutable type
+    def set_to(self, type):
+        """Update the value of this type to a new type.  This is used to update the type during a proof."""
+        self.type = type.immutable()  # Ensure the new type is immutable
     def defeq(self, other):
         """Check if two mutable types are definitionally equal (up to defeq)."""
         if isinstance(other, (Type,MutableType)):
@@ -104,7 +107,7 @@ class MutableType(Concept):
         new_type = self.type.simp(immutable(hypotheses))
         if not new_type.defeq_immutable(self.type):
             print(f"Simplifying {self.type} to {new_type}.")
-            self.type = new_type
+            self.set_to(new_type)
     def copy(self):
         """Return a copy of the mutable type."""
         return MutableType(self.type)

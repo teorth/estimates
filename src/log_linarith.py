@@ -86,7 +86,7 @@ Inequality.multiplicative_name = multiplicative_name  # add method to Inequality
 
 
 def log_linarith( proof_state ):
-    """Test whether the hypotheses of the current goal lead to a contradiction by logarithmic linear arithmetic, without preprocessing terms into variables."""
+    """Test whether the hypotheses of the current goal lead to a contradiction purely by logarithmic linear arithmetic."""
     if not isinstance(proof_state, ProofState):
         raise ValueError(f"log_linarith() must be called with a ProofState object, not {type(proof_state)}.")
 
@@ -108,7 +108,8 @@ def log_linarith( proof_state ):
     else:
         print("A contradiction can be obtained by multiplying the following estimates:")
         for ineq, value in certificate.items():
-            print(f"{ineq.multiplicative_name()} raised to power {value}")
+            if not value == Fraction(0,1):
+                print(f"{ineq.multiplicative_name()} raised to power {value}")
         proof_state.resolve()  # resolve the current goal
 
     return outcome
@@ -116,7 +117,7 @@ def log_linarith( proof_state ):
 ProofState.log_linarith = log_linarith  # add method to ProofState class
 
 # See if a given estimate follows by linear arithmetic from the hypotheses of the current goal.
-def log_linarith_test(proof_state, estimate):
+def log_linarith_test(proof_state, estimate, silent=False):
     if not isinstance(proof_state, ProofState):
         raise ValueError(f"log_linarith_test() must be called with a ProofState object, not {type(proof_state)}.")
     if not isinstance(estimate, Estimate):
@@ -128,32 +129,26 @@ def log_linarith_test(proof_state, estimate):
         if isinstance(hypothesis.immutable(), Estimate):
             inequalities.add(hypothesis.immutable().inequality())
 
-    inequalities.add(estimate.negate().inequality())
-    outcome, _ = feasibility(inequalities)
+    final_inequality = estimate.negate().inequality()  # convert the estimate to an inequality
+    inequalities.add(final_inequality)
+    outcome, certificate = feasibility(inequalities)
     if outcome:
-        print(f"Unfortunately, {estimate} does not follow from the hypotheses.")
+        if not silent:
+            print(f"Unfortunately, {estimate} does not follow from the hypotheses.  Sample feasible values (for N large):")
+            for var, value in certificate.items():
+                print(f"{var} = N^{value}")
         return False
     else:
-        print(f"{estimate} follows from the hypotheses!")
+        if not silent:
+            print(f"{estimate} follows from the hypotheses!  This follows by multiplying the following estimates:")
+            for ineq, value in certificate.items():
+                if ineq != final_inequality:
+                    if not value == Fraction(0,1):
+                        print(f"{ineq.multiplicative_name()} raised to power {value}")
+
         return True
 
 ProofState.log_linarith_test = log_linarith_test  # add method to ProofState class
-
-x = Variable("x")
-y = Variable("y")
-z = Variable("z")
-
-proof_state = begin_proof( x*y>1, { x > 1, y > 1 })
-proof_state.log_linarith_test( x*y**2 >= 1 )
-
-
-
-# proof_state.log_linarith()
-
-
-
-
-
 
 
 

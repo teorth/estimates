@@ -19,7 +19,7 @@ class Goal:
     def add_hypothesis(self, hypotheses):
         """Add one or more hypotheses to the goal (as mutable types)."""
         if isinstance(hypotheses, MutableType):
-            self.add_hypothesis(hypotheses.type)  # Unwrap the mutable type to get the original type
+            self.add_hypothesis(hypotheses.immutable())  # Unwrap the mutable type to get the original type
         elif isinstance(hypotheses, Statement):
             if self.match_hypothesis(hypotheses) is None:
                 self.hypotheses.add(hypotheses.mutable())
@@ -76,13 +76,15 @@ class ProofState:
     
     def current_conclusion(self):
         """Get the conclusion of the current goal."""
-        assert not self.solved(), "Cannot get current conclusion when all goals are solved."
         return self.current_goal().conclusion
     
     def current_hypotheses(self):
         """Get the hypotheses of the current goal."""
-        assert not self.solved(), "Cannot get current hypotheses when all goals are solved."
         return self.current_goal().hypotheses
+
+    def add_hypothesis(self, hypotheses):
+        """Add one or more hypotheses to the current goal."""
+        self.current_goal().add_hypothesis(hypotheses)
 
     def resolve(self):
         """Resolve the current goal """
@@ -221,18 +223,3 @@ ProofState.simp_all = simp_all
 
 
 
-def tactic_examples():
-    A = Proposition("A")
-    B = Proposition("B")
-    C = Proposition("C")
-    D = Proposition("D")
-    E = Proposition("E")
-
-    proof_state = begin_proof( And(A,B,D), { Or(C,E), And(B,C), Or(C,D) } )
-    
-    proof_state.simp_all()
-
-    print(proof_state)
-
-
-# tactic_examples()

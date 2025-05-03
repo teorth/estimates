@@ -30,7 +30,7 @@ class Or(Statement):
     def simp(self, hypotheses=()):
         if self.appears_in(hypotheses):
             return Bool(True)
-        new_disjuncts = ()
+        new_disjuncts = set()
         """Simplify the disjunction by flattening nested ORs and removing duplicates."""
         for disjunct in self.disjuncts:
             disjunct = disjunct.simp(hypotheses)

@@ -84,16 +84,3 @@ Expression.asymp = expression_eq  # cannot override __eq__ because it is used fo
 
 
 
-
-def estimate_examples():
-    a = Variable("a")
-    b = Variable("b")
-    c = Variable("c")
-
-    X = (a+b*c)**2 <= a+a
-
-    print(X)
-
-    print(X.simp()) 
-
-# estimate_examples() 

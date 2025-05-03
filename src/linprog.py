@@ -135,22 +135,3 @@ def verbose_feasibility(inequalities):
         for ineq, coeff in dict.items():
             print(f"{ineq} multiplied by {coeff}")
 
-
-def feasbility_examples():
-    inequalities = set()
-    inequalities.add(Inequality({'x': 1}, 'leq', 3))
-    inequalities.add(Inequality({'y': 1}, 'leq', 2))
-    inequalities.add(Inequality({'x': 1, 'y': 1}, 'geq', 5))
-    verbose_feasibility(inequalities)    
-
-    inequalities.add(Inequality({'x': 1, 'y': 1}, 'gt', 5))
-    verbose_feasibility(inequalities)    
-
-    inequalities2 = set()
-    inequalities2.add(Inequality({'x': 1}, 'lt', 2))
-    inequalities2.add(Inequality({'y': 1}, 'gt', 3))
-    inequalities2.add(Inequality({'x': 2, 'y':-1}, 'eq', 0))
-    verbose_feasibility(inequalities2)    
-
-
-# feasbility_examples()
