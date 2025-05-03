@@ -87,6 +87,8 @@ Inequality.multiplicative_name = multiplicative_name  # add method to Inequality
 
 def log_linarith( proof_state ):
     """Test whether the hypotheses of the current goal lead to a contradiction by logarithmic linear arithmetic, without preprocessing terms into variables."""
+    if not isinstance(proof_state, ProofState):
+        raise ValueError(f"log_linarith() must be called with a ProofState object, not {type(proof_state)}.")
 
     if not proof_state.current_conclusion().defeq_immutable(Bool(False)):
         proof_state.by_contra()  # if the goal is not already a contradiction, assume it for contradiction
@@ -113,12 +115,40 @@ def log_linarith( proof_state ):
 
 ProofState.log_linarith = log_linarith  # add method to ProofState class
 
+# See if a given estimate follows by linear arithmetic from the hypotheses of the current goal.
+def log_linarith_test(proof_state, estimate):
+    if not isinstance(proof_state, ProofState):
+        raise ValueError(f"log_linarith_test() must be called with a ProofState object, not {type(proof_state)}.")
+    if not isinstance(estimate, Estimate):
+        raise ValueError(f"log_linarith_Test() must be called with an Estimate object, not {type(estimate)}.")
+    
+    # Convert all estimates in the hypotheses to inequalities.
+    inequalities = set()
+    for hypothesis in proof_state.current_hypotheses():
+        if isinstance(hypothesis.immutable(), Estimate):
+            inequalities.add(hypothesis.immutable().inequality())
+
+    inequalities.add(estimate.negate().inequality())
+    outcome, _ = feasibility(inequalities)
+    if outcome:
+        print(f"Unfortunately, {estimate} does not follow from the hypotheses.")
+        return False
+    else:
+        print(f"{estimate} follows from the hypotheses!")
+        return True
+
+ProofState.log_linarith_test = log_linarith_test  # add method to ProofState class
+
 x = Variable("x")
 y = Variable("y")
 z = Variable("z")
 
 proof_state = begin_proof( x*y>1, { x > 1, y > 1 })
-proof_state.log_linarith()
+proof_state.log_linarith_test( x*y**2 >= 1 )
+
+
+
+# proof_state.log_linarith()
 
 
 

@@ -5,7 +5,7 @@ class Statement(Type):
     def negate(self):
         """Negate the statement.  Can be overridden."""
         return Not(self)
-    def simp(self, hypotheses=set()):
+    def simp(self, hypotheses=()):
         """Simplify the statement.  Can be overridden.  Can use the hypotheses in the `hypotheses` to simplify."""
         if self.appears_in(hypotheses):
             return Bool(True)
@@ -27,10 +27,10 @@ class Or(Statement):
     def negate(self):
         """Negate the disjunction by negating each disjunct and combining with AND."""
         return And(*(d.negate() for d in self.disjuncts))
-    def simp(self, hypotheses=set()):
+    def simp(self, hypotheses=()):
         if self.appears_in(hypotheses):
             return Bool(True)
-        new_disjuncts = set()
+        new_disjuncts = ()
         """Simplify the disjunction by flattening nested ORs and removing duplicates."""
         for disjunct in self.disjuncts:
             disjunct = disjunct.simp(hypotheses)
@@ -63,7 +63,7 @@ class And(Statement):
     def negate(self):
         """Negate the conjunction by negating each conjunct and combining with OR."""
         return Or(*(c.negate() for c in self.conjuncts))
-    def simp(self, hypotheses=set()):
+    def simp(self, hypotheses=()):
         if self.appears_in(hypotheses):
             return Bool(True)
         new_conjuncts = set()
@@ -99,7 +99,7 @@ class Not(Statement):
     def negate(self):
         """Negate the negation to get the original operand."""
         return self.operand
-    def simp(self, hypotheses=set()):
+    def simp(self, hypotheses=()):
         if self.appears_in(hypotheses):
             return Bool(True)
         return self.operand.simp(hypotheses).negate()

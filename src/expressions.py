@@ -69,7 +69,7 @@ class Constant(Expression):
         if isinstance(other, Constant):
             return self.value == other.value
         return False
-    def simp(self, hypotheses=set()):
+    def simp(self, hypotheses=()):
         """Because we are working with orders of magnitude, constants can be simplified to 1."""
         return Constant(1)
     def __str__(self):
@@ -84,7 +84,7 @@ class Max(Expression):
         if isinstance(other, Max):
             return set_defeq(self.operands, other.operands)
         return False
-    def simp(self, hypotheses=set()):
+    def simp(self, hypotheses=()):
         """Simplify the max expression by flattening nested max's and removing duplicates."""
         new_operands = set()
         for op in self.operands:
@@ -116,7 +116,7 @@ class Min(Expression):
         if isinstance(other, Min):
             return set_defeq(self.operands, other.operands)
         return False
-    def simp(self, hypotheses=set()):
+    def simp(self, hypotheses=()):
         """Simplify the min expression by flattening nested mins and removing duplicates."""
         new_operands = set()
         for op in self.operands:
@@ -147,7 +147,7 @@ class Add(Expression):
         if isinstance(other, Add):
             return set_defeq(self.summands, other.summands)
         return False
-    def simp(self, hypotheses=set()):
+    def simp(self, hypotheses=()):
         """For orders of magnitude, one can turn a sum into a max."""
         return Max(*self.summands).simp(hypotheses)
     def __str__(self):
@@ -162,7 +162,7 @@ class Mul(Expression):
         if isinstance(other, Mul):
             return set_defeq(self.factors, other.factors)
         return False
-    def simp(self, hypotheses=set()):
+    def simp(self, hypotheses=()):
         """Simplify the product in several steps."""
         
         # First, flatten nested products and delete constants.
@@ -217,7 +217,8 @@ class Div(Expression):
         if isinstance(other, Div):
             return self.numerator.defeq(other.numerator) and self.denominator.defeq(other.denominator)
         return False
-    def simp(self, hypotheses=set()): # appeal to Mul's simplifier to handle division
+    def simp(self, hypotheses=()): 
+        # appeal to Mul's simplifier to handle division
         return (self.numerator * (self.denominator**(-1))).simp(hypotheses)
     def __str__(self):
         return f"({self.numerator} / {self.denominator})"
@@ -236,7 +237,7 @@ class Power(Expression):
         if isinstance(other, Power):
             return self.base.defeq(other.base) and self.exponent == other.exponent
         return False
-    def simp(self, hypotheses=set()):
+    def simp(self, hypotheses=()):
         base = self.base.simp(hypotheses)
         if self.exponent == Fraction(1,1):
             return base  # x^1 simplifies to x

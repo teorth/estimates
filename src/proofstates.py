@@ -5,7 +5,7 @@ from statements import *
 
 # A goal consists of a collection of hypotheses and a desired conclusion, stored as mutable types.
 class Goal:
-    def __init__(self, conclusion, hypotheses=set()):
+    def __init__(self, conclusion, hypotheses=()):
         self.conclusion = MutableType(conclusion)
         self.hypotheses = {MutableType(hypothesis) for hypothesis in hypotheses} 
         
@@ -63,8 +63,8 @@ class Goal:
 
 # A proof state consists of a set of goals.  The first goal is the current goal.
 class ProofState:
-    def __init__(self, goals=set()):
-        self.goals = goals 
+    def __init__(self, goals=()):
+        self.goals = set(goals) 
 
     def add_goal(self, goal):
         """Add a goal to the proof state."""
@@ -109,7 +109,7 @@ class ProofState:
             n += 1
         return str
 
-def begin_proof( conclusion, hypotheses=set()):
+def begin_proof( conclusion, hypotheses=()):
     """Begin a proof with a given conclusion and hypotheses."""
     goal = Goal(conclusion, hypotheses)
     proof_state = ProofState(goals={goal})
