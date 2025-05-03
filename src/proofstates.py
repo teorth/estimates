@@ -1,15 +1,15 @@
 from statements import *
 
-# Basic classes for goals and proof states
+#### GOALS AND PROOF STATES ####
 
 # A goal consists of a collection of hypotheses and a desired conclusion.
 class Goal:
-    def __init__(self, conclusion, hypotheses=None):
+    def __init__(self, conclusion, hypotheses=set()):
         self.conclusion = conclusion
-        self.hypotheses = hypotheses if hypotheses is not None else set()
-
+        self.hypotheses = hypotheses 
+        
     def match_hypothesis(self, statement):
-        """Check if a statement matches any of the hypotheses in the goal. If so, return the matching hypothesis (which may be a different object from the original statement)"""
+        """Check if a statement is defeq to any of the hypotheses in the goal. If so, return the matching hypothesis (which may be a different object from the original statement)"""
         for hypothesis in self.hypotheses:
             if hypothesis.defeq(statement):
                 return hypothesis
@@ -34,12 +34,22 @@ class Goal:
         else:
             raise ValueError(f"Hypothesis {hypothesis} not found in the goal.")
 
+    def clear_hypotheses(self):
+        """Clear all hypotheses from the goal."""
+        self.hypotheses.clear()
+
     def replace_hypothesis(self, old_hypothesis, new_hypotheses):
         """Replace an old hypothesis with one or more new hypotheses."""
         self.remove_hypothesis(old_hypothesis)
         for new_hypothesis in new_hypotheses:
             self.add_hypothesis(new_hypothesis)
 
+    def replace_hypotheses(self, new_hypotheses):
+        """Replace all hypotheses with a new set of hypotheses."""
+        self.hypotheses.clear()
+        for new_hypothesis in new_hypotheses:
+            self.add_hypothesis(new_hypothesis)
+            
     def replace_conclusion(self, new_conclusion):
         """Replace the conclusion of the goal."""
         self.conclusion = new_conclusion
@@ -50,8 +60,8 @@ class Goal:
 
 # A proof state consists of a set of goals.  The first goal is the current goal.
 class ProofState:
-    def __init__(self, goals=None):
-        self.goals = goals if goals is not None else set()
+    def __init__(self, goals=set()):
+        self.goals = goals 
 
     def add_goal(self, goal):
         """Add a goal to the proof state."""
@@ -99,6 +109,8 @@ class ProofState:
 
 
 
+#### TACTICS ####
+
 
 def by_contra(proof_state):
     """A tactic to prove a goal by contradiction."""
@@ -115,7 +127,7 @@ ProofState.by_contra = by_contra
 
 
 def split(proof_state, statement=None):
-    """A tactic to split a goal into several sub-goals based on a statement, or split a hypothesis into several subhypotheses."""
+    """A tactic to split a goal into several sub-goals based on a statement (the default), or split a hypothesis into several subhypotheses."""
     if statement is None:
         conclusion = proof_state.current_conclusion()
         if isinstance(conclusion, And):
@@ -150,25 +162,55 @@ ProofState.split = split
 
 
 
+def simp_all(proof_state):
+    """A tactic to simplify all hypotheses in the current goal."""
+    assert not proof_state.solved(), "Cannot apply `simp_all` when all goals are solved."
+    print("Simplifying hypotheses and conclusion in the current goal.")
+    
+    goal = proof_state.current_goal()
+    
+    new_hypotheses = set()
+    for hypothesis in goal.hypotheses:
+        new_hypothesis = hypothesis.simp()
+        if isinstance(new_hypothesis, Bool):
+            if new_hypothesis.bool_value:
+                continue  # no point adding a True hypothesis
+            else:
+                print(f"Contradiction found.") # ex falso quodlibet
+                proof_state.resolve()
+        elif isinstance(new_hypothesis, And):
+            for conjunct in new_hypothesis.conjuncts:
+                new_hypotheses.add(conjunct)
+        else:
+            new_hypotheses.add(new_hypothesis)
+    goal.replace_hypotheses(new_hypotheses)
+
+    new_conclusion = goal.conclusion.simp(goal.hypotheses)
+    goal.replace_conclusion(new_conclusion)
+    if isinstance(new_conclusion, Bool):
+        if new_conclusion.bool_value:
+            proof_state.resolve()
+    elif isinstance(new_conclusion, And):
+        proof_state.split()
+
+ProofState.simp_all = simp_all
+
 A = Proposition("A")
 B = Proposition("B")
 C = Proposition("C")
 D = Proposition("D")
+E = Proposition("E")
 
 proof_state = ProofState()
 
-goal = Goal(And(A,D))
-goal.add_hypothesis(Or(C,D))
-goal.add_hypothesis(B)
+goal = Goal(And(A,B,D))
+goal.add_hypothesis(Or(C,E))
+goal.add_hypothesis(And(B,C))
 goal.add_hypothesis(Or(C,D))
 proof_state.add_goal(goal)
 
 print(proof_state)
 
-proof_state.split(Or(C,D))
-
-print(proof_state)
-
-proof_state.split()
+proof_state.simp_all()
 
 print(proof_state)
