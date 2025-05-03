@@ -3,6 +3,9 @@ import pulp
 import itertools
 from itertools import product
 
+# This is a proof of concept tool to manipulate symbolic expressions representing orders of magnitude, and to prove statements about them.  Most likely it will be refactored into a more systematic formalism, so this code should be viewed as an experimental prototype rather than as a final product.
+
+
 # Symbolic expression classes for order of magnitude estimates (where we only care about magnitudes up to a constant factor)
 
 
@@ -343,6 +346,7 @@ class Ordering:
         elif isinstance(expr, Add):
             return self.order_simplify(max(expr.left, expr.right))  # outsource processing of Add to max  
         elif isinstance(expr, Mul):
+# TODO: collect any Mul or Prod instances in the operands, and simplify them to a single Prod instance
             left = self.order_simplify(expr.left)
             right = self.order_simplify(expr.right)
             if isinstance(left, Constant):
@@ -452,6 +456,7 @@ def splittings(expr):
     else:
         raise TypeError(f"Unsupported expression type: {type(expr)}")
 
+# Currently, assumptions are in two types: `assumptions`, which are `statements`, and `splits`, which are disjunctions of conjunctions of statements.  One could conceivably add more types of assumptions.
 class Assumptions:
     def __init__(self):
         self.assumptions = []
