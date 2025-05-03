@@ -1,5 +1,14 @@
 # Code to automatically prove or verify estimates in analysis
 
+A project to develop a framework to automatically (or semi-automatically) prove estimates in analysis.  Estimates are inequalities of the form $X \lesssim Y$ (which means $X = O(Y)$ in asymptotic notation) or $X \ll Y$ (which means that $X = o(Y)$ in asymptotic notation).
+
+- [Blog post](https://terrytao.wordpress.com/2025/05/01/a-proof-of-concept-tool-to-verify-estimates/)
+
+
+A crude working prototype of the code has already been written; a somewhat different second attempt (creating a pseudo proof assistant environment) is currently underway.
+
+## First attempt (crude working prototype)
+
 Initially we will focus on proving bounds involving positive quantities (up to constants) via (inefficient) brute force case splitting.
 
 Example: to prove that $\min(a,b) \lesssim \max(a,b)$ for all positive $a,b$, run the following code

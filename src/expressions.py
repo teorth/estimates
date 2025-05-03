@@ -78,7 +78,7 @@ class Max(Expression):
     """The formal maximum of a set of expressions."""
     def __init__(self, *operands):
         assert len(operands) > 0, "Max must have at least one operand."
-        self.operands = {ensure_expr(operand) for operand in operands}
+        self.operands = [ensure_expr(operand) for operand in operands]
     def defeq(self, other):
         if isinstance(other, Max):
             return set_defeq(self.operands, other.operands)
@@ -110,7 +110,7 @@ class Min(Expression):
     """The formal minimum of a set of expressions."""
     def __init__(self, *operands):
         assert len(operands) > 0, "Min must have at least one operand."
-        self.operands = {ensure_expr(operand) for operand in operands}
+        self.operands = [ensure_expr(operand) for operand in operands]
     def defeq(self, other):
         if isinstance(other, Min):
             return set_defeq(self.operands, other.operands)
@@ -141,7 +141,7 @@ class Add(Expression):
     """The formal sum of a set of expressions."""
     def __init__(self, *summands):
         assert len(summands) > 0, "Add must have at least one summand."
-        self.summands = {ensure_expr(summand) for summand in summands}
+        self.summands = [ensure_expr(summand) for summand in summands]
     def defeq(self, other):
         if isinstance(other, Add):
             return set_defeq(self.summands, other.summands)
@@ -240,4 +240,4 @@ def expression_examples():
     print(x)
     print(x.simp()) 
     
-expression_examples()
+# expression_examples()
