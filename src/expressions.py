@@ -174,12 +174,33 @@ class Mul(Expression):
                 continue  # multiplying by a constant has no effect in orders of magnitude
             else:
                 new_factors.append(factor)
-        if len(new_factors) == 0:
-            return Constant(1)
-        elif len(new_factors) == 1:
-            return new_factors[0]
-        else:
-            return Mul(*new_factors)
+
+        # Next, gather terms
+        terms = {}
+        for factor in new_factors:
+            if isinstance(factor, Power):
+                base = factor.base
+                exponent = factor.exponent
+            else:
+                base = factor
+                exponent = Fraction(1, 1)
+            new = True
+            for b in terms:
+                if base.defeq(b):
+                    terms[b] += exponent
+                    new = False
+                    break
+            if new:
+                terms[base] = exponent        
+
+        # Simplify all monomials and remove constants
+        final_factors = []
+        for base, exponent in terms.items():
+            monomial = Power(base,exponent).simp(hypotheses)
+            if not isinstance(monomial,Constant):
+                final_factors.append(monomial)
+
+        return Mul(*final_factors)
 
     def __str__(self):
         inner = " * ".join(str(f) for f in self.factors)
@@ -194,14 +215,8 @@ class Div(Expression):
         if isinstance(other, Div):
             return self.numerator.defeq(other.numerator) and self.denominator.defeq(other.denominator)
         return False
-    def simp(self, hypotheses=set()):
-        numerator = self.numerator.simp(hypotheses)
-        denominator = self.denominator.simp(hypotheses)
-        if isinstance(denominator, Constant):
-            return numerator # for orders of magnitude, division by a constant does nothing
-        if numerator.defeq(denominator):
-            return Constant(1)
-        return Div(numerator, denominator)
+    def simp(self, hypotheses=set()): # appeal to Mul's simplifier to handle division
+        return (self.numerator * (self.denominator**(-1))).simp(hypotheses)
     def __str__(self):
         return f"({self.numerator} / {self.denominator})"
 
@@ -228,10 +243,16 @@ class Power(Expression):
         if isinstance(base, Power):
             # If the base is already a power, we can combine the exponents
             return Power(base.base, base.exponent * self.exponent)
+        if isinstance(base, Mul):
+            # distribute the exponent over the product
+            return Mul(*(Power(factor, self.exponent) for factor in base.factors)).simp(hypotheses)
         return Power(base, self.exponent)
     def __str__(self):
         return f"({self.base} ^ {self.exponent})"
 
+def sqrt(expr):
+    return Power(expr, Fraction(1, 2))
+Expression.sqrt = sqrt  # Add a convenience method to Expression
 
 def expression_examples():
     """Example usage of the Expression, Variable, Constant, Max, and Min classes"""
@@ -240,7 +261,7 @@ def expression_examples():
     b = Variable("b")
     c = Variable("c")
     d = Variable("d")
-    x = 3*(a**2)*min(max(a,c),(b**Fraction(1,3))**2,c,max(c,c),max(a,min(c,c)))*2/a
+    x = (sqrt(a+b+c)*(a+b)*sqrt(max(a,c,b))/(d*max(a,b)))**2
 
     print(x)
     print(x.simp()) 
