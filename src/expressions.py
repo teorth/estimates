@@ -218,7 +218,7 @@ class Power(Expression):
         base = self.base.simp(hypotheses)
         if self.exponent == 1:
             return base  # x^1 simplifies to x
-        if self.exponent == 0:
+        if self.exponent == 0 or isinstance(base, Constant):
             return Constant(1)
         if isinstance(base, Power):
             # If the base is already a power, we can combine the exponents
