@@ -1,4 +1,5 @@
 from type import *
+from fractions import Fraction
 
 class Expression(Type):
     """A formal expression that represents an order of magnitude."""
@@ -205,20 +206,24 @@ class Div(Expression):
         return f"({self.numerator} / {self.denominator})"
 
 class Power(Expression):
-    """The formal power of an expression raised to an exponent."""
+    """The formal power of an expression raised to an exponent.  To use exact arithmetic, exponents must be rational. """
     def __init__(self, base, exponent):
         self.base = ensure_expr(base)
-        assert isinstance(exponent, (int,float)), f"Exponent {exponent} must be an int or float, was type {type(exponent)}."
-        self.exponent = exponent
+        if isinstance(exponent, int):
+            self.exponent = Fraction(exponent, 1)  # Convert integer exponent to Fraction
+        elif isinstance(exponent, Fraction):
+            self.exponent = exponent
+        else:
+            raise ValueError(f"Exponent {exponent} must be an int or rational, was type {type(exponent)}.")
     def defeq(self, other):
         if isinstance(other, Power):
             return self.base.defeq(other.base) and self.exponent == other.exponent
         return False
     def simp(self, hypotheses=set()):
         base = self.base.simp(hypotheses)
-        if self.exponent == 1:
+        if self.exponent == Fraction(1,1):
             return base  # x^1 simplifies to x
-        if self.exponent == 0 or isinstance(base, Constant):
+        if self.exponent == Fraction(0,1) or isinstance(base, Constant):
             return Constant(1)
         if isinstance(base, Power):
             # If the base is already a power, we can combine the exponents
@@ -235,9 +240,9 @@ def expression_examples():
     b = Variable("b")
     c = Variable("c")
     d = Variable("d")
-    x = 3*(a**2)*min(max(a,c),b,c,max(c,c),max(a,min(c,c)))*2/a
+    x = 3*(a**2)*min(max(a,c),(b**Fraction(1,3))**2,c,max(c,c),max(a,min(c,c)))*2/a
 
     print(x)
     print(x.simp()) 
     
-# expression_examples()
+expression_examples()
