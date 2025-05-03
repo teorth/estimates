@@ -124,7 +124,7 @@ def by_contra(proof_state):
     """A tactic to prove a goal by contradiction."""
     assert not proof_state.solved(), "Cannot apply `by_contra` when all goals are solved."
     goal = proof_state.current_goal()
-    conclusion = proof_state.current_conclusion()
+    conclusion = proof_state.current_conclusion().immutable()
     # Negate the conclusion and add it as a hypothesis
     goal.add_hypothesis(conclusion.negate())
     goal.replace_conclusion(Bool(False))  # The goal is now to obtain a contradiction
@@ -137,9 +137,9 @@ ProofState.by_contra = by_contra
 def split(proof_state, statement=None):
     """A tactic to split a goal into several sub-goals based on a statement (the default), or split a hypothesis into several subhypotheses."""
     if statement is None:
-        conclusion = proof_state.current_conclusion()
-        if isinstance(conclusion.immutable(), And):
-            print(f"Splitting conclusion {conclusion} into subgoals {conclusion.immutable().conjuncts}.")
+        conclusion = proof_state.current_conclusion().immutable()
+        if isinstance(conclusion, And):
+            print(f"Splitting conclusion {conclusion} into subgoals {conclusion.conjuncts}.")
             goal = proof_state.pop()
             for conjunct in conclusion.immutable().conjuncts:
                 # Create a new goal for each conjunct, keeping the hypotheses the same, but copied to a different mutable type so that they can be modified independently.

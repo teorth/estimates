@@ -1,7 +1,5 @@
 from statements import *
 from expressions import *
-from linprog import *
-
 
 # An estimate is a comparison between two expressions that is of one of the following forms:
 
@@ -83,6 +81,10 @@ def expression_eq(self, other):
 Expression.asymp = expression_eq  # cannot override __eq__ because it is used for object identity, not equality of expressions
     
 
+
+
+
+
 def estimate_examples():
     a = Variable("a")
     b = Variable("b")
@@ -94,4 +96,4 @@ def estimate_examples():
 
     print(X.simp()) 
 
-estimate_examples() 
+# estimate_examples() 

@@ -268,4 +268,4 @@ def expression_examples():
     print(x)
     print(x.simp()) 
     
-expression_examples()
+# expression_examples()

@@ -26,6 +26,12 @@ class Concept:
     def appears_in(self, collection):
         """Check if the type appears in a collection of types (up to defeq)."""
         return any(self.defeq_immutable(object) for object in collection)
+    def match(self, collection):
+        """Check if the type matches any type in a collection of types (up to defeq). If so, return the matching type."""
+        for object in collection:
+            if self.defeq_immutable(object):
+                return object
+        return None
     def add_to(self, collection):
         """Add the type to a collection of types, if it is not already present (up to defeq)."""
         if not self.appears_in(collection):

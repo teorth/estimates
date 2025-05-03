@@ -63,7 +63,7 @@ def feasibility(inequalities):
     s = Solver()
 
 # create a dictionary of real z3 variables for each inequality variable
-    z3_variables = {var: Real(var) for var in variables}
+    z3_variables = {var: Real(str(var)) for var in variables}
 
 # add the constraint for each inequality
     for ineq in inequalities:
@@ -82,7 +82,7 @@ def feasibility(inequalities):
 # solve
     if s.check() == sat:
         m = s.model()
-        return False, {var: m[z3_variables[var]] for var in variables}
+        return True, {var: m[z3_variables[var]] for var in variables}
 
 #   Now we test for infeasibility.
 
@@ -115,7 +115,7 @@ def feasibility(inequalities):
 
     if dual_s.check() == sat:
         m = dual_s.model()
-        return True, {ineq:m[v] for ineq, v in dual_vars.items()}
+        return False, {ineq:m[v] for ineq, v in dual_vars.items()}
     else:
         raise ValueError("Farkas lemma violation!  Problem is neither feasible nor infeasible.")
 
@@ -127,13 +127,13 @@ def verbose_feasibility(inequalities):
 
     outcome, dict = feasibility(inequalities)
     if outcome:
-        print("Infeasible with the following values:")
-        for ineq, coeff in dict.items():
-            print(f"{ineq} multiplied by {coeff}")
-    else:
         print("Feasible with the following values:")
         for var, value in dict.items():
             print(f"{var} = {value}")
+    else:
+        print("Infeasible with the following values:")
+        for ineq, coeff in dict.items():
+            print(f"{ineq} multiplied by {coeff}")
 
 
 def feasbility_examples():
