@@ -1,4 +1,4 @@
-from linprog import *
+from linprog.linprog import *
 from proofstates import *
 from estimates import *
 

@@ -2,8 +2,11 @@
 
 A project to develop a framework to automatically (or semi-automatically) prove estimates in analysis.  Estimates are inequalities of the form $X \lesssim Y$ (which means $X = O(Y)$ in asymptotic notation) or $X \ll Y$ (which means that $X = o(Y)$ in asymptotic notation).
 
-- [Blog post explaining the project](https://terrytao.wordpress.com/2025/05/01/a-proof-of-concept-tool-to-verify-estimates/)
+- [Blog post explaining the project](https://terrytao.wordpress.com/2025/05/01/a-proof-of-concept-tool-to-verify-estimates/) - Terence Tao, May 1 2025
+    - A [companion post](https://terrytao.wordpress.com/2025/05/04/orders-of-infinity/) on the algebraic structure of orders of infinity - Terence Tao - May 4 2025
 - [A proof-of-concept prototype](src/first_attempt/README.md)
+
+As a byproduct of this project, an [exact linear programming proof certificate tool](src/linprog/README.md) was written.
 
 ## First example: Propositional logic
 

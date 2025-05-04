@@ -82,7 +82,7 @@ def feasbility_examples():
     inequalities2.add(Inequality({'x': 2, 'y':-1}, 'eq', 0))
     verbose_feasibility(inequalities2)    
 
-# feasbility_examples()
+feasbility_examples()
 
 
 def unfold_examples():
@@ -150,7 +150,7 @@ def LP_autosolve_example():
     proof_state = begin_proof( min(x,y,z)*max(x,y,z)**2 <= x*y*z, { LP_property(x,y,z) } )
     proof_state.autosolve()
 
-LP_autosolve_example()
+# LP_autosolve_example()
 
 def log_linarith_example_2():
     x = Variable("x")
@@ -170,5 +170,3 @@ def simp_example():
     print(proof_state)
 
 # simp_example()
-
-

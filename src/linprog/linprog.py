@@ -117,7 +117,7 @@ def feasibility(inequalities):
         m = dual_s.model()
         return False, {ineq:m[v] for ineq, v in dual_vars.items()}
     else:
-        raise ValueError("Farkas lemma violation!  Problem is neither feasible nor infeasible.")
+        raise ValueError(f"Farkas lemma violation!  Problem is neither feasible nor infeasible. Inequalities: {inequalities}")
 
 def verbose_feasibility(inequalities):
     """ Test via dual linear programming if a list of inequalities is feasible, outputting a certificate in both cases. """
@@ -131,7 +131,8 @@ def verbose_feasibility(inequalities):
         for var, value in dict.items():
             print(f"{var} = {value}")
     else:
-        print("Infeasible with the following values:")
+        print("Infeasible by summing the following:")
         for ineq, coeff in dict.items():
-            print(f"{ineq} multiplied by {coeff}")
+            if not coeff == Fraction(0,1):
+                print(f"{ineq} multiplied by {coeff}")
 
