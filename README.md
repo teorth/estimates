@@ -8,6 +8,8 @@ A project to develop a framework to automatically (or semi-automatically) prove 
 
 As a byproduct of this project, an [exact linear programming proof certificate tool](src/linprog/README.md) was written.
 
+It has been suggested that this project be somehow integrated into [sympy](https://docs.sympy.org/latest/index.html).  I would be interested in further discussion of this possibility, for instance at the [blog post mentioned above](https://terrytao.wordpress.com/2025/05/01/a-proof-of-concept-tool-to-verify-estimates/).
+
 ## First example: Propositional logic
 
 Examples of the code can be found [here](src/examples.py).  The code requires the Z3 solver, which can be installed for instance by `pip install z3-solver`.  We now give some worked out cases.
