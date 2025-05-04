@@ -10,6 +10,7 @@ def tactic_examples():
     proof_state = begin_proof( And(A,B,D), { Or(C,E), And(B,C), Or(C,D) } )
     proof_state.simp_all()
     proof_state.by_contra()
+    proof_state.split(Or(C,E))
 
     print(proof_state)
 
@@ -110,12 +111,23 @@ def log_linarith_examples():
 
 # log_linarith_examples()
 
+def log_linarith_example2():
+    X = Variable("X")
+    Y = Variable("Y")
+    Z = Variable("Z")
+    W = Variable("W")
+    U = Variable("U")
+    proof_state = begin_proof( X*Z**2 < Y*U*W, { X <= Y, Z < W, Z.asymp(U) })
+    proof_state.log_linarith()
+
+# log_linarith_example2()
 
 def max_lt_min_example():
     a = Variable("a")
     b = Variable("b")
     proof_state = begin_proof( min(a,b) <= max(a,b) )
     proof_state.unfold_max()
+    print(proof_state)
     proof_state.log_linarith()
 
 # max_lt_min_example()
@@ -136,6 +148,27 @@ def LP_autosolve_example():
     z = Variable("z")
 
     proof_state = begin_proof( min(x,y,z)*max(x,y,z)**2 <= x*y*z, { LP_property(x,y,z) } )
-    autosolve(proof_state)
+    proof_state.autosolve()
 
 LP_autosolve_example()
+
+def log_linarith_example_2():
+    x = Variable("x")
+    y = Variable("y")
+    z = Variable("z")
+    proof_state = begin_proof( x <= z, {x**2 < y, y**2 < z } )
+    proof_state.log_linarith()
+
+# log_linarith_example_2()
+
+def simp_example():
+    x = Variable("x")
+    y = Variable("y")
+    z = Variable("z")
+    proof_state = begin_proof( (x*sqrt(y))**4 * 3 / x < z * y * z**(-2))
+    proof_state.simp_all()
+    print(proof_state)
+
+# simp_example()
+
+

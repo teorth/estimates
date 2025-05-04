@@ -58,7 +58,10 @@ class Goal:
         self.conclusion = new_conclusion.mutable()
 
     def __str__(self):
-        return f"Assuming: {', '.join(map(str, self.hypotheses))}, prove: {self.conclusion}"
+        if len(self.hypotheses) == 0:
+            return f"Prove: {self.conclusion}"
+        else:
+            return f"Assuming: {', '.join(map(str, self.hypotheses))}, prove: {self.conclusion}"
 
 
 # A proof state consists of a set of goals, and a current goal

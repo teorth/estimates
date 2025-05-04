@@ -18,3 +18,5 @@ def autosolve(proof_state):
             continue
         print("No existing tactics fully resolved current goal.")
         return False
+    
+ProofState.autosolve = autosolve
