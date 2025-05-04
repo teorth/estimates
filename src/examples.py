@@ -17,6 +17,18 @@ def tactic_examples():
 # tactic_examples()
 
 
+def more_tactic_examples():
+    A = Proposition("A")
+    B = Proposition("B")
+    C = Proposition("C")
+    D = Proposition("D")
+
+    proof_state = begin_proof( Or(And(A,C),And(B,C),And(A,D),And(B,D)), { Or(A,B), Or(C,D) } )
+
+    proof_state.simp_and_split()
+
+more_tactic_examples()
+
 def expression_examples():
     """Example usage of the Expression, Variable, Constant, Max, and Min classes"""
 
@@ -110,5 +122,5 @@ def am_gm_example():
     proof_state.unfold_max()
     proof_state.log_linarith()
 
-am_gm_example()
+# am_gm_example()
 
