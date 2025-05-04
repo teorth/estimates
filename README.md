@@ -7,7 +7,7 @@ A project to develop a framework to automatically (or semi-automatically) prove 
 
 ## First example: Propositional logic
 
-Examples of the code can be found [here](src/examples.py).  We now give some worked out cases.
+Examples of the code can be found [here](src/examples.py).  The code requires the Z3 solver, which can be installed for instance by `pip install z3-solver`.  We now give some worked out cases.
 
 Even though the primary motivation was to prove asymptotic estimates, it turned out to be natural to build a framework that can handle propositional logic, in particular boolean connectives such as `AND` and `OR`, basically in order to take advantage of dichotomies such as "$X \lesssim Y$ OR $X \gg Y$".  So we will begin with an example of the code in pure propositional logic.
 
