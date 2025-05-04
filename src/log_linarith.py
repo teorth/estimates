@@ -93,6 +93,7 @@ def log_linarith( proof_state ):
     if not proof_state.current_conclusion().defeq_immutable(Bool(False)):
         proof_state.by_contra()  # if the goal is not already a contradiction, assume it for contradiction
 
+    print("Trying to obtain a contradiction by logarithmic linear arithmetic...")
     # Convert all estimates in the hypotheses to inequalities.
     inequalities = set()
     for hypothesis in proof_state.current_hypotheses():
@@ -101,7 +102,7 @@ def log_linarith( proof_state ):
 
     outcome, certificate = feasibility(inequalities)
     if outcome:
-        print("Unfortunately, hypotheses are feasible.  Sample feasible values (for N large):")
+        print("Unfortunately, the purely multiplicative hypotheses are feasible.  Sample feasible values (for N large):")
         for var, value in certificate.items():
             print(f"{var} = N^{value}")
         return False
@@ -111,8 +112,7 @@ def log_linarith( proof_state ):
             if not value == Fraction(0,1):
                 print(f"{ineq.multiplicative_name()} raised to power {value}")
         proof_state.resolve()  # resolve the current goal
-
-    return outcome
+        return True
 
 ProofState.log_linarith = log_linarith  # add method to ProofState class
 

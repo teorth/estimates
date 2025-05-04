@@ -1,5 +1,4 @@
-from log_linarith import *
-from unfold_max import *
+from autosolve import *
 
 def tactic_examples():
     A = Proposition("A")
@@ -27,7 +26,7 @@ def more_tactic_examples():
 
     proof_state.simp_and_split()
 
-more_tactic_examples()
+# more_tactic_examples()
 
 def expression_examples():
     """Example usage of the Expression, Variable, Constant, Max, and Min classes"""
@@ -57,6 +56,13 @@ def estimate_examples():
 
 # estimate_examples() 
 
+def LP_example():
+    x = Variable("x")
+    y = Variable("y")
+    z = Variable("z")
+    print(LP_property(x, y, z))  
+    
+# LP_example()
 
 
 def feasbility_examples():
@@ -124,3 +130,12 @@ def am_gm_example():
 
 # am_gm_example()
 
+def LP_autosolve_example():
+    x = Variable("x")
+    y = Variable("y")
+    z = Variable("z")
+
+    proof_state = begin_proof( min(x,y,z)*max(x,y,z)**2 <= x*y*z, { LP_property(x,y,z) } )
+    autosolve(proof_state)
+
+LP_autosolve_example()

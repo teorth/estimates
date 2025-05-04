@@ -141,6 +141,8 @@ def begin_proof( conclusion, hypotheses=()):
 def by_contra(proof_state):
     """A tactic to prove a goal by contradiction."""
     assert not proof_state.solved(), "Cannot apply `by_contra` when all goals are solved."
+    if proof_state.current_conclusion().defeq(Bool(False)):
+        return True  # We already are proving by contradiction.
     goal = proof_state.current_goal
     conclusion = proof_state.current_conclusion().immutable()
     # Negate the conclusion and add it as a hypothesis
@@ -211,7 +213,7 @@ ProofState.split_first = split_first
 def simp_all(proof_state):
     """A tactic to simplify all hypotheses in the current goal."""
     assert not proof_state.solved(), "Cannot apply `simp_all` when all goals are solved."
-    print("Simplifying hypotheses and conclusion in the current goal.")
+    print("Simplifying hypotheses and conclusion in the current goal...")
     
     goal = proof_state.current_goal
     

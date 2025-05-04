@@ -1,5 +1,7 @@
 from statements import *
 from expressions import *
+import itertools
+
 
 # An estimate is a comparison between two expressions that is of one of the following forms:
 
@@ -80,7 +82,18 @@ def expression_eq(self, other):
     return Estimate(self, '~', ensure_expr(other))
 Expression.asymp = expression_eq  # cannot override __eq__ because it is used for object identity, not equality of expressions
     
+# the Littlewood-Paley property asserts that some collection N_1,...,N_k of variables are magnitudes (up to constants) of vectors that sum to zero.  Equivalently, two of them are comparable in magnitude and bound the rest.
 
+def LP_property(*args):
+    cases = []
+    assert len(args) > 1, "Error: Littlewood-Paley constraints must involve at least two variables."
+    for expr1, expr2 in itertools.combinations(args, 2):
+        conjuncts = { expr1.asymp(expr2) }
+        for other_expr in args:
+            if not other_expr.defeq(expr1) and not other_expr.defeq(expr2):
+                conjuncts.add(other_expr <= expr1)
+        cases.append(And(*conjuncts))
+    return Or(*cases)
 
 
 

@@ -74,7 +74,8 @@ def unfold_max(proof_state):
         collect_new_variables(hypothesis, new_variables)
     collect_new_variables(proof_state.current_conclusion(), new_variables)
 
-    print(f"Creating new variables: {new_variables}")
+    if len(new_variables) > 0:
+        print(f"Creating new variables: {new_variables}")
 
     # Now, recursively replace all occurrences of `max` and `min` terms in the hypotheses and conclusion with the new variables.
     for hypothesis in proof_state.current_hypotheses():
