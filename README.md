@@ -4,7 +4,7 @@ A project to develop a framework to automatically (or semi-automatically) prove 
 
 - [Blog post explaining the project](https://terrytao.wordpress.com/2025/05/01/a-proof-of-concept-tool-to-verify-estimates/) - Terence Tao, May 1 2025
     - A [companion post](https://terrytao.wordpress.com/2025/05/04/orders-of-infinity/) on the algebraic structure of orders of infinity - Terence Tao - May 4 2025
-- [A proof-of-concept prototype](src/first_attempt/README.md)
+- [A proof-of-concept prototype](src/ver_0_0/README.md)
 
 As a byproduct of this project, an [exact linear programming proof certificate tool](src/linprog/README.md) was written.
 
