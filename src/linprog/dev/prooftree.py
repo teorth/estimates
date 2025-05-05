@@ -1,39 +1,11 @@
 
+from proofstate import *
+from tactic import *
+
 # Support for proof trees, mimicking a Lean-type tactic proof environment.
 
 
-## Proof states describe the current state of a proof (a list of hypotheses and a goal).  For now, implemented as a stub in which the goals and hypotheses are stored as strings.
-# 
-class ProofState:
-    def __init__(self, goal: str, hypotheses: list[str] = None):
-        """
-        Initialize a proof state with a name, a goal, and an optional list of hypotheses.
-        
-        :param name: The name of the proof state.
-        :param goal: The goal of the proof state.
-        :param hypotheses: A list of hypotheses for the proof state (optional).
-        """
-        self.goal = goal
-        self.hypotheses = hypotheses if hypotheses is not None else []
 
-    def __str__(self):
-        return f"Prove {self.goal} assuming {self.hypotheses}"
-
-
-## Tactics are operations that can transform a proof state into one or more proof states.  For now, implemented as a stub that describes the operation in a string.
-
-class Tactic:
-    def __init__(self, name: str):
-        """
-        Initialize a tactic with a name and an optional description.
-        
-        :param name: The name of the tactic.
-        :param description: A description of the tactic (optional).
-        """
-        self.name = name
-
-    def __str__(self):
-        return f"{self.name}"
 
 
 # A proof tree consists of the following objects:
