@@ -70,6 +70,22 @@ class ProofTree:
         """Return a string representation of the proof tree, with indentation for each level."""
         return "\n".join(self.rstr(current_node=current_node))
     
+    def num_sorries(self, node:'ProofTree' = None) -> int:
+        """Return the number of sorries in the proof tree, optionally excluding a given node."""
+        if self.tactic is None:
+            return 1
+        elif self == node:
+            return 0
+        else:
+            count = 0
+            for child in self.children:
+                count += child.num_sorries()
+            return count
+        
+    def is_sorry_free(self) -> bool:
+        """Return True if the proof tree is free of sorries."""
+        return self.num_sorries() == 0
+
     def __str__(self):
         return self.rstr_join()
     
