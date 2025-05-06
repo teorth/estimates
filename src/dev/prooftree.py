@@ -11,7 +11,7 @@ from tactic import *
 ## The current proof state
 ## The parent proof state (or None, if this is the root)
 ## The tactic used to transform this state into new states (or None, if the state is "sorried")
-## A list of proof states that are children of this state (or None, if this is a leaf)
+## A list of proof states that are children of this state (representing the tasks left to do by the current tactic)
 
 class ProofTree:
     def __init__(self, proof_state: ProofState):
@@ -21,7 +21,7 @@ class ProofTree:
         self.proof_state = proof_state
         self.parent = None  # parents are managed automatically by the add_sorry method
         self.tactic = None  # Proof trees are initialized as a "sorry", so the tactic is None
-        self.children = []
+        self.children = []  # Must be empty if self.tactic is None; can also be empty if self.tactic completes the goal
 
     def add_sorry(self, proof_state) -> 'ProofTree':
         """Add a child proof tree node as a 'sorry'."""
@@ -62,21 +62,41 @@ class ProofTree:
         """Return a string representation of the proof tree, with indentation for each level."""
         return "\n".join(self.rstr(current_node=current_node))
     
-    def num_sorries(self, node:'ProofTree' = None) -> int:
-        """Return the number of sorries in the proof tree, optionally excluding a given node."""
-        if self.tactic is None:
-            return 1
-        elif self == node:
-            return 0
+    def list_sorries(self, exclude : list['ProofTree'] = []) -> list['ProofTree']:
+        """Return a list of sorry nodes in the proof tree, optionally excluding a given node."""
+        if self in exclude:
+            return []
+        elif self.tactic is None:
+            return [self]
         else:
-            count = 0
+            sorries = []
             for child in self.children:
-                count += child.num_sorries()
-            return count
-        
+                sorries.extend(child.list_sorries(exclude))
+            return sorries
+
+    def num_sorries(self, exclude : list['ProofTree'] = []) -> int:
+        """Return the number of sorries in the proof tree, optionally excluding a given node."""
+        return len(self.list_sorries(exclude))
+                
     def is_sorry_free(self) -> bool:
         """Return True if the proof tree is free of sorries."""
         return self.num_sorries() == 0
+    
+    def first_sorry(self) -> 'ProofTree':
+        """Return the first sorry node in the proof tree."""
+        sorries = self.list_sorries()
+        if len(sorries) == 0:
+            return None
+        else:
+            return sorries[0]
+
+    def last_sorry(self) -> 'ProofTree':
+        """Return the last sorry node in the proof tree."""
+        sorries = self.list_sorries()
+        if len(sorries) == 0:
+            return None
+        else:
+            return sorries[len(sorries)-1]
 
     # recursively trace through the proof tree to find
     #
