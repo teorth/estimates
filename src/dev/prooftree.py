@@ -39,14 +39,14 @@ class ProofTree:
     # apply a tactic and create children with the indicated proof states
     def use_tactic(self, tactic: Tactic, proof_state_list: list[ProofState]) -> list['ProofTree']:
         if self.tactic is not None:
-            raise ValueError("Cannot use a tactic on a proof tree that already has a tactic.")
+            raise ValueError("Cannot use a tactic on a proof tree that already has a tactic.") #TODO: remove this restriction
         self.tactic = tactic
         for proof_state in proof_state_list:
             self.add_sorry(proof_state)
         return self.children
 
     # Recursively generate a list of strings representing of the proof tree, with indentation for each level.  Highlight the node if it is the current node
-    def rstr(self, indent:str = "", next_indent:str = "", current_node:'ProofTree' = None) -> list[str]:
+    def rstr(self, indent:str = "  ", next_indent:str = "  ", current_node:'ProofTree' = None) -> list[str]:
         if self.tactic == None:
             if self == current_node:
                 return [indent + "**sorry**"]
@@ -90,16 +90,17 @@ class ProofTree:
         return self.rstr_join()
     
 
-node0 = ProofTree(ProofState(""))
-node0.use_tactic(Tactic("split"), [ProofState(""), ProofState("")])
-node1 = node0.children[0]
-node1.use_tactic(Tactic("simp"), [ProofState("")])
-node2 = node1.children[0]
-node2.use_tactic(Tactic("log_linarith"), [ProofState("")])
-sorry = node2.children[0]
-node3 = node0.children[1]
-node3.use_tactic(Tactic("by_contra"), [ProofState("")])
-node4 = node3.children[0]
-node4.use_tactic(Tactic("simp"), [])
+def example():
+    node0 = ProofTree(ProofState(""))
+    node0.use_tactic(Tactic("split"), [ProofState(""), ProofState("")])
+    node1 = node0.children[0]
+    node1.use_tactic(Tactic("simp"), [ProofState("")])
+    node2 = node1.children[0]
+    node2.use_tactic(Tactic("log_linarith"), [ProofState("")])
+    sorry = node2.children[0]
+    node3 = node0.children[1]
+    node3.use_tactic(Tactic("by_contra"), [ProofState("")])
+    node4 = node3.children[0]
+    node4.use_tactic(Tactic("simp"), [])
 
-print(node0.rstr_join(sorry))
+    print(node0.rstr_join(sorry))
