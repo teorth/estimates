@@ -1,16 +1,15 @@
-## Tactics are operations that can transform a proof state into one or more proof states.  For now, implemented as a stub that describes the operation in a string.
+from proofstate import *
 
-## actual, specific tactics should go in another python file, in particular one that imports proofstates (since almost all tactics will need to modify the proof state)
+## Tactics are operations that can transform a proof state into one or more proof states.  
 
 class Tactic:
-    def __init__(self, name: str):
+    def activate(self, state: ProofState) -> list[ProofState]:
         """
-        Initialize a tactic with a name and an optional description.
+        Activate the tactic on the given proof state.  Will return any proof states that remain after applying the tactic.  
+        """
+        raise NotImplementedError("Tactics should be implemented in a derived class.")
         
-        :param name: The name of the tactic.
-        :param description: A description of the tactic (optional).
-        """
-        self.name = name
-
     def __str__(self):
-        return f"{self.name}"
+        raise NotImplementedError("Tactics should be implemented in a derived class.")
+
+

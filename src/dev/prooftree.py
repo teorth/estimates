@@ -2,9 +2,7 @@
 from proofstate import *
 from tactic import *
 
-# Support for proof trees, mimicking a Lean-type tactic proof environment.
-
-
+# Support for proof trees and tactics, mimicking a Lean-type tactic proof environment.
 
 
 
@@ -16,17 +14,13 @@ from tactic import *
 ## A list of proof states that are children of this state (or None, if this is a leaf)
 
 class ProofTree:
-    def __init__(self, proof_state: ProofState, tactic: Tactic = None):
+    def __init__(self, proof_state: ProofState):
         """
-        Initialize a proof tree node with a proof state, an optional parent, and an optional tactic.
-        
-        :param proof_state: The current proof state.
-        :param parent: The parent proof tree node (None, if is the root).
-        :param tactic: The tactic used to transform this state into new states (None, if this step is "sorried").
+        Initialize a proof tree node with a proof state.
         """
         self.proof_state = proof_state
         self.parent = None  # parents are managed automatically by the add_sorry method
-        self.tactic = tactic
+        self.tactic = None  # Proof trees are initialized as a "sorry", so the tactic is None
         self.children = []
 
     def add_sorry(self, proof_state) -> 'ProofTree':
@@ -36,15 +30,13 @@ class ProofTree:
         self.children.append(child)
         return child
     
-    # apply a tactic and create children with the indicated proof states
-    def use_tactic(self, tactic: Tactic, proof_state_list: list[ProofState]) -> list['ProofTree']:
-        if self.tactic is not None:
-            raise ValueError("Cannot use a tactic on a proof tree that already has a tactic.") #TODO: remove this restriction
+    # apply a tactic and create children nodes with the resulting indicated proof states
+    def use_tactic(self, tactic: Tactic):
         self.tactic = tactic
+        proof_state_list = tactic.activate(self.proof_state)
         for proof_state in proof_state_list:
             self.add_sorry(proof_state)
-        return self.children
-
+        
     # Recursively generate a list of strings representing of the proof tree, with indentation for each level.  Highlight the node if it is the current node
     def rstr(self, indent:str = "  ", next_indent:str = "  ", current_node:'ProofTree' = None) -> list[str]:
         if self.tactic == None:
@@ -86,21 +78,72 @@ class ProofTree:
         """Return True if the proof tree is free of sorries."""
         return self.num_sorries() == 0
 
+    # recursively trace through the proof tree to find
+    #
+    ## whether the target appeared in the tree
+    ## the last "sorry" node before a given target (if present), or the last "sorry" node, period
+    ## the first "sorry" after the given target (if present), or the first "sorry" node, period
+    def find_sorry(self, target:'ProofTree') -> tuple[bool, 'ProofTree', 'ProofTree']:
+        if self == target:
+            for child in self.children:
+                _, _, first = child.find_sorry(target)
+                if first is not None:
+                    return True, None, first
+            return True, None, None
+        if self.tactic is None:
+            return False, self, self
+        before = None
+        after = None
+        found_target = False
+        for child in self.children:
+            found, last_before, first_after = child.find_sorry(target)
+            if found:
+                found_target = True
+                if last_before is not None:
+                    before = last_before
+                after = first_after
+            else:
+                if found_target:
+                    if after is None:
+                        after = first_after
+                else:
+                    before = last_before
+        return (found_target, before, after)
+    
+    # recursively trace through the proof tree to find
+    #
+    ## whether the target appeared in the tree
+    ## how many sorries appeared before the target (if present), or the total number of sorries, period 
+    ## how many sorries appeared after the target (if present), or the total number of sorries, period
+    def count_sorries(self, target:'ProofTree') -> tuple[bool, int, int]:
+        if self == target:
+            before = 0
+            after = 0
+            for child in self.children:
+                found, before_count, after_count = child.count_sorries(target)
+                if found:
+                    after += after_count
+                else:
+                    before += before_count
+            return True, before, after
+        if self.tactic is None:
+            return False, 1, 1
+        before = 0
+        after = 0
+        found_target = False
+        for child in self.children:
+            found, before_count, after_count = child.count_sorries(target)
+            if found:
+                found_target = True
+                before += before_count
+                after += after_count
+            else:
+                if found_target:
+                    after += after_count
+                else:
+                    before += before_count 
+        return (found_target, before, after)
+
     def __str__(self):
         return self.rstr_join()
     
-
-def example():
-    node0 = ProofTree(ProofState(""))
-    node0.use_tactic(Tactic("split"), [ProofState(""), ProofState("")])
-    node1 = node0.children[0]
-    node1.use_tactic(Tactic("simp"), [ProofState("")])
-    node2 = node1.children[0]
-    node2.use_tactic(Tactic("log_linarith"), [ProofState("")])
-    sorry = node2.children[0]
-    node3 = node0.children[1]
-    node3.use_tactic(Tactic("by_contra"), [ProofState("")])
-    node4 = node3.children[0]
-    node4.use_tactic(Tactic("simp"), [])
-
-    print(node0.rstr_join(sorry))

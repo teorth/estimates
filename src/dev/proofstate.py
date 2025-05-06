@@ -23,6 +23,14 @@ class ProofState:
         :param goal: The new goal for the proof state.
         """
         self.goal = goal
+
+    def copy(self) -> 'ProofState':
+        """
+        Create a copy of the proof state.
+        
+        :return: A new ProofState object with the same goal and hypotheses.
+        """
+        return ProofState(self.goal, self.hypotheses.copy())
         
     def __str__(self):
         output = []
