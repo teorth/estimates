@@ -22,18 +22,38 @@ class ProofAssistant:
             raise ValueError("Cannot add hypotheses in tactic mode.  Please switch to assumption mode.")
 
     def var(self, type:str, name:str = "this") -> Basic:
-        """ Introduce a variable of a given type. """
+        """ Introduce a variable of a given type, stored as a Tuple wrapper around a sympy variable of the same type. """
         if self.mode == "assumption":
             assert not name in self.hypotheses, f"The name {name} is already taken."
             match type:
                 case "int":
                     obj = Symbol(name, integer=True)
+                case "pos_int":
+                    obj = Symbol(name, integer=True, positive=True)
+                case "nonneg_int":
+                    obj = Symbol(name, integer=True, nonnegative=True)  
                 case "real":
                     obj = Symbol(name, real=True)
+                case "pos_real":
+                    obj = Symbol(name, real=True, positive=True)
+                case "nonneg_real":
+                    obj = Symbol(name, real=True, nonnegative=True)
+                case "bool":
+                    obj = Proposition(name)
                 case _:
-                    raise ValueError(f"Unknown type {type}.  Please use 'int' or 'real'.")
-            self.hypotheses[name] = obj
+                    raise ValueError(f"Unknown type {type}.  Currently accepted types: 'int', 'pos_int', 'nonneg_int', 'real', 'pos_real', 'nonneg_real',  'bool'.")
+            self.hypotheses[name] = Type(obj)
             return obj
+        else:
+            raise ValueError("Cannot introduce variables in tactic mode.  Please switch to assumption mode.")
+
+    def vars(self, type:str, *names:str) -> list[Basic]:
+        """ Introduce a list of variables of a given type. """
+        if self.mode == "assumption":
+            varlist = []
+            for name in names:
+                varlist.append(self.var(type, name))
+            return varlist
         else:
             raise ValueError("Cannot introduce variables in tactic mode.  Please switch to assumption mode.")
 
@@ -79,17 +99,26 @@ class ProofAssistant:
         else:
             return self.theorem_str + " := by" + "\n" + self.proof_tree.rstr_join(current_node=self.current_node)
 
+    def status(self):
+        n = self.proof_tree.num_sorries()
+        if n == 0:
+            print("Proof complete!")
+        elif n == 1:
+            print("1 goal remaining.")
+        else:
+            print(f"{n} goals remaining.")
+
     # Apply a given tactic to the current proof state.  
     def use(self, tactic:Tactic):
         if self.mode == "tactic":
             self.current_node.use_tactic(tactic)
+            self.status()
             _,before,after = self.proof_tree.find_sorry(self.current_node)
             if after is not None:
                 self.current_node = after
             elif before is not None:
                 self.current_node = before
             else:
-                print("All sorries cleared - proof complete!")
                 self.mode = "assumption"
 
     # Move the current node
@@ -178,49 +207,3 @@ class ProofAssistant:
                 output += f"\nThis is goal {before+1} of {count}."
             return output
 
-
-class Simp(Tactic): 
-    def activate(self, state: ProofState) -> tuple[bool, list[ProofState]]:
-        print("Failed to simplify.")
-        return [state.copy()]
-
-    def __str__(self):
-        return "simp"
-
-
-class Split(Tactic): 
-    def activate(self, state: ProofState) -> tuple[bool, list[ProofState]]:
-        print("Split into cases.")
-        return [state.copy(), state.copy()]
-
-    def __str__(self):
-        return "split"
-
-class Solve(Tactic): 
-    def activate(self, state: ProofState) -> tuple[bool, list[ProofState]]:
-        print("Solved the goal.")
-        return []
-    
-    def __str__(self):
-        return "solve"
-
-
-
-
-def proof_assistant_example():
-    p = ProofAssistant()
-    x = p.var("int", "x")
-    y = p.var("real", "y")
-    p.assume(x + y < 1, "h")
-    p.assume(x > 0, "hx")
-    p.assume(y > 0, "hy")
-    p.begin_proof(x + y < 1)
-    p.use(Simp())
-    p.use(Split())
-    p.use(Simp())
-    p.use(Solve())
-    p.use(Solve())
-    print(p)
-    print(p.proof())
-       
-# proof_assistant_example()

@@ -7,9 +7,9 @@ class Tactic:
         """
         Activate the tactic on the given proof state.  Will return any proof states that remain after applying the tactic.  
         """
-        raise NotImplementedError("Tactics should be implemented in a derived class.")
-        
+        raise NotImplementedError("This tactic has not implemented an activate() method yet.")
+    
     def __str__(self):
-        raise NotImplementedError("Tactics should be implemented in a derived class.")
+        raise NotImplementedError("This tactic has not implemented a __str__() method yet.")
 
 

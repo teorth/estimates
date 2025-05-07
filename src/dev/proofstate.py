@@ -31,6 +31,57 @@ class ProofState:
         :return: A new ProofState object with the same goal and hypotheses.
         """
         return ProofState(self.goal, self.hypotheses.copy())
+    
+    def new(self, name:str) -> str:
+        """ returns the first unused version of name (adding primes as needed) that isn't already claimed as a hypothesis """
+        new_name = name
+        while new_name in self.hypotheses:
+                new_name += "'" 
+        return new_name
+    
+    def remove_hypothesis(self, name:str):
+        """ Remove a hypothesis from the proof state. """
+        assert name in self.hypotheses, f"Hypothesis {name} not found in proof state."
+        if isinstance(self.hypotheses[name], Type):
+            raise ValueError(f"Hypothesis {name} is a variable declaration.  Removing variables is currently unimplemented.")
+            # TODO: allow for variables to be removed if no hypotheses or goals uses them
+        else:
+            del self.hypotheses[name]
+        
+    def rename_hypothesis(self, old_name:str, new_name:str) -> str:
+        """ Rename a hypothesis in the proof state. """
+        if old_name in self.hypotheses:
+            if new_name in self.hypotheses:
+                raise ValueError(f"Hypothesis {new_name} already exists.  Please choose a different name.")
+            else:
+                if isinstance(self.hypotheses[old_name], Type):
+                    raise ValueError(f"Hypothesis {old_name} is a variable declaration.  Renaming variables is currently unimplemented.")
+                    # May be best to keep this functionality disabled, as things get confusing if the proofstate name and the sympy name for a variable are permitted to diverge.  Alternatively, if one renames a proofstate variable, one could create a sympy variable with the new name and swap all occurrences of the old name with the new name.  This would be a bit of a pain to implement, though.
+                else:
+                    hyp  = self.hypotheses[old_name]
+                    del self.hypotheses[old_name]
+                    new_name = self.new(new_name)
+                    self.hypotheses[new_name] = hyp
+                    return new_name
+        else:
+            raise ValueError(f"Hypothesis {old_name} not found in proof state.")
+
+    def var(self, name:str = "this") -> Basic:
+        # Return the sympy variable associated to this name, if it exists
+        assert name in self.hypotheses, f"Variable {name} not found in proof state."
+        assert isinstance(self.hypotheses[name], Type), f"{describe(name, self.hypotheses[name])} is a hypothesis, not a variable."
+        return self.hypotheses[name].var()
+        
+    def new_hypothesis(self, name:str, hypothesis:Basic) -> str:
+        """ Add a new hypothesis to the proof state, updating the name if necessary.  Returns the name of the hypothesis. """
+        name = self.new(name)
+        self.hypotheses[name] = hypothesis
+        return name
+    
+    def list_hypotheses(self) -> list[Basic]:
+        """ Return a list of the names of the hypotheses in the proof state that are not of type Type. """
+        return [var for var in self.hypotheses.values() if not isinstance(var, Type)]
+
         
     def __str__(self):
         output = []

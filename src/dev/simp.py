@@ -1,0 +1,65 @@
+from tactic import *
+from sympy import Basic, simplify, Not
+
+#  The simplifier
+
+def simp(goal: Basic, hyp: Basic) -> Basic:
+    """
+    Simplifies the goal using the hypothesis.
+    """
+
+    if not goal.is_Boolean:
+        return goal
+    
+    if not hyp.is_Boolean:
+        return goal
+    
+    # We start with sympy's native simplifier.
+
+    new_goal =  simplify(goal)
+    
+    if hyp.is_Boolean:
+        # If the hypothesis is a boolean, we can use it to simplify the goal further.
+        new_goal = simplify(new_goal.subs(hyp, True))
+
+        if isinstance(hyp, Not):
+            new_goal = simplify(new_goal.subs(hyp.args[0], False))
+
+    if new_goal is not goal:
+        print(f"Simplified {goal} to {new_goal} using {hyp}.")
+    return new_goal
+
+
+class SimpAll(Tactic):
+    """
+    Simplifies each hypothesis using other hypotheses, then the goal using the hypothesis.
+    """
+
+    def activate(self, state: ProofState) -> list[ProofState]:
+        newstate = state.copy()
+        for name, hyp in state.hypotheses.items():
+            for other_name, other_hyp in newstate.hypotheses.items():
+                if other_name != name:  # Cannot use a hypothesis to simplify itself!
+                    hyp = simp(hyp, other_hyp)    
+            newstate.hypotheses[name] = hyp
+
+        if hyp == true:
+            newstate.remove_hypothesis(name)
+
+        if hyp == false:
+            print(f"Goal solved by _ex falso quodlibet_.")
+            return []
+        
+        goal = newstate.goal
+        for name, hyp in state.hypotheses.items():
+            goal = simp(goal, hyp)
+        newstate.set_goal(goal)
+
+        if goal == true:
+            print(f"Goal solved!")
+            return []
+        else:
+            return [newstate]
+
+    def __str__(self):
+        return "simp_all"
