@@ -38,10 +38,16 @@ class ProofAssistant:
                     obj = Symbol(name, real=True, positive=True)
                 case "nonneg_real":
                     obj = Symbol(name, real=True, nonnegative=True)
+                case "rat":
+                    obj = Symbol(name, rational=True)
+                case "pos_rat":
+                    obj = Symbol(name, rational=True, positive=True)
+                case "nonneg_rat":
+                    obj = Symbol(name, rational=True, nonnegative=True)
                 case "bool":
                     obj = Proposition(name)
                 case _:
-                    raise ValueError(f"Unknown type {type}.  Currently accepted types: 'int', 'pos_int', 'nonneg_int', 'real', 'pos_real', 'nonneg_real',  'bool'.")
+                    raise ValueError(f"Unknown type {type}.  Currently accepted types: 'int', 'pos_int', 'nonneg_int', 'real', 'pos_real', 'nonneg_real',  `rat`, `pos_rat`, `nonneg_rat`, 'bool'.")
             self.hypotheses[name] = Type(obj)
             return obj
         else:

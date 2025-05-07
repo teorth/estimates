@@ -11,6 +11,13 @@ def typeof(obj:Basic) -> str:
             return f"nonneg_int"
         else:
             return f"int"
+    elif obj.is_rational:
+        if obj.is_positive:
+            return f"pos_rat"
+        elif obj.is_nonnegative:
+            return f"nonneg_rat"
+        else:
+            return f"rat"
     elif obj.is_real:
         if obj.is_positive:
             return f"pos_real"
