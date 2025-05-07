@@ -122,3 +122,6 @@ class Cases(Tactic):
         else:
             print(f"Cannot find hypothesis {self.h}.")
             return [state.copy()]
+        
+    def __str__(self):
+        return "cases " + self.h

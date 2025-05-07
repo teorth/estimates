@@ -78,9 +78,12 @@ class ProofState:
         self.hypotheses[name] = hypothesis
         return name
     
-    def list_hypotheses(self) -> list[Basic]:
-        """ Return a list of the names of the hypotheses in the proof state that are not of type Type. """
-        return [var for var in self.hypotheses.values() if not isinstance(var, Type)]
+    def list_hypotheses(self, variables=False) -> list[Basic]:
+        """ Return a list of the names of the hypotheses in the proof state.  By default, variable declarations are excluded. """
+        if variables:
+            return list(self.hypotheses.values())
+        else:
+            return [var for var in self.hypotheses.values() if not isinstance(var, Type)]
 
         
     def __str__(self):

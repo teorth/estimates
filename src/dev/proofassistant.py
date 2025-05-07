@@ -24,7 +24,8 @@ class ProofAssistant:
     def var(self, type:str, name:str = "this") -> Basic:
         """ Introduce a variable of a given type, stored as a Tuple wrapper around a sympy variable of the same type. """
         if self.mode == "assumption":
-            assert not name in self.hypotheses, f"The name {name} is already taken."
+            while name in self.hypotheses:  # avoid namespace collisions
+                name += "'"
             match type:
                 case "int":
                     obj = Symbol(name, integer=True)
@@ -133,11 +134,10 @@ class ProofAssistant:
             if node in self.proof_tree.list_sorries():
                 self.current_node = node
                 _, num_before, num_after = self.proof_tree.count_sorries(self.current_node)
-                print(f"Moved to goal {num_before+1} of {num_before+1+num_after}.  Current proof state:")
-                print(self.current_proof_state())
+                print(f"Moved to goal {num_before+1} of {num_before+1+num_after}.")
             else:
-                print(f"Moved to the following proof state (currently handled by {node.tactic}):")
-                print(self.current_proof_state())
+                self.current_node = node
+                print(f"Moved to a proof state currently handled by \"{node.tactic}\").")
         else:
             raise ValueError("Cannot set current node in assumption mode.")
 
@@ -186,6 +186,40 @@ class ProofAssistant:
         else:
             raise ValueError("Cannot move to last goal in assumption mode.")
 
+    # Move back a node in the proof tree
+    def go_back(self):
+        if self.mode == "tactic":
+            if self.current_node.parent is not None:
+                self.set_current_node(self.current_node.parent)
+                print("Moved back a step in the proof.")
+            else:
+                print("Already at start of proof.")
+        else:
+            raise ValueError("Cannot move back in assumption mode.")
+
+    # Move forward a node in the proof tree
+    def go_forward(self, case=1):
+        if self.mode == "tactic":
+            if len(self.current_node.children) == 0:
+                print("There are no more steps in this branch of the proof.")
+            elif case > len(self.current_node.children):
+                print("There are only {len(self.current_node.children)} cases after this step of the proof.")
+            else:
+                self.set_current_node(self.current_node.children[case-1])
+                if len(self.current_node.children) == 1:
+                    print("Moved forward a step in the proof.")
+                elif case == 1:
+                    print("Moved forward to the first case in the proof.")
+                elif case == 2:
+                    print("Moved forward to the second case in the proof.")
+                elif case == 3:
+                    print("Moved forward to the third case in the proof.")
+                else:
+                    print("Moved forward to case {case} in the proof.")
+        else:
+            raise ValueError("Cannot move forward in assumption mode.")
+
+
     def list_goals(self):
         """ Print all the goals in the proof tree. """
         N = self.proof_tree.num_sorries()
@@ -207,9 +241,19 @@ class ProofAssistant:
         else:
             output = f"Proof Assistant is in tactic mode.  Current proof state:\n"
             output += str(self.current_proof_state()) 
-            count = self.proof_tree.num_sorries()
-            if count > 1:
-                _, before, _ = self.proof_tree.count_sorries(self.current_node)
-                output += f"\nThis is goal {before+1} of {count}."
+            if self.current_node.tactic is None:
+                count = self.proof_tree.num_sorries()
+                if count > 1:
+                    _, before, _ = self.proof_tree.count_sorries(self.current_node)
+                    output += f"\nThis is goal {before+1} of {count}."
+            else:
+                num_children = len(self.current_node.children)
+                if num_children == 0:
+                    output += f"\nThis goal was solved with \"{self.current_node.tactic}\"."
+                else:
+                    if num_children == 1:
+                        output += f"\nThe next step in the proof is \"{self.current_node.tactic}\"."
+                    else:
+                        output += f"\nThe next step in the proof is \"{self.current_node.tactic}\", generating {num_children} sub-goals."
             return output
 

@@ -1,5 +1,5 @@
 from tactic import *
-from linprog import Inequality, feasibility
+from linprog import Inequality, feasibility, verbose_feasibility
 from sympy import S, Eq, LessThan, StrictLessThan, GreaterThan, StrictGreaterThan
 
     
@@ -7,18 +7,32 @@ from sympy import S, Eq, LessThan, StrictLessThan, GreaterThan, StrictGreaterTha
 
 # A tactic to try to establish a goal via linear arithmetic.  
 class Linarith(Tactic):
+    def __init__ (self, verbose: bool = False):
+        """
+        :param verbose: If true, print the inequalities generated.
+        """
+        self.verbose = verbose
+
     def activate(self, state: ProofState) -> list[ProofState]:
         
-        # First, gather all the inequality type hypotheses. 
+        # First, gather all the hypotheses that can generate inequalities.
         hypotheses = set()
-        for hypothesis in state.list_hypotheses():
-            if isinstance(hypothesis, Eq|LessThan|StrictLessThan|GreaterThan|StrictGreaterThan):
+        for hypothesis in state.list_hypotheses(variables=true):
+            if isinstance(hypothesis, Eq|LessThan|StrictLessThan|GreaterThan|StrictGreaterThan|Type):
                 hypotheses.add(hypothesis)
         if isinstance(state.goal, Eq|LessThan|StrictLessThan|GreaterThan|StrictGreaterThan):
             hypotheses.add(Not(state.goal))
 
+        # Now, build the inequalities from the hypotheses.
         inequalities = []
         for hypothesis in hypotheses:
+            if isinstance(hypothesis, Type):  # check for positivity conditions to add to the inequalities
+               # print(f"Testing {hypothesis} for positivity.")
+                if hypothesis.var().is_positive:
+                    inequalities.append(Inequality({hypothesis.var(): S(1)}, 'gt', S(0)))
+                elif hypothesis.var().is_nonnegative:
+                    inequalities.append(Inequality({hypothesis.var(): S(1)}, 'geq', S(0)))
+                continue
             coeffs = (hypothesis.args[0] - hypothesis.args[1]).as_coefficients_dict()
             if S(1) in coeffs:
                 const = -coeffs[S(1)]
@@ -36,7 +50,10 @@ class Linarith(Tactic):
             elif isinstance(hypothesis, StrictGreaterThan):
                 inequalities.append(Inequality(coeffs, 'gt', const))
         
-        outcome, dict = feasibility(inequalities)
+        if self.verbose:
+            outcome = verbose_feasibility(inequalities)
+        else:
+            outcome, dict = feasibility(inequalities)
 
         if outcome:
             print("Linear arithmetic was unable to prove goal.")
