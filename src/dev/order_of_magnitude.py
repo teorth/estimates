@@ -1,5 +1,6 @@
 from sympy import Expr, S, Add, Mul, Pow, Symbol, Basic, Eq, sympify
 from sympy.logic.boolalg import Boolean, Or, And, Not, true, false
+from sympy.core.relational import Relational, Rel
 from sympy.multipledispatch import dispatch
 
 class OrderOfMagnitude(Basic):
@@ -37,31 +38,19 @@ class OrderOfMagnitude(Basic):
     def __rpow__(self, other):
         return NotImplementedError
     
-    def __lt__(self, other):
-        return Ll(self, other).doit()
-    
-    def __le__(self, other):
-        return Lesssim(self, other).doit()
-    
-    def __gt__(self, other):
-        return Ll(other, self).doit()
-    
-    def __ge__(self, other):
-        return Lesssim(other, self).doit()
-
 class FormalSub(Expr):
     """ A formal difference between two expressions.  This is a hack, to handle the fact that the default equality tester in Expr uses subtraction.  Otherwise, this class has no functionality. """
     def __new__(cls, lhs, rhs):
         obj = Expr.__new__(cls, lhs, rhs)
-        obj.name = f"FormalDiff({lhs}, {rhs})"
+        obj.name = f"FormalSub({lhs}, {rhs})"
         return obj
 
     def __str__(self):
-        return f"FormalDiff({self.args[0]!r}, {self.args[1]!r})"
+        return self.name
     
     def __repr__(self):
-        return f"FormalDiff({self.args[0]!r}, {self.args[1]!r})"
-
+        return self.name
+    
 
 class Theta(OrderOfMagnitude, Expr):
     """
@@ -236,48 +225,37 @@ class OrderPow(OrderOfMagnitude, Expr):
     def __repr__(self):
         return str(self)   
 
-class Ll(OrderOfMagnitude, Boolean):
-    def __new__(cls, *args):
-        assert len(args) == 2, f"Ll{args} requires exactly two arguments."
-        lhs = Theta(args[0])
-        rhs = Theta(args[1])
-        if Eq(lhs, rhs) == true:
-            return false
-        obj = Boolean.__new__(cls, lhs, rhs)
-        obj.name = f"{lhs} < {rhs}"
-        return obj
-    
-    def doit(self):
-        if Eq(self.args[0], self.args[1]) == true:
-            return false
-        return self
-    
-    def __str__(self):
-        return self.name
-    
-    def __repr__(self):
-        return str(self)   
+def ll(expr1:Expr, expr2:Expr) -> Relational:
+    """
+    The formal assertion that expr1 is asymptotically much less than expr2.
+    """
+    return Theta(expr1) < Theta(expr2)
+Expr.ll = ll
 
-class Lesssim(OrderOfMagnitude, Boolean):
-    def __new__(cls, *args):
-        assert len(args) == 2, f"Lesssim{args} requires exactly two arguments."
-        lhs = Theta(args[0])
-        rhs = Theta(args[1])
-        if Eq(lhs, rhs) == true:
-            return true
-        obj = Boolean.__new__(cls, lhs, rhs)
-        obj.name = f"{lhs} <= {rhs}"
-        return obj
-    
-    def doit(self):
-        if Eq(self.args[0], self.args[1]) == true:
-            return true
-        return self
-    
-    def __str__(self):
-        return self.name
-    
-    def __repr__(self):
-        return str(self)   
+def lesssim(expr1:Expr, expr2:Expr) -> Relational:
+    """
+    The formal assertion that expr1 is less than or comparable to expr2.
+    """
+    return Theta(expr1) <= Theta(expr2)
+Expr.lesssim = lesssim
 
+def gg(expr1:Expr, expr2:Expr) -> Relational:
+    """
+    The formal assertion that expr1 is asymptotically much greater than expr2.
+    """
+    return Theta(expr1) > Theta(expr2)
+Expr.gg = gg
 
+def gtrsim(expr1:Expr, expr2:Expr) -> Relational:
+    """
+    The formal assertion that expr1 is greater than or comparable to expr2.
+    """
+    return Theta(expr1) >= Theta(expr2)
+Expr.gtrsim = gtrsim
+
+def asymp(expr1:Expr, expr2:Expr) -> Relational:
+    """
+    The formal assertion that expr1 is asymptotically equivalent to expr2.
+    """
+    return Eq(Theta(expr1), Theta(expr2))
+Expr.asymp = asymp
