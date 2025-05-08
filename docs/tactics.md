@@ -185,3 +185,36 @@ Linear arithmetic was unable to prove goal.
 ## Simplification tactics
 
 ### `SimpAll()`
+
+Applies "obvious" simplifications to each hypothesis, using each of the other hypotheses in turn.  For instance, if the other hypothesis is of the form `P` and the current hypothesis is of the form `P|Q`, it gets simplified to `Q`.  Then, simplify the goal using all the other hypotheses.  If, in the course of doing so, a hypothesis turns into `False`, or the goal turns into `True`, complete the goal.
+
+"Expensive" simplifications that require linear algebra or SAT solving are not implemented in this tactic.
+
+The set of simplifications performed is currently far from complete.  If you discover that a situation where an "obvious" simplification should have occurred, but didn't, please inform me (e.g., via a github issue) to see if it can be added to the simplification routine.
+
+Example:
+```
+>>> from main import *
+>>> p = case_split_exercise()
+Starting proof.  Current proof state:
+P: bool
+Q: bool
+R: bool
+S: bool
+h1: P | Q
+h2: R | S
+|- (P & R) | (P & S) | (Q & R) | (Q & S)
+>>> p.use(Cases("h1"))
+Splitting h1: P | Q into cases.
+2 goals remaining.
+>>> p.use(SimpAll())
+Simplified (P & R) | (P & S) | (Q & R) | (Q & S) to R | S using Q.
+Simplified R | S to True using R | S.
+Goal solved!
+1 goal remaining.
+>>> p.use(SimpAll())
+Simplified (P & R) | (P & S) | (Q & R) | (Q & S) to R | S using P.
+Simplified R | S to True using R | S.
+Goal solved!
+Proof complete!
+```
