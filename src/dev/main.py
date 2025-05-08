@@ -46,6 +46,23 @@ def case_split_solution():
     p.use(Cases("h1"))
     p.use(SimpAll())
 
+def split_exercise():
+    p = ProofAssistant()
+    x, y = p.vars("real", "x", "y")
+    p.assume((x > -1) & (x < 1), "h1")
+    p.assume((y > -2) & (y < 2), "h2")
+    p.begin_proof((x+y > -3) & (x+y < 3))
+    return p
+
+def split_solution():
+    p = split_exercise()
+    p.use(SplitHyp("h1"))
+    p.use(SplitHyp("h2"))
+    p.use(SplitGoal())
+    p.use(Linarith())
+    p.use(Linarith())
+    
+
 
 def ineq_exercise():
     p = ProofAssistant()

@@ -214,3 +214,36 @@ example (P: bool) (Q: bool) (R: bool) (S: bool) (h1: P | Q) (h2: R | S): (P & R)
   . simp_all
   simp_all
 ```
+One can combine propositional tactics with linear arithmetic tactics.  Here is one example (using some propositional tactics we have not yet discussed, but whose purpose should be clear, and which one can look up [in this page](tactics.md)):
+```
+>>> from main import *
+>>> p = split_exercise()
+Starting proof.  Current proof state:
+x: real
+y: real
+h1: (x > -1) & (x < 1)
+h2: (y > -2) & (y < 2)
+|- (x + y > -3) & (x + y < 3)
+>>> p.use(SplitHyp("h1"))
+Decomposing h1: (x > -1) & (x < 1) into components x > -1, x < 1.
+1 goal remaining.
+>>> p.use(SplitHyp("h2"))
+Decomposing h2: (y > -2) & (y < 2) into components y > -2, y < 2.
+1 goal remaining.
+>>> p.use(SplitGoal())
+Split into conjunctions: x + y > -3, x + y < 3
+2 goals remaining.
+>>> p.use(Linarith())
+Goal solved by linear arithmetic!
+1 goal remaining.
+>>> p.use(Linarith())
+Goal solved by linear arithmetic!
+Proof complete!
+>>> print(p.proof())
+example (x: real) (y: real) (h1: (x > -1) & (x < 1)) (h2: (y > -2) & (y < 2)): (x + y > -3) & (x + y < 3) := by
+  split_hyp h1
+  split_hyp h2
+  split_goal
+  . linarith
+  linarith
+```

@@ -28,7 +28,9 @@ h2: y < 3*z+1
 |- x < 7*z+2
 ```
 
-## Unsolvable linear arithmetic exercise
+**Hint**: use the `Linarith()` tactic.
+
+## Unsolvable linear arithmetic example
 
 **Informal version**: If $x,y,z$ are positive reals with $x < 2y$ and $y < 3z+1$, prove that $x < 7z$.
 
@@ -58,7 +60,7 @@ h2: y < 3*z+1
 
 ## Case splitting exercise
 
-**Informal version** If either $P$ or $Q$ holds, and either $R$ or $S$ holds, show that one of ``$P$ and $R$``, ``$P$ and $S$``, `$Q$ and $R$`, or `$Q$ and $S$` holds.
+**Informal version** If either $P$ or $Q$ holds, and either $R$ or $S$ holds, show that one of "$P$ and $R$", "$P$ and $S$", "$Q$ and $R$", or "$Q$ and $S$" holds.
 
 **Python code**:
 ```
@@ -84,3 +86,5 @@ h1: P | Q
 h2: R | S
 |- (P & R) | (P & S) | (Q & R) | (Q & S)
 ```
+
+**Hint**: use the `Cases()` and `SimpAll()` tactics.

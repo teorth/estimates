@@ -8,9 +8,64 @@ The proof assistant is designed to be easily extensible by the addition of furth
 
 ### `Cases(hyp:str="this")`
 
-### `SplitGoal()`
+Takes a hypothesis `hyp` that is a disjunction (several statements joined together by the "or" operator `|`) and splits into one subgoal for each disjunct, in which the hypothesis `hyp` is replaced by that disjunct.
 
+Example:
+```
+>>> from main import *
+>>> p = case_split_exercise()
+Starting proof.  Current proof state:
+P: bool
+Q: bool
+R: bool
+S: bool
+h1: P | Q
+h2: R | S
+|- (P & R) | (P & S) | (Q & R) | (Q & S)
+>>> p.use(Cases("h1"))
+Splitting h1: P | Q into cases.
+2 goals remaining.
+```
+
+### `SplitGoal()`
 ### `SplitHyp(hyp:str="this", *names:str)`
+
+`SplitGoal()` splits the goal (if it is a conjunction - several statements joined together by the "and" operator `&`) into one subgoal for each conjunct.  `SplitHyp(hyp,*names)` is similar but splits a hypothesis `hyp` (if it is a conjunction) into multiple new hypotheses (using the provided `names` if available, or using a default naming system otherwise.)
+
+Example:
+```
+>>> from main import *
+>>> p = split_exercise()
+Starting proof.  Current proof state:
+x: real
+y: real
+h1: (x > -1) & (x < 1)
+h2: (y > -2) & (y < 2)
+|- (x + y > -3) & (x + y < 3)
+>>> p.use(SplitHyp("h1"))
+Decomposing h1: (x > -1) & (x < 1) into components x > -1, x < 1.
+1 goal remaining.
+>>> p.use(SplitHyp("h2"))
+Decomposing h2: (y > -2) & (y < 2) into components y > -2, y < 2.
+1 goal remaining.
+>>> p.use(SplitGoal())
+Split into conjunctions: x + y > -3, x + y < 3
+2 goals remaining.
+>>> p.use(Linarith())
+Goal solved by linear arithmetic!
+1 goal remaining.
+>>> p.use(Linarith())
+Goal solved by linear arithmetic!
+Proof complete!
+>>> print(p.proof())
+example (x: real) (y: real) (h1: (x > -1) & (x < 1)) (h2: (y > -2) & (y < 2)): (x + y > -3) & (x + y < 3) := by
+  split_hyp h1
+  split_hyp h2
+  split_goal
+  . linarith
+  linarith
+```
+
 
 ### `Contrapose(hyp:str="this")`
 

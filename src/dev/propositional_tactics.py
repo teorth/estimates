@@ -22,7 +22,7 @@ class SplitGoal(Tactic):
             return [state.copy()]
     
     def __str__(self):
-        return "constructor"
+        return "split_goal"
     
 class Contrapose(Tactic):
     # Given a hypothesis h, replace the goal with the negation of h, and h with the negation of the goal.  If h is not already a hypothesis, this becomes a proof by contradiction, adding the negation of the goal as a hypothesis, and "false" as the goal.
@@ -74,7 +74,7 @@ class SplitHyp(Tactic):
             if not isinstance(hyp, And):
                 print(f"Obtain did nothing, as {describe(self.h, hyp)} is not a conjunction.")
                 return [state.copy()]
-            print(f"Decomposing {describe(self.h,hyp)} into components.")
+            print(f"Decomposing {describe(self.h,hyp)} into components {", ".join([str(disjunct) for disjunct in hyp.args])}.")
             new_state = state.copy()
             new_state.remove_hypothesis(self.h)
             for i, conjunct in enumerate(hyp.args):
@@ -90,12 +90,12 @@ class SplitHyp(Tactic):
         
     def __str__(self):
         if self.h == "this":
-            return "obtain"
+            return "split_hyp"
         else:
             if len(self.names) == 0:
-                return "obtain " + self.h
+                return "split_hyp " + self.h
             else:
-                return "obtain " + self.h + " " + ", ".join(self.names)
+                return "split_hyp " + self.h + " " + ", ".join(self.names)
 
 # Take a hypothesis that is a disjunction, and split it into its disjuncts, creating a separate goal for each disjunct.
 class Cases(Tactic):
