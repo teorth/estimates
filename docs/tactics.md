@@ -66,9 +66,35 @@ example (x: real) (y: real) (h1: (x > -1) & (x < 1)) (h2: (y > -2) & (y < 2)): (
   linarith
 ```
 
-
 ### `Contrapose(hyp:str="this")`
 
+Contrapose the goal with hypothesis `hyp`, by replacing `hyp` with the negation of the goal, and the goal with the negation of `hyp`.  Of course, `hyp` needs to be a Boolean hypothesis for this to work.  If `hyp` does not exist, then this becomes a proof by contradiction, with the goal becoming `False`.
+
+Example:
+```
+>>> from main import *              
+>>> p = pigeonhole_exercise()
+Starting proof.  Current proof state:
+x: real
+y: real
+h: x + y > 5
+|- (x > 2) | (y > 3)
+>>> p.use(Contrapose("h"))                   
+Contraposing h: x + y > 5 with (x > 2) | (y > 3).
+1 goal remaining.
+>>> print(p)
+Proof Assistant is in tactic mode.  Current proof state:
+x: real
+y: real
+h: (x <= 2) & (y <= 3)
+|- x + y <= 5
+>>> p.use(SplitHyp("h"))
+Decomposing h: (x <= 2) & (y <= 3) into components x <= 2, y <= 3.
+1 goal remaining.
+>>> p.use(Linarith())
+Goal solved by linear arithmetic!
+Proof complete!
+```
 
 ## Linear arithmetic tactics
 

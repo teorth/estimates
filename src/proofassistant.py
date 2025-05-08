@@ -81,6 +81,43 @@ class ProofAssistant:
         else:
             raise ValueError("Cannot clear hypotheses in tactic mode.  Please switch to assumption mode.")
 
+    def get_state(self) -> ProofState:
+        """ Get the current proof state. """
+        if self.mode == "assumption":
+            raise ValueError("Cannot get proof state in assumption mode.  Please switch to tactic mode.")
+        else:
+            return self.current_node.proof_state
+        
+    def get_hypothesis(self, name:str) -> Basic:
+        """ Get a hypothesis from the list of assumptions (in Assumption mode) or proof state (in Tactic mode). """
+        if self.mode == "assumption":
+            assert name in self.hypotheses, f"Hypothesis {name} not found in lisat of assumptions."
+            obj = self.hypotheses[name]
+            if isinstance(obj, Type):
+                raise ValueError(f"Hypothesis {name} is a variable declaration.  Use get_var() to get the variable.")
+            return self.hypotheses[name]
+        else:
+            return self.get_state().get_hypothesis(name)
+                
+    def get_var(self, name:str) -> Basic:
+        """ Get a variable from the list of assumptions (in Assumption mode) or proof state (in Tactic mode). """
+        if self.mode == "assumption":
+            assert name in self.hypotheses, f"Variable {name} not found in list of assumptions."
+            obj = self.hypotheses[name]
+            if isinstance(obj, Type):
+                return obj.var()
+            else:
+                raise ValueError(f"Hypothesis {name} is a hypothesis, not a variable.  Use get_hypothesis() to get the hypothesis.")
+        else:
+            return self.get_state().get_var(name)
+        
+    def get_vars(self, *names:str) -> list[Basic]:
+        """ Get a list of variables from the list of assumptions (in Assumption mode) or proof state (in Tactic mode). """
+        varlist = []
+        for name in names:
+            varlist.append(self.get_var(name))
+        return varlist
+                    
     def begin_proof(self, goal: Basic):
         if self.mode == "assumption":
             self.mode = "tactic"

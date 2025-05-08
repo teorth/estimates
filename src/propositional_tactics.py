@@ -36,7 +36,7 @@ class Contrapose(Tactic):
     def activate(self, state: ProofState) -> list[ProofState]:
         if self.h in state.hypotheses:
             hyp = state.hypotheses[self.h]
-            if not hyp.is_Boolean:
+            if not isinstance(hyp, Boolean):
                 raise ValueError(f"{describe(self.h, hyp)} is not a proposition.")
             print(f"Contraposing {describe(self.h,hyp)} with {state.goal}.")
             newstate = state.copy()

@@ -47,7 +47,24 @@ class ProofState:
             # TODO: allow for variables to be removed if no hypotheses or goals uses them
         else:
             del self.hypotheses[name]
-        
+    
+    def get_hypothesis(self, name:str) -> Basic:
+        """ Get a hypothesis from the proof state. """
+        assert name in self.hypotheses, f"Hypothesis {name} not found in proof state."
+        obj = self.hypotheses[name]
+        if isinstance(obj, Type):
+            raise ValueError(f"Hypothesis {name} is a variable declaration.  Use get_var() to get the variable.")
+        return self.hypotheses[name]
+    
+    def get_var(self, name:str) -> Basic:
+        """ Get a variable from the proof state. """
+        assert name in self.hypotheses, f"Variable {name} not found in proof state."
+        obj = self.hypotheses[name]
+        if isinstance(obj, Type):
+            return obj.var()
+        else:
+            raise ValueError(f"Hypothesis {name} is a hypothesis, not a variable.  Use get_hypothesis() to get the hypothesis.")
+
     def rename_hypothesis(self, old_name:str, new_name:str) -> str:
         """ Rename a hypothesis in the proof state. """
         if old_name in self.hypotheses:

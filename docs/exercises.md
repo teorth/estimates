@@ -88,3 +88,30 @@ h2: R | S
 ```
 
 **Hint**: use the `Cases()` and `SimpAll()` tactics.
+
+## Pigeonhole principle exercise
+
+**Informal version** If $x,y$ are real numbers with $x+y > 5$, show that either $x>2$ or $y>3$.
+
+**Python code**:
+```
+def pigeonhole_exercise():
+    p = ProofAssistant()
+    x, y = p.vars("real", "x", "y")
+    p.assume(x + y > 5, "h")
+    p.begin_proof((x > 2) | (y > 3))
+    return p
+```
+
+**In an interactive Python environment**:
+```
+>>> from main import *              
+>>> p = pigeonhole_exercise()
+Starting proof.  Current proof state:
+x: real
+y: real
+h: x + y > 5
+|- (x > 2) | (y > 3)
+```
+
+**Hint** Use the tactics `Contrapose()`, `SplitHyp()`, and `Linarith()`.

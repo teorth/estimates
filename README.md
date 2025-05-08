@@ -1,518 +1,257 @@
-# Code to automatically prove or verify estimates in analysis
+# A mathematical proof assistant 
 
-A project to develop a framework to automatically (or semi-automatically) prove estimates in analysis.  Estimates are inequalities of the form $X \lesssim Y$ (which means $X = O(Y)$ in asymptotic notation) or $X \ll Y$ (which means that $X = o(Y)$ in asymptotic notation).
+This project aims to develop (in Python) a lightweight proof assistant that is substantially less powerful than full proof assistants such as Lean, Isabelle or Coq, but which (hopefully) is easy to use to prove short, tedious tasks, such as verifying that one inequality or estimate follows from others.
+
+## Documentation links
+
+- [List of tactics](docs/tactics.md)
+- [List of exercises and examples](docs/exercises.md)
+- [List of navigation tools](docs/navigation.md)
+
+## Other links
 
 - [Blog post explaining the project](https://terrytao.wordpress.com/2025/05/01/a-proof-of-concept-tool-to-verify-estimates/) - Terence Tao, May 1 2025
     - A [companion post](https://terrytao.wordpress.com/2025/05/04/orders-of-infinity/) on the algebraic structure of orders of infinity - Terence Tao - May 4 2025
-- [A proof-of-concept prototype](src/ver_0_0/README.md)
+- [Version 0.0: A proof-of-concept prototype](src/ver_0_0/README.md)
+- [Version 1.0: A rudimentary proof assistant](src/ver_1_0/README.md)
+    -  As a byproduct of this version, an [exact linear programming proof certificate tool](src/ver_1_0/linprog/README.md) was written.
 
-As a byproduct of this project, an [exact linear programming proof certificate tool](src/linprog/README.md) was written.
+## Getting started
 
-It has been suggested that this project be somehow integrated into [sympy](https://docs.sympy.org/latest/index.html).  I would be interested in further discussion of this possibility, for instance at the [blog post mentioned above](https://terrytao.wordpress.com/2025/05/01/a-proof-of-concept-tool-to-verify-estimates/).
+To start the assistant in an interactive Python session:
 
-## First example: Propositional logic
+- Install Python and the following packages (unless they are already pre-installed):
+    - `sympy`, for intsance via `pip install sympy`
+    - `z3-solver`, for instance via `pip install z3-solver` 
+- Download all the Python files in this directory.
+- In this directory, start Python from the command line to start an interactive Python session, and type `from main import *`
+- To launch a new proof assistant, type `p = ProofAssistant()`.
+- Alternatively, to try one of the exercises, such as `linarith_exercise()`, type `p = linarith_exercise()`.  A list of exercises can be found [here](docs/exercises.md).
 
-Examples of the code can be found [here](src/examples.py).  The code requires the Z3 solver, which can be installed for instance by `pip install z3-solver`.  We now give some worked out cases.
+## How the assistant works
 
-Even though the primary motivation was to prove asymptotic estimates, it turned out to be natural to build a framework that can handle propositional logic, in particular boolean connectives such as `AND` and `OR`, basically in order to take advantage of dichotomies such as "$X \lesssim Y$ OR $X \gg Y$".  So we will begin with an example of the code in pure propositional logic.
+The assistant can be in one of two modes: **Assumption mode** and **Tactic mode**.  We will get to assumption mode later, but let us first discuss tactic mode, which is the mode one ends up in when one tries any of the exercises.  The format of this mode is deliberately designed to resemble the tactic mode in modern proof assistant languages such as Lean, Isabelle or Coq.
 
-The code is inspired by the tactic mode of modern proof assistants such as Lean, in which at any given moment one is in a "proof state" with several "goals", each of which aims to deduce a conclusion from some hypotheses.  Here is a starting example (where the text indented by arrows is Python code, and the unindented text is the output):
+Let's start for instance with `linarith_exercise()`.  Informally, this exercise asks to establish the following claim:
+
+**Informal version**: If $x,y,z$ are positive reals with $x < 2y$ and $y < 3z+1$, prove that $x < 7z+2$.
+
+If one follows the above quick start instructions, one should now see the following:
+```
+>>> from main import *
+>>> p = linarith_exercise()
+Starting proof.  Current proof state:
+x: pos_real
+y: pos_real
+z: pos_real
+h1: x < 2*y
+h2: y < 3*z + 1
+|- x < 7*z + 2
+```
+We are now in **Tactic mode**, in which we try to establish a desired goal (the assertion after the |- symbol, which in this case is $x < 7z+2$) from the given hypotheses `x`, `y`, `z`, `h1`, `h2`.  Hypotheses come in two types:
+* **Variable declarations**, such as `x: pos_real`, which asserts that we have a variable `x` that is a positive real number.
+* **Predicates**, such as `h1: x < 2*y`, which have a name (in this case, `h1`), and a boolean-valued assertion involving the variables, in this case $x < 2y$.
+
+The goal is also a predicate.  The list of hypotheses together with a goal is collectively referred to as a **proof state**.
+
+In order to obtain the goal from the hypotheses, one usually uses a sequence of **tactics**, which can transform a given proof state to zero or more further proof states.  This can decrease, increase, or hold steady the number of outstanding goals.  The "game" is then to keep using tactics until the number of outstanding goals drops to zero, at which point the proof is complete.  A full list of tactics can be [found here](docs/tactics.md).
+
+In this particular case, there is a "linear arithmetic" tactic `Linarith()` (inspired by the [Lean tactic `linarith`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/Tactic/Linarith/Frontend.html)) that is specifically designed for the task of obtaining a goal as a linear combination of the hypotheses, and it "one-shots" this particular exercise:
 
 ```
->>> A = Proposition("A")
->>> B = Proposition("B")
->>> C = Proposition("C")
->>> D = Proposition("D")
->>> proof_state = begin_proof( Or(And(A,C),And(B,C),And(A,D),And(B,D)), { Or(A,B), Or(C,D) } )
-
-Starting proof with goal: Assuming: (A OR B), (C OR D), prove: ((A AND C) OR (B AND C) OR (A AND D) OR (B AND D))
+>>> p.use(Linarith())
+Goal solved by linear arithmetic!
+Proof complete!
 ```
 
-Here, we have a problem to solve in propositional logic: `A`, `B`, `C`, `D` are atomic propositions (statements that can be true or false), we are given the two hypothesis `A OR B` and `C OR D`, and we wish to show that one of `A AND C`, `B OR C`, `A AND D`, and `B AND D` is true.
-
-At any time, one can print out the proof state:
+This may seem suspiciously easy, but one can ask `Linarith` to give a more detailed explanation:
 ```
->>> print(proof_state)
-
-1. [Current Goal] Assuming: (A OR B), (C OR D), prove: ((A AND C) OR (B AND C) OR (A AND D) OR (B AND D))
+>>> from main import *
+>>> p = linarith_exercise()
+Starting proof.  Current proof state:
+x: pos_real
+y: pos_real
+z: pos_real
+h1: x < 2*y
+h2: y < 3*z + 1
+|- x < 7*z + 2
+>>> p.use(Linarith(verbose=true))
+Checking feasibility of the following inequalities:
+1*z > 0
+1*x + -7*z >= 2
+1*y + -3*z < 1
+1*y > 0
+1*x > 0
+1*x + -2*y < 0
+Infeasible by summing the following:
+1*z > 0 multiplied by 1/4p0---899999999999999999
+1*x + -7*z >= 2 multiplied by 1/4
+1*y + -3*z < 1 multiplied by -1/2
+1*x + -2*y < 0 multiplied by -1/4
+Goal solved by linear arithmetic!
+Proof complete!
 ```
+This gives more details as to what `Linarith` actually did:
+* First, it argued by contradiction, by taking the negation $x \geq 7z+2$ of the goal $x < 7z+2$ and added it to the hypotheses.
+* Then, it converted all the inequalities that were explicit or implicit in the hypotheses into a "linear programming" form in which the variables are on the left-hand side, and constants on the right-hand side.  For instance, the assertion that `x` was a positive real became $1*x>0$, and the assertion $y < 3z$ became $1*y + -3*z < 1$.
+* Finally, it sought a linear combination of these inequalities that would lead to an absurd inequality, in this case $0 < 1$.
 
-To proceed further one has to apply a suitable tactic.  For this example, we will choose to `split()` the hypothesis `A OR B` into two cases, one where `A` holds and one where `B` holds.
-
+One can also inspect the final proof after solving the problem by using the `proof()` method, although in this case the proof is extremely simple:
 ```
->>> proof_state.split(Or(A,B))
-
-Splitting hypothesis (A OR B) into cases.
-```
-
-Again, we can inspect the proof state to see what has changed:
-```
->>> print(proof_state)
-
-1. [Current Goal] Assuming: (C OR D), A, prove: ((A AND C) OR (B AND C) OR (A AND D) OR (B AND D))
-2. Assuming: (C OR D), B, prove: ((A AND C) OR (B AND C) OR (A AND D) OR (B AND D))
-```
-Note that we now have two goals to prove, corresponding to the two cases.  But the "Current goal" is "pointing" at Goal 1; this is the goal that tactics will currently try to resolve.
-
-Now that we have that `A` is true, we should be able to simplify many of the expressions in our proof state; for instance, `A AND D` should simplify to `D`.  We have a `simp_all()` tactic to do this automatically:
-```
->>> proof_state.simp_all()
-
-Simplifying hypotheses and conclusion in the current goal...
-Simplifying ((A AND C) OR (B AND C) OR (A AND D) OR (B AND D)) to (C OR (B AND C) OR D OR (B AND D)).
-```
-Again, we can inspect the proof state:
-```
->>> print(proof_state)
-
-1. [Current Goal] Assuming: (C OR D), A, prove: (C OR (B AND C) OR D OR (B AND D))
-2. Assuming: (C OR D), B, prove: ((A AND C) OR (B AND C) OR (A AND D) OR (B AND D))
-```
-Note that `simp_all()` has only simplified the current goal, not the other goals.  (I may upgrade the functionality of this tactic later so that it simplifies all goals simultaneously.)
-
-To proceed further, we can also `split()` the hypothesis `C OR D` and try `simp_all()` again:
-```
->>> proof_state.split(C OR D)
-Splitting hypothesis (C OR D) into cases.
->>> proof_state.simp_all()
-Simplifying hypotheses and conclusion in the current goal...
-Simplifying (C OR D OR (B AND C) OR (B AND D)) to TRUE.
-Current goal solved!
-```
-Now the conclusion got simplified all the way to `TRUE`, in which case the goal got resolved, leaving two further goals remaining:
-```
->>> print(proof_state)
-
-1. [Current Goal] Assuming: A, D, prove: (C OR D OR (B AND C) OR (B AND D))
-2. Assuming: (C OR D), B, prove: ((A AND C) OR (B AND C) OR (A AND D) OR (B AND D))
-```
-One can continue in this fashion until all the goals are resolved, though in this particular case one can also apply a combined `simp_and_split()` tactic to one-shot the whole thing:
-```
->>> A = Proposition("A")
->>> B = Proposition("B")
->>> C = Proposition("C")
->>> D = Proposition("D")
->>> proof_state = begin_proof( Or(And(A,C),And(B,C),And(A,D),And(B,D)), { Or(A,B), Or(C,D) } )
-
-Starting proof with goal: Assuming: (A OR B), (C OR D), prove: ((A AND C) OR (B AND C) OR (A AND D) OR (B AND D))
-
->>> proof_state.simp_and_split()
-
-Trying the repeated simplification and splitting tactic.
-Current goal: Assuming: (A OR B), (C OR D), prove: ((A AND C) OR (B AND C) OR (A AND D) OR (B AND D))
-Simplifying hypotheses and conclusion in the current goal...
-Splitting hypothesis (A OR B) into cases.
-Current goal: Assuming: (C OR D), A, prove: ((A AND C) OR (B AND C) OR (A AND D) OR (B AND D))
-Simplifying hypotheses and conclusion in the current goal...
-Simplifying ((A AND C) OR (B AND C) OR (A AND D) OR (B AND D)) to (C OR D OR (B AND C) OR (B AND D)).
-Splitting hypothesis (C OR D) into cases.
-Current goal: Assuming: A, C, prove: (C OR D OR (B AND C) OR (B AND D))
-Simplifying hypotheses and conclusion in the current goal...
-Simplifying (C OR D OR (B AND C) OR (B AND D)) to TRUE.
-Current goal solved!
-Current goal: Assuming: (C OR D), B, prove: ((A AND C) OR (B AND C) OR (A AND D) OR (B AND D))
-Simplifying hypotheses and conclusion in the current goal...
-Simplifying ((A AND C) OR (B AND C) OR (A AND D) OR (B AND D)) to ((A AND C) OR C OR D OR (A AND D)).
-Splitting hypothesis (C OR D) into cases.
-Current goal: Assuming: B, C, prove: ((A AND C) OR C OR D OR (A AND D))
-Simplifying hypotheses and conclusion in the current goal...
-Simplifying ((A AND C) OR C OR D OR (A AND D)) to TRUE.
-Current goal solved!
-Current goal: Assuming: B, D, prove: ((A AND C) OR C OR D OR (A AND D))
-Simplifying hypotheses and conclusion in the current goal...
-Simplifying ((A AND C) OR C OR D OR (A AND D)) to TRUE.
-Current goal solved!
-Current goal: Assuming: A, D, prove: (C OR D OR (B AND C) OR (B AND D))
-Simplifying hypotheses and conclusion in the current goal...
-Simplifying (C OR D OR (B AND C) OR (B AND D)) to TRUE.
-All goals solved!
-```
-Basically, this tactic brute forced this propositional logic problem by repeatedly splitting into cases and simplifying until all goals were solved.
-
-## Second example: simple multiplicative inequalities
-
-The main goal of this project is to obtain estimates involving non-negative quantities such as `X`, where we are only interested in the order of magnitude of these quantities rather than their exact value; in particular, our estimates are up to multiplicative constants.  We will be interested in the following type of asymptotic estimates:
-
-1.  $X \lesssim Y$ (also denoted $X = O(Y)$), which means that $X$ is bounded by a constant times $Y$.
-2.  $X \sim Y$ (also denoted $X \asymp Y$), which means that $X \lesssim Y \lesssim X$, that is to say $X$ and $Y$ are bounded by constant multiples of each other.
-3.  $X \ll Y$ (also denoted $X = o(Y)$), which means that, for any fixed $\varepsilon>0$, that $X \leq \varepsilon Y$ if a certain asymptotic parameter is large enough.
-
-One can also formalize these asymptotics using the language of nonstandard analysis, but we will not dwell on these foundational issues here.
-
-Such non-negative quantities are instantiated using the `Variable()` constructor, and the usual ordering symbols `<`, `<=`, `>`, `>=` are used to describe $\ll$, $\lesssim$, $\gg$, $\gtrsim$ relationships, though for technical reasons we cannot use either of the Python equality symbols `=`, `==` to define comparability, and will use `asymp()` instead.  For simple multiplicative problems, the tactic `log_linarith()`, which performs linear arithmetic at the log scale, suffices:
-
-```
->>> X = Variable("X")
->>> Y = Variable("Y")
->>> Z = Variable("Z")
->>> W = Variable("W")
->>> U = Variable("U")
->>> proof_state = begin_proof( X*Z**2 < Y*U*W, { X <= Y, Z < W, Z.asymp(U) })
-
-Starting proof with goal: Assuming: X <~ Y, Z << W, Z ~ U, prove: (X * (Z ^ 2)) << (Y * U * W)
-
->>> proof_state.log_linarith()
-
-Assume for contradiction that (X * (Z ^ 2)) << (Y * U * W) fails.
-Trying to obtain a contradiction by logarithmic linear arithmetic...
-A contradiction can be obtained by multiplying the following estimates:
-Z * W^-1 << 1 raised to power -1
-X * Y^-1 <~ 1 raised to power -1
-X * Z^2 * Y^-1 * U^-1 * W^-1 >~ 1 raised to power 1
-Z * U^-1 ~ 1 raised to power -1
-All goals solved!
+>>> print(p.proof())
+example (x: pos_real) (y: pos_real) (z: pos_real) (h1: x < 2*y) (h2: y < 3*z + 1): x < 7*z + 2 := by
+  linarith
 ```
 
-The `log_linarith()` tactic first uses proof by contradiction to add the (negation of the) desired conclusion as an additional hypothesis, then one normalizes all the estimates to have 1 on the right-hand side.  An (exact arithmetic) linear programming package (from Z3) is then called to determine if a contradiction is found; if so, a certificate to give the contradiction, by multiplying various hypotheses raised to suitable powers, is provided, in order to obtain an absurd conclusion such as $1 \gg 1$.
+Here, the original hypotheses and goal are listed in a pseudo-Lean style, followed by the actual proof, which in this case is just one line.
 
-Of course, sometimes the linear program fails.  In that case, a dual program is run to locate an asymptotic counterexample:
+One could ask what happens if `Linarith` fails to resolve the goal.  With the verbose flag, it will give a specific counterexample consistent with all the inequalities it could find:
 ```
->>> x = Variable("x")
->>> y = Variable("y")
->>> z = Variable("z")
->>> proof_state = begin_proof( x <= z, {x**2 < y, y**2 < z } )
-
-Starting proof with goal: Assuming: (x ^ 2) << y, (y ^ 2) << z, prove: x <~ z
-
->>> proof_state.log_linarith()
-
-Unfortunately, the purely multiplicative hypotheses are feasible.  Sample feasible values (for N large):
-y = N^-5/6
-z = N^-7/6
-x = N^-2/3
+>>> from main import *
+>>> p = linarith_impossible_example()
+Starting proof.  Current proof state:
+x: pos_real
+y: pos_real
+z: pos_real
+h1: x < 2*y
+h2: y < 3*z + 1
+|- x < 7*z
+>>> p.use(Linarith(verbose=true))
+Checking feasibility of the following inequalities:
+1*x + -7*z >= 0
+1*x > 0
+1*y + -3*z < 1
+1*x + -2*y < 0
+1*z > 0
+1*y > 0
+Feasible with the following values:
+y = 2
+x = 7/2
+z = 1/2
+Linear arithmetic was unable to prove goal.
+1 goal remaining.
+>>>
 ```
-In this case, we can show that the hypotheses $X^2 \ll Y$, $Y^2 \ll Z$ fail to imply $X \lesssim Z$ by exhibiting a (somewhat arbitrarily chosen) asymptotic family of counterexamples.
+Here, the task given was an impossible one: to deduce $x < 7z$ from the hypotheses that $x,y,z$ are positive reals with $x < 2y$ and $y < 3z+1$.  A specific counterexample $x=7/2$, $y=2$, $z=1/2$ was given to this problem.  (In this case, this means that the original problem was impossible to solve; but in general one cannot draw such a conclusion, because it may have been possible to establish the goal by using some non-inequality hypotheses).
 
-Basic algebraic simplifications, such as gathering like terms, is supported:
+Now let us consider a slightly more complicated proof, in which some branching of cases is required.  
 ```
->>> x = Variable("x")
->>> y = Variable("y")
->>> z = Variable("z")
->>> proof_state = begin_proof( (x*sqrt(y))**4 * 3 / x < z * y * z**(-2))
-
-Starting proof with goal: Prove: ((((x * (y ^ 1/2)) ^ 4) * 3) / x) << (z * y * (z ^ -2))
-
->>> proof_state.simp_all()
-
-Simplifying ((((x * (y ^ 1/2)) ^ 4) * 3) / x) << (z * y * (z ^ -2)) to ((z ^ -1) * (y ^ -1) * (x ^ -3)) >> 1.
+>>> from main import *
+>>> p = case_split_exercise()
+Starting proof.  Current proof state:
+P: bool
+Q: bool
+R: bool
+S: bool
+h1: P | Q
+h2: R | S
+|- (P & R) | (P & S) | (Q & R) | (Q & S)
 ```
+Here, we have four atomic propositions (boolean variables) `P`, `Q`, `R`, `S`, with the hypothesis `h1` that either `P` or `Q` is true, as well as the hypothesis `h2` that either `R` or `S` is true.  The objective is then to prove that one of the four statements `P & R` (i.e., `P` and `R` are both true), `P & S`, `Q & R`, and `Q & S` is true.
 
-Note that the simplifier is designed to be useful to computers, rather than elegant for human readers; humans may for instance wish to move the negative exponent terms to the other side to make the exponents positive.
-
-## Third example: addition and max/min
-
-Importantly, these tools can not only handle purely multiplicative estimates, but also estimates involving addition, as well as the `max` and `min` operations.  In fact, in this order of magnitude setting, addition and `max` are equivalent; for instance, $X+Y \sim \max(X,Y)$.
-
-Our main way of dealing with expressions such as $\max(X,Y)$ is to make these expressions variables in their own right.  If we let $[\max(X,Y)]$ denote a new variable that is supposed to represent the maximum of $X$ and $Y$, then a estimate such as $\max(X,Y) * Z \ll W$ which involves both multiplicative operations and the `max` operation can now be written as the purely multiplicative estimate $[\max(X,Y)] * Z \ll W$, as well as the defining relation $[\max(X,Y)] \sim \max(X,Y)$.  This defining relation can then be decomposed into two further estimates
-$$ X \lesssim [\max(X,Y)] \hbox{ AND } Y \lesssim [\max(X,Y)]$$
-as well as a further disjunction
-$$ X \sim [\max(X,Y)] \hbox{ OR } Y \sim [\max(X,Y)].$$
-On performing a `split()` of the latter disjunction one now has purely multiplicative estimates, suitable for tackling by tools such as `log_linarith()`.
-
-The tactic `unfold_max()` is designed to convert all `max` type expressions into variables in this fashion.  Here is a simple example of it in action:
-
+Here we can split the hypothesis `h1 : P | Q` into two cases:
 ```
->>> a = Variable("a")
->>> b = Variable("b")
->>> proof_state = begin_proof( min(a,b) <= max(a,b) )
-
-Starting proof with goal: Prove: min(a, b) <~ max(a, b)
-
->>> proof_state.unfold_max()
-
-Creating new variables: "min(a, b)", "max(a, b)"
-
->>> print(proof_state)
-
-1. [Current Goal] Assuming: b >~ "min(a, b)", a <~ "max(a, b)", a >~ "min(a, b)", (a ~ "min(a, b)" OR b ~ "min(a, b)"), b <~ "max(a, b)", (a ~ "max(a, b)" OR b ~ "max(a, b)"), prove: "min(a, b)" <~ "max(a, b)"
-
->>> proof_state.log_linarith()
-
-Assume for contradiction that "min(a, b)" <~ "max(a, b)" fails.
-Trying to obtain a contradiction by logarithmic linear arithmetic...
-A contradiction can be obtained by multiplying the following estimates:
-"min(a, b)" * "max(a, b)"^-1 >> 1 raised to power 1
-b * "min(a, b)"^-1 >~ 1 raised to power 1
-b * "max(a, b)"^-1 <~ 1 raised to power -1
-All goals solved!
+>>> p.use(Cases("h1"))
+Splitting h1: P | Q into cases.
+2 goals remaining.
 ```
-
-Here is another example, proving the arithmetic mean-geometric mean inequality (up to constants):
-
+Let's now look at the current proof state:
 ```
->>> a = Variable("a")
->>> b = Variable("b")
->>> c = Variable("c")
->>> proof_state = begin_proof( (a*b*c)**Fraction(1,3) <= (a+b+c)/3 )
-
-Starting proof with goal: Prove: ((a * b * c) ^ 1/3) <~ ((a + b + c) / 3)
-
->>> proof_state.unfold_max()
-
-Creating new variables: "(a + b + c)"
-
->>> proof_state.log_linarith()
-
-Assume for contradiction that ((a * b * c) ^ 1/3) <~ ("(a + b + c)" / 3) fails.
-Trying to obtain a contradiction by logarithmic linear arithmetic...
-A contradiction can be obtained by multiplying the following estimates:
-a * "(a + b + c)"^-1 <~ 1 raised to power -1/3
-a^1/3 * b^1/3 * c^1/3 * "(a + b + c)"^-1 >> 1 raised to power 1
-c * "(a + b + c)"^-1 <~ 1 raised to power -1/3
-b * "(a + b + c)"^-1 <~ 1 raised to power -1/3
+>>> print(p)
+Proof Assistant is in tactic mode.  Current proof state:
+P: bool
+Q: bool
+R: bool
+S: bool
+h1: P
+h2: R | S
+|- (P & R) | (P & S) | (Q & R) | (Q & S)
+This is goal 1 of 2.
 ```
-
-The most powerful tactic currently available is `autosolve()`, which repeatedly tries all of the above tactics to exhaustively resolve all goals.  However, the proofs produced are rather lengthy.  Here is an example, using the "Littlewood-Paley property" `LP(x,y,z)` that `x,y,z` are the magnitudes of three vectors summing to zero (which means that two of these three magnitudes are comparable, and bound the third):
-
+Note how the hypothesis `h1` has changed from `P | Q` to just `P`.  But this is just one of the two goals.  We can see this by looking at the current state of the proof:
 ```
->>> x = Variable("x")
->>> y = Variable("y")
->>> z = Variable("z")
->>> proof_state = begin_proof( min(x,y,z)*max(x,y,z)**2 <= x*y*z, { LP_property(x,y,z) } )
-   
-Starting proof with goal: Assuming: ((x ~ y AND z <~ x) OR (x ~ z AND y <~ x) OR (y ~ z AND x <~ y)), prove: (min(x, y, z) * (max(x, y, z) ^ 2)) <~ (x * y * z)
+>>> print(p.proof())
+example (P: bool) (Q: bool) (R: bool) (S: bool) (h1: P | Q) (h2: R | S): (P & R) | (P & S) | (Q & R) | (Q & S) := by
+  cases h1
+  . **sorry**
+  sorry 
+```
+The proof has now branched into a tree with two leaf nodes (marked ``sorry''), representing the two unresolved goals.  We are currently located at the first goal (as indicated by the asterisks).  We can move to the next goal:
+```
+>>> p.next_goal()
+Moved to goal 2 of 2.
+>>> print(p.proof())
+example (P: bool) (Q: bool) (R: bool) (S: bool) (h1: P | Q) (h2: R | S): (P & R) | (P & S) | (Q & R) | (Q & S) := by
+  cases h1
+  . sorry
+  **sorry**
+>>> print(p)
+Proof Assistant is in tactic mode.  Current proof state:
+P: bool
+Q: bool
+R: bool
+S: bool
+h1: Q
+h2: R | S
+|- (P & R) | (P & S) | (Q & R) | (Q & S)
+This is goal 2 of 2.
+```
+So we see that in this second branch of the proof tree, `h1` is now set to `Q`.  For further ways to navigate the proof tree, [see this page](docs/navigation.md).
 
->>> proof_state.autosolve()
-
-Trying to automatically solve all goals with all existing tactics.
-Current goal: Assuming: ((x ~ y AND z <~ x) OR (x ~ z AND y <~ x) OR (y ~ z AND x <~ y)), prove: (min(x, y, z) * (max(x, y, z) ^ 2)) <~ (x * y * z)
-Assume for contradiction that (min(x, y, z) * (max(x, y, z) ^ 2)) <~ (x * y * z) fails.
-Simplifying hypotheses and conclusion in the current goal...
-Simplifying ((x ~ y AND z <~ x) OR (x ~ z AND y <~ x) OR (y ~ z AND x <~ y)) to (((x * (y ^ -1)) ~ 1 AND (x * (z ^ -1)) >~ 1) OR ((x * (z ^ -1)) ~ 1 AND (x * (y ^ -1)) >~ 1) OR ((y * (z ^ -1)) ~ 1 AND (y * (x ^ -1)) >~ 1)).
-Simplifying (min(x, y, z) * (max(x, y, z) ^ 2)) >> (x * y * z) to (min(x, y, z) * (max(x, y, z) ^ 2) * (x ^ -1) * (y ^ -1) * (z ^ -1)) >> 1.      
-Creating new variables: "min(x, y, z)", "max(x, y, z)"
-Trying to obtain a contradiction by logarithmic linear arithmetic...
-Unfortunately, the purely multiplicative hypotheses are feasible.  Sample feasible values (for N large):
-"min(x, y, z)" = N^-1/2
-y = N^0
-z = N^-1/2
-"max(x, y, z)" = N^0
-x = N^-1/2
-Splitting hypothesis (((x * (y ^ -1)) ~ 1 AND (x * (z ^ -1)) >~ 1) OR ((x * (z ^ -1)) ~ 1 AND (x * (y ^ -1)) >~ 1) OR ((y * (z ^ -1)) ~ 1 AND (y * (x ^ -1)) >~ 1)) into cases.
-Current goal: Assuming: y >~ "min(x, y, z)", x <~ "max(x, y, z)", z <~ "max(x, y, z)", (x ~ "max(x, y, z)" OR z ~ "max(x, y, z)" OR y ~ "max(x, y, z)"), y <~ "max(x, y, z)", (x ~ "min(x, y, z)" OR y ~ "min(x, y, z)" OR z ~ "min(x, y, z)"), z >~ "min(x, y, z)", x >~ "min(x, y, z)", ("min(x, y, z)" * ("max(x, y, z)" ^ 2) * (x ^ -1) * (y ^ -1) * (z ^ -1)) >> 1, ((x * (y ^ -1)) ~ 1 AND (x * (z ^ -1)) >~ 1), prove: FALSE
-Simplifying hypotheses and conclusion in the current goal...
-Simplifying y >~ "min(x, y, z)" to (y * ("min(x, y, z)" ^ -1)) >~ 1.
-Simplifying x <~ "max(x, y, z)" to ("max(x, y, z)" * (x ^ -1)) >~ 1.
-Simplifying z <~ "max(x, y, z)" to ("max(x, y, z)" * (z ^ -1)) >~ 1.
-Simplifying (x ~ "max(x, y, z)" OR z ~ "max(x, y, z)" OR y ~ "max(x, y, z)") to ((x * ("max(x, y, z)" ^ -1)) ~ 1 OR (y * ("max(x, y, z)" ^ -1)) ~ 1 OR (z * ("max(x, y, z)" ^ -1)) ~ 1).
-Simplifying y <~ "max(x, y, z)" to ("max(x, y, z)" * (y ^ -1)) >~ 1.
-Simplifying (x ~ "min(x, y, z)" OR y ~ "min(x, y, z)" OR z ~ "min(x, y, z)") to ((x * ("min(x, y, z)" ^ -1)) ~ 1 OR (y * ("min(x, y, z)" ^ -1)) ~ 1 OR (z * ("min(x, y, z)" ^ -1)) ~ 1).
-Simplifying z >~ "min(x, y, z)" to (z * ("min(x, y, z)" ^ -1)) >~ 1.
-Simplifying x >~ "min(x, y, z)" to (x * ("min(x, y, z)" ^ -1)) >~ 1.
-Expanding hypothesis ((x * (y ^ -1)) ~ 1 AND (x * (z ^ -1)) >~ 1) into conjuncts ((x * (y ^ -1)) ~ 1, (x * (z ^ -1)) >~ 1).
-Trying to obtain a contradiction by logarithmic linear arithmetic...
-Unfortunately, the purely multiplicative hypotheses are feasible.  Sample feasible values (for N large):
-"min(x, y, z)" = N^0
-y = N^0
-z = N^0
-"max(x, y, z)" = N^1/2
-x = N^0
-Splitting hypothesis ((x * ("max(x, y, z)" ^ -1)) ~ 1 OR (y * ("max(x, y, z)" ^ -1)) ~ 1 OR (z * ("max(x, y, z)" ^ -1)) ~ 1) into cases.
-Current goal: Assuming: (x * (z ^ -1)) >~ 1, ("max(x, y, z)" * (y ^ -1)) >~ 1, (x * ("min(x, y, z)" ^ -1)) >~ 1, ("max(x, y, z)" * (x ^ -1)) >~ 1, (x * (y ^ -1)) ~ 1, ((x * ("min(x, y, z)" ^ -1)) ~ 1 OR (y * ("min(x, y, z)" ^ -1)) ~ 1 OR (z * ("min(x, y, z)" ^ -1)) ~ 1), (z * ("min(x, y, z)" ^ -1)) >~ 1, ("max(x, y, z)" * (z ^ -1)) >~ 1, ("min(x, y, z)" * ("max(x, y, z)" ^ 2) * (x ^ -1) * (y ^ -1) * (z ^ -1)) >> 1, (y * ("min(x, y, z)" ^ -1)) >~ 1, (x * ("max(x, y, z)" ^ -1)) ~ 1, prove: FALSE
-Simplifying hypotheses and conclusion in the current goal...
-Trying to obtain a contradiction by logarithmic linear arithmetic...
-A contradiction can be obtained by multiplying the following estimates:
-z * "min(x, y, z)"^-1 >~ 1 raised to power 1
-x * "max(x, y, z)"^-1 ~ 1 raised to power 2
-x * y^-1 ~ 1 raised to power -1
-"min(x, y, z)" * "max(x, y, z)"^2 * x^-1 * y^-1 * z^-1 >> 1 raised to power 1
-Current goal solved!
-Current goal: Assuming: x >~ "min(x, y, z)", y <~ "max(x, y, z)", ("min(x, y, z)" * ("max(x, y, z)" ^ 2) * (x ^ -1) * (y ^ -1) * (z ^ -1)) >> 1, z <~ "max(x, y, z)", (x ~ "min(x, y, z)" OR y ~ "min(x, y, z)" OR z ~ "min(x, y, z)"), y >~ "min(x, y, z)", z >~ "min(x, y, z)", x <~ "max(x, y, z)", (x ~ "max(x, y, z)" OR z ~ "max(x, y, z)" OR y ~ "max(x, y, z)"), ((x * (z ^ -1)) ~ 1 AND (x * (y ^ -1)) >~ 1), prove: FALSE
-Simplifying hypotheses and conclusion in the current goal...
-Simplifying x >~ "min(x, y, z)" to (x * ("min(x, y, z)" ^ -1)) >~ 1.
-Simplifying y <~ "max(x, y, z)" to ("max(x, y, z)" * (y ^ -1)) >~ 1.
-Simplifying z <~ "max(x, y, z)" to ("max(x, y, z)" * (z ^ -1)) >~ 1.
-Simplifying (x ~ "min(x, y, z)" OR y ~ "min(x, y, z)" OR z ~ "min(x, y, z)") to ((x * ("min(x, y, z)" ^ -1)) ~ 1 OR (y * ("min(x, y, z)" ^ -1)) ~ 1 OR (z * ("min(x, y, z)" ^ -1)) ~ 1).
-Simplifying y >~ "min(x, y, z)" to (y * ("min(x, y, z)" ^ -1)) >~ 1.
-Simplifying z >~ "min(x, y, z)" to (z * ("min(x, y, z)" ^ -1)) >~ 1.
-Simplifying x <~ "max(x, y, z)" to ("max(x, y, z)" * (x ^ -1)) >~ 1.
-Simplifying (x ~ "max(x, y, z)" OR z ~ "max(x, y, z)" OR y ~ "max(x, y, z)") to ((x * ("max(x, y, z)" ^ -1)) ~ 1 OR (z * ("max(x, y, z)" ^ -1)) ~ 1 OR (y * ("max(x, y, z)" ^ -1)) ~ 1).
-Expanding hypothesis ((x * (z ^ -1)) ~ 1 AND (x * (y ^ -1)) >~ 1) into conjuncts ((x * (z ^ -1)) ~ 1, (x * (y ^ -1)) >~ 1).
-Trying to obtain a contradiction by logarithmic linear arithmetic...
-Unfortunately, the purely multiplicative hypotheses are feasible.  Sample feasible values (for N large):
-x = N^0
-z = N^0
-"max(x, y, z)" = N^1/2
-y = N^0
-"min(x, y, z)" = N^0
-Splitting hypothesis ((x * ("min(x, y, z)" ^ -1)) ~ 1 OR (y * ("min(x, y, z)" ^ -1)) ~ 1 OR (z * ("min(x, y, z)" ^ -1)) ~ 1) into cases.
-Current goal: Assuming: (x * (z ^ -1)) ~ 1, ("max(x, y, z)" * (z ^ -1)) >~ 1, (y * ("min(x, y, z)" ^ -1)) >~ 1, (z * ("min(x, y, z)" ^ -1)) >~ 1, (x * (y ^ -1)) >~ 1, ("max(x, y, z)" * (y ^ -1)) >~ 1, (x * ("min(x, y, z)" ^ -1)) >~ 1, ("max(x, y, z)" * (x ^ -1)) >~ 1, ((x * ("max(x, y, z)" ^ -1)) ~ 1 OR (z * ("max(x, y, z)" ^ -1)) ~ 1 OR (y * ("max(x, y, z)" ^ -1)) ~ 1), ("min(x, y, z)" * ("max(x, y, z)" ^ 2) * (x ^ -1) * (y ^ -1) * (z ^ -1)) >> 1, (x * ("min(x, y, z)" ^ -1)) ~ 1, prove: FALSE
-Simplifying hypotheses and conclusion in the current goal...
-Trying to obtain a contradiction by logarithmic linear arithmetic...
-Unfortunately, the purely multiplicative hypotheses are feasible.  Sample feasible values (for N large):
-x = N^0
-y = N^0
-"min(x, y, z)" = N^0
-z = N^0
-"max(x, y, z)" = N^1/2
-Splitting hypothesis ((x * ("max(x, y, z)" ^ -1)) ~ 1 OR (z * ("max(x, y, z)" ^ -1)) ~ 1 OR (y * ("max(x, y, z)" ^ -1)) ~ 1) into cases.
-Current goal: Assuming: (x * (z ^ -1)) ~ 1, (z * ("min(x, y, z)" ^ -1)) >~ 1, (y * ("min(x, y, z)" ^ -1)) >~ 1, ("max(x, y, z)" * (y ^ -1)) >~ 1, (x * ("min(x, y, z)" ^ -1)) >~ 1, (x * ("min(x, y, z)" ^ -1)) ~ 1, (x * ("max(x, y, z)" ^ -1)) ~ 1, ("max(x, y, z)" * (z ^ -1)) >~ 1, (x * (y ^ -1)) >~ 1, ("max(x, y, z)" * (x ^ -1)) >~ 1, ("min(x, y, z)" * ("max(x, y, z)" ^ 2) * (x ^ -1) * (y ^ -1) * (z ^ -1)) >> 1, prove: FALSE
-Simplifying hypotheses and conclusion in the current goal...
-Trying to obtain a contradiction by logarithmic linear arithmetic...
-A contradiction can be obtained by multiplying the following estimates:
-x * "max(x, y, z)"^-1 ~ 1 raised to power 2
-"min(x, y, z)" * "max(x, y, z)"^2 * x^-1 * y^-1 * z^-1 >> 1 raised to power 1
-y * "min(x, y, z)"^-1 >~ 1 raised to power 1
-x * z^-1 ~ 1 raised to power -1
-Current goal solved!
-Current goal: Assuming: (x * ("min(x, y, z)" ^ -1)) >~ 1, ("max(x, y, z)" * (y ^ -1)) >~ 1, ("min(x, y, z)" * ("max(x, y, z)" ^ 2) * (x ^ -1) * (y ^ -1) * (z ^ -1)) >> 1, (z * ("min(x, y, z)" ^ -1)) >~ 1, (y * ("min(x, y, z)" ^ -1)) >~ 1, ("max(x, y, z)" * (x ^ -1)) >~ 1, (x * (z ^ -1)) ~ 1, (y * ("min(x, y, z)" ^ -1)) ~ 1, ("max(x, y, z)" * (z ^ -1)) >~ 1, ((x * ("max(x, y, z)" ^ -1)) ~ 1 OR (z * ("max(x, y, z)" ^ -1)) ~ 1 OR (y * ("max(x, y, z)" ^ -1)) ~ 1), (x * (y ^ -1)) >~ 1, prove: FALSE
-Simplifying hypotheses and conclusion in the current goal...
-Trying to obtain a contradiction by logarithmic linear arithmetic...
-Unfortunately, the purely multiplicative hypotheses are feasible.  Sample feasible values (for N large):
-y = N^0
-z = N^0
-"min(x, y, z)" = N^0
-"max(x, y, z)" = N^1/2
-x = N^0
-Splitting hypothesis ((x * ("max(x, y, z)" ^ -1)) ~ 1 OR (z * ("max(x, y, z)" ^ -1)) ~ 1 OR (y * ("max(x, y, z)" ^ -1)) ~ 1) into cases.
-Current goal: Assuming: (y * ("min(x, y, z)" ^ -1)) >~ 1, ("max(x, y, z)" * (z ^ -1)) >~ 1, (x * ("min(x, y, z)" ^ -1)) >~ 1, ("min(x, y, z)" * ("max(x, y, z)" ^ 2) * (x ^ -1) * (y ^ -1) * (z ^ -1)) >> 1, (z * ("min(x, y, z)" ^ -1)) >~ 1, ("max(x, y, z)" * (x ^ -1)) >~ 1, (x * (z ^ -1)) ~ 1, ("max(x, y, z)" * (y ^ -1)) >~ 1, (y * ("min(x, y, z)" ^ -1)) ~ 1, (x * (y ^ -1)) >~ 1, (x * ("max(x, y, z)" ^ -1)) ~ 1, prove: FALSE
-Simplifying hypotheses and conclusion in the current goal...
-Trying to obtain a contradiction by logarithmic linear arithmetic...
-A contradiction can be obtained by multiplying the following estimates:
-x * z^-1 ~ 1 raised to power -1
-y * "min(x, y, z)"^-1 >~ 1 raised to power 1
-x * "max(x, y, z)"^-1 ~ 1 raised to power 2
-"min(x, y, z)" * "max(x, y, z)"^2 * x^-1 * y^-1 * z^-1 >> 1 raised to power 1
-Current goal solved!
-Current goal: Assuming: ("min(x, y, z)" * ("max(x, y, z)" ^ 2) * (x ^ -1) * (y ^ -1) * (z ^ -1)) >> 1, (x * (z ^ -1)) ~ 1, (z * ("min(x, y, z)" ^ -1)) >~ 1, (x * (y ^ -1)) >~ 1, (y * ("min(x, y, z)" ^ -1)) >~ 1, (x * ("min(x, y, z)" ^ -1)) >~ 1, ("max(x, y, z)" * (z ^ -1)) >~ 1, ("max(x, y, z)" * (y ^ -1)) >~ 1, ((x * ("max(x, y, z)" ^ -1)) ~ 1 OR (z * ("max(x, y, z)" ^ -1)) ~ 1 OR (y * ("max(x, y, z)" ^ -1)) ~ 1), ("max(x, y, z)" * (x ^ -1)) >~ 1, (z * ("min(x, y, z)" ^ -1)) ~ 1, prove: FALSE
-Simplifying hypotheses and conclusion in the current goal...
-Trying to obtain a contradiction by logarithmic linear arithmetic...
-Unfortunately, the purely multiplicative hypotheses are feasible.  Sample feasible values (for N large):
-"max(x, y, z)" = N^1/2
-y = N^0
-"min(x, y, z)" = N^0
-x = N^0
-z = N^0
-Splitting hypothesis ((x * ("max(x, y, z)" ^ -1)) ~ 1 OR (z * ("max(x, y, z)" ^ -1)) ~ 1 OR (y * ("max(x, y, z)" ^ -1)) ~ 1) into cases.
-Current goal: Assuming: (x * (z ^ -1)) ~ 1, ("max(x, y, z)" * (x ^ -1)) >~ 1, ("max(x, y, z)" * (y ^ -1)) >~ 1, ("min(x, y, z)" * ("max(x, y, z)" ^ 2) * (x ^ -1) * (y ^ -1) * (z ^ -1)) >> 1, (x * (y ^ -1)) >~ 1, (y * ("min(x, y, z)" ^ -1)) >~ 1, (x * ("min(x, y, z)" ^ -1)) >~ 1, (x * ("max(x, y, z)" ^ -1)) ~ 1, (z * ("min(x, y, z)" ^ -1)) ~ 1, (z * ("min(x, y, z)" ^ -1)) >~ 1, ("max(x, y, z)" * (z ^ -1)) >~ 1, prove: FALSE
-Simplifying hypotheses and conclusion in the current goal...
-Trying to obtain a contradiction by logarithmic linear arithmetic...
-A contradiction can be obtained by multiplying the following estimates:
-"min(x, y, z)" * "max(x, y, z)"^2 * x^-1 * y^-1 * z^-1 >> 1 raised to power 1
-x * "max(x, y, z)"^-1 ~ 1 raised to power 2
-y * "min(x, y, z)"^-1 >~ 1 raised to power 1
-x * z^-1 ~ 1 raised to power -1
-Current goal solved!
-Current goal: Assuming: ("max(x, y, z)" * (y ^ -1)) >~ 1, (z * ("min(x, y, z)" ^ -1)) >~ 1, ("max(x, y, z)" * (x ^ -1)) >~ 1, (y * ("max(x, y, z)" ^ -1)) ~ 1, (x * (z ^ -1)) ~ 1, (x * (y ^ -1)) >~ 1, (y * ("min(x, y, z)" ^ -1)) >~ 1, (x * ("min(x, y, z)" ^ -1)) >~ 1, ("min(x, y, z)" * ("max(x, y, z)" ^ 2) * (x ^ -1) * (y ^ -1) * (z ^ -1)) >> 1, (x * ("min(x, y, z)" ^ -1)) ~ 1, ("max(x, y, z)" * (z ^ -1)) >~ 1, prove: FALSE
-Simplifying hypotheses and conclusion in the current goal...
-Trying to obtain a contradiction by logarithmic linear arithmetic...
-A contradiction can be obtained by multiplying the following estimates:
-"min(x, y, z)" * "max(x, y, z)"^2 * x^-1 * y^-1 * z^-1 >> 1 raised to power 1
-x * "min(x, y, z)"^-1 >~ 1 raised to power 1
-y * "max(x, y, z)"^-1 ~ 1 raised to power 2
-x * y^-1 >~ 1 raised to power 1
-x * z^-1 ~ 1 raised to power -1
-Current goal solved!
-Current goal: Assuming: ((x * ("min(x, y, z)" ^ -1)) ~ 1 OR (y * ("min(x, y, z)" ^ -1)) ~ 1 OR (z * ("min(x, y, z)" ^ -1)) ~ 1), (y * ("min(x, y, z)" ^ -1)) >~ 1, ("max(x, y, z)" * (z ^ -1)) >~ 1, (x * ("min(x, y, z)" ^ -1)) >~ 1, ("min(x, y, z)" * ("max(x, y, z)" ^ 2) * (x ^ -1) * (y ^ -1) * (z ^ -1)) >> 1, ("max(x, y, z)" * (x ^ -1)) >~ 1, (x * (y ^ -1)) ~ 1, ("max(x, y, z)" * (y ^ -1)) >~ 1, (x * (z ^ -1)) >~ 1, (z * ("min(x, y, z)" ^ -1)) >~ 1, (y * ("max(x, y, z)" ^ -1)) ~ 1, prove: FALSE
-Simplifying hypotheses and conclusion in the current goal...
-Trying to obtain a contradiction by logarithmic linear arithmetic...
-A contradiction can be obtained by multiplying the following estimates:
-z * "min(x, y, z)"^-1 >~ 1 raised to power 1
-x * y^-1 ~ 1 raised to power 1
-y * "max(x, y, z)"^-1 ~ 1 raised to power 2
-"min(x, y, z)" * "max(x, y, z)"^2 * x^-1 * y^-1 * z^-1 >> 1 raised to power 1
-Current goal solved!
-Current goal: Assuming: y <~ "max(x, y, z)", y >~ "min(x, y, z)", ("min(x, y, z)" * ("max(x, y, z)" ^ 2) * (x ^ -1) * (y ^ -1) * (z ^ -1)) >> 1, (x ~ "min(x, y, z)" OR y ~ "min(x, y, z)" OR z ~ "min(x, y, z)"), z >~ "min(x, y, z)", (x ~ "max(x, y, z)" OR z ~ "max(x, y, z)" OR y ~ "max(x, y, z)"), x <~ "max(x, y, z)", x >~ "min(x, y, z)", z <~ "max(x, y, z)", ((y * (z ^ -1)) ~ 1 AND (y * (x ^ -1)) >~ 1), prove: FALSE
-Simplifying hypotheses and conclusion in the current goal...
-Simplifying y <~ "max(x, y, z)" to ("max(x, y, z)" * (y ^ -1)) >~ 1.
-Simplifying y >~ "min(x, y, z)" to (y * ("min(x, y, z)" ^ -1)) >~ 1.
-Simplifying (x ~ "min(x, y, z)" OR y ~ "min(x, y, z)" OR z ~ "min(x, y, z)") to ((x * ("min(x, y, z)" ^ -1)) ~ 1 OR (y * ("min(x, y, z)" ^ -1)) ~ 1 OR (z * ("min(x, y, z)" ^ -1)) ~ 1).
-Simplifying z >~ "min(x, y, z)" to (z * ("min(x, y, z)" ^ -1)) >~ 1.
-Simplifying (x ~ "max(x, y, z)" OR z ~ "max(x, y, z)" OR y ~ "max(x, y, z)") to ((x * ("max(x, y, z)" ^ -1)) ~ 1 OR (y * ("max(x, y, z)" ^ -1)) ~ 1 OR (z * ("max(x, y, z)" ^ -1)) ~ 1).
-Simplifying x <~ "max(x, y, z)" to ("max(x, y, z)" * (x ^ -1)) >~ 1.
-Simplifying x >~ "min(x, y, z)" to (x * ("min(x, y, z)" ^ -1)) >~ 1.
-Simplifying z <~ "max(x, y, z)" to ("max(x, y, z)" * (z ^ -1)) >~ 1.
-Expanding hypothesis ((y * (z ^ -1)) ~ 1 AND (y * (x ^ -1)) >~ 1) into conjuncts ((y * (z ^ -1)) ~ 1, (y * (x ^ -1)) >~ 1).
-Trying to obtain a contradiction by logarithmic linear arithmetic...
-Unfortunately, the purely multiplicative hypotheses are feasible.  Sample feasible values (for N large):
-x = N^0
-y = N^0
-"min(x, y, z)" = N^0
-"max(x, y, z)" = N^1/4
-z = N^0
-Splitting hypothesis ((x * ("max(x, y, z)" ^ -1)) ~ 1 OR (y * ("max(x, y, z)" ^ -1)) ~ 1 OR (z * ("max(x, y, z)" ^ -1)) ~ 1) into cases.
-Current goal: Assuming: (y * (z ^ -1)) ~ 1, ("max(x, y, z)" * (x ^ -1)) >~ 1, ((x * ("min(x, y, z)" ^ -1)) ~ 1 OR (y * ("min(x, y, z)" ^ -1)) ~ 1 OR (z * ("min(x, y, z)" ^ -1)) ~ 1), (x * ("min(x, y, z)" ^ -1)) >~ 1, (z * ("min(x, y, z)" ^ -1)) >~ 1, (y * ("min(x, y, z)" ^ -1)) >~ 1, ("max(x, y, z)" * (z ^ -1)) >~ 1, ("max(x, y, z)" * (y ^ -1)) >~ 1, (y * (x ^ -1)) >~ 1, ("min(x, y, z)" * ("max(x, y, z)" ^ 2) * (x ^ -1) * (y ^ -1) * (z ^ -1)) >> 1, (x * ("max(x, y, z)" ^ -1)) ~ 1, prove: FALSE
-Simplifying hypotheses and conclusion in the current goal...
-Trying to obtain a contradiction by logarithmic linear arithmetic...
-A contradiction can be obtained by multiplying the following estimates:
-"min(x, y, z)" * "max(x, y, z)"^2 * x^-1 * y^-1 * z^-1 >> 1 raised to power 1
-y * x^-1 >~ 1 raised to power 1
-x * "max(x, y, z)"^-1 ~ 1 raised to power 2
-y * z^-1 ~ 1 raised to power -1
-y * "min(x, y, z)"^-1 >~ 1 raised to power 1
-Current goal solved!
-Current goal: Assuming: (z * ("min(x, y, z)" ^ -1)) >~ 1, ("max(x, y, z)" * (y ^ -1)) >~ 1, ("max(x, y, z)" * (z ^ -1)) >~ 1, (y * (z ^ -1)) ~ 1, (y * (x ^ -1)) >~ 1, ("max(x, y, z)" * (x ^ -1)) >~ 1, (x * ("min(x, y, z)" ^ -1)) >~ 1, ((x * ("min(x, y, z)" ^ -1)) ~ 1 OR (y * ("min(x, y, z)" ^ -1)) ~ 1 OR (z * ("min(x, y, z)" ^ -1)) ~ 1), ("min(x, y, z)" * ("max(x, y, z)" ^ 2) * (x ^ -1) * (y ^ -1) * (z ^ -1)) >> 1, (y * ("min(x, y, z)" ^ -1)) >~ 1, (z * ("max(x, y, z)" ^ -1)) ~ 1, prove: FALSE
-Simplifying hypotheses and conclusion in the current goal...
-Trying to obtain a contradiction by logarithmic linear arithmetic...
-A contradiction can be obtained by multiplying the following estimates:
-x * "min(x, y, z)"^-1 >~ 1 raised to power 1
-z * "max(x, y, z)"^-1 ~ 1 raised to power 2
-"min(x, y, z)" * "max(x, y, z)"^2 * x^-1 * y^-1 * z^-1 >> 1 raised to power 1
-y * z^-1 ~ 1 raised to power 1
-Current goal solved!
-Current goal: Assuming: ("min(x, y, z)" * ("max(x, y, z)" ^ 2) * (x ^ -1) * (y ^ -1) * (z ^ -1)) >> 1, ("max(x, y, z)" * (y ^ -1)) >~ 1, (z * ("min(x, y, z)" ^ -1)) ~ 1, ("max(x, y, z)" * (z ^ -1)) >~ 1, (y * ("min(x, y, z)" ^ -1)) >~ 1, (x * (z ^ -1)) ~ 1, ("max(x, y, z)" * (x ^ -1)) >~ 1, (z * ("min(x, y, z)" ^ -1)) >~ 1, (x * (y ^ -1)) >~ 1, (x * ("min(x, y, z)" ^ -1)) >~ 1, (z * ("max(x, y, z)" ^ -1)) ~ 1, prove: FALSE
-Simplifying hypotheses and conclusion in the current goal...
-Trying to obtain a contradiction by logarithmic linear arithmetic...
-A contradiction can be obtained by multiplying the following estimates:
-"min(x, y, z)" * "max(x, y, z)"^2 * x^-1 * y^-1 * z^-1 >> 1 raised to power 1
-y * "min(x, y, z)"^-1 >~ 1 raised to power 1
-z * "max(x, y, z)"^-1 ~ 1 raised to power 2
-x * z^-1 ~ 1 raised to power 1
-Current goal solved!
-Current goal: Assuming: (x * (z ^ -1)) ~ 1, (z * ("min(x, y, z)" ^ -1)) >~ 1, ("max(x, y, z)" * (y ^ -1)) >~ 1, ("min(x, y, z)" * ("max(x, y, z)" ^ 2) * (x ^ -1) * (y ^ -1) * (z ^ -1)) >> 1, (z * ("max(x, y, z)" ^ -1)) ~ 1, (x * (y ^ -1)) >~ 1, ("max(x, y, z)" * (z ^ -1)) >~ 1, (x * ("min(x, y, z)" ^ -1)) >~ 1, ("max(x, y, z)" * (x ^ -1)) >~ 1, (x * ("min(x, y, z)" ^ -1)) ~ 1, (y * ("min(x, y, z)" ^ -1)) >~ 1, prove: FALSE
-Simplifying hypotheses and conclusion in the current goal...
-Trying to obtain a contradiction by logarithmic linear arithmetic...
-A contradiction can be obtained by multiplying the following estimates:
-x * z^-1 ~ 1 raised to power 1
-"min(x, y, z)" * "max(x, y, z)"^2 * x^-1 * y^-1 * z^-1 >> 1 raised to power 1
-y * "min(x, y, z)"^-1 >~ 1 raised to power 1
-z * "max(x, y, z)"^-1 ~ 1 raised to power 2
-Current goal solved!
-Current goal: Assuming: (y * ("min(x, y, z)" ^ -1)) >~ 1, ("min(x, y, z)" * ("max(x, y, z)" ^ 2) * (x ^ -1) * (y ^ -1) * (z ^ -1)) >> 1, (z * ("min(x, y, z)" ^ -1)) >~ 1, ("max(x, y, z)" * (z ^ -1)) >~ 1, (x * (y ^ -1)) >~ 1, (x * (z ^ -1)) ~ 1, (y * ("min(x, y, z)" ^ -1)) ~ 1, ("max(x, y, z)" * (x ^ -1)) >~ 1, (x * ("min(x, y, z)" ^ -1)) >~ 1, ("max(x, y, z)" * (y ^ -1)) >~ 1, (y * ("max(x, y, z)" ^ -1)) ~ 1, prove: FALSE
-Simplifying hypotheses and conclusion in the current goal...
-Trying to obtain a contradiction by logarithmic linear arithmetic...
-A contradiction can be obtained by multiplying the following estimates:
-z * "min(x, y, z)"^-1 >~ 1 raised to power 1
-x * "min(x, y, z)"^-1 >~ 1 raised to power 1
-y * "max(x, y, z)"^-1 ~ 1 raised to power 2
-"min(x, y, z)" * "max(x, y, z)"^2 * x^-1 * y^-1 * z^-1 >> 1 raised to power 1
-y * "min(x, y, z)"^-1 ~ 1 raised to power -1
-Current goal solved!
-Current goal: Assuming: (x * ("min(x, y, z)" ^ -1)) >~ 1, ("max(x, y, z)" * (x ^ -1)) >~ 1, ("max(x, y, z)" * (y ^ -1)) >~ 1, ("min(x, y, z)" * ("max(x, y, z)" ^ 2) * (x ^ -1) * (y ^ -1) * (z ^ -1)) >> 1, (x * (y ^ -1)) >~ 1, (y * ("min(x, y, z)" ^ -1)) >~ 1, (z * ("min(x, y, z)" ^ -1)) ~ 1, ("max(x, y, z)" * (z ^ -1)) >~ 1, (x * (z ^ -1)) ~ 1, (z * ("min(x, y, z)" ^ -1)) >~ 1, (y * ("max(x, y, z)" ^ -1)) ~ 1, prove: FALSE
-Simplifying hypotheses and conclusion in the current goal...
-Trying to obtain a contradiction by logarithmic linear arithmetic...
-A contradiction can be obtained by multiplying the following estimates:
-z * "min(x, y, z)"^-1 ~ 1 raised to power 1
-"min(x, y, z)" * "max(x, y, z)"^2 * x^-1 * y^-1 * z^-1 >> 1 raised to power 1
-y * "max(x, y, z)"^-1 ~ 1 raised to power 2
-x * y^-1 >~ 1 raised to power 1
-Current goal solved!
-Current goal: Assuming: ("min(x, y, z)" * ("max(x, y, z)" ^ 2) * (x ^ -1) * (y ^ -1) * (z ^ -1)) >> 1, ("max(x, y, z)" * (z ^ -1)) >~ 1, (y * (z ^ -1)) ~ 1, ("max(x, y, z)" * (x ^ -1)) >~ 1, ("max(x, y, z)" * (y ^ -1)) >~ 1, (z * ("min(x, y, z)" ^ -1)) >~ 1, ((x * ("min(x, y, z)" ^ -1)) ~ 1 OR (y * ("min(x, y, z)" ^ -1)) ~ 1 OR (z * ("min(x, y, z)" ^ -1)) ~ 1), (y * ("min(x, y, z)" ^ -1)) >~ 1, (x * ("min(x, y, z)" ^ -1)) >~ 1, (y * (x ^ -1)) >~ 1, (y * ("max(x, y, z)" ^ -1)) ~ 1, prove: FALSE
-Simplifying hypotheses and conclusion in the current goal...
-Trying to obtain a contradiction by logarithmic linear arithmetic...
-A contradiction can be obtained by multiplying the following estimates:
-x * "min(x, y, z)"^-1 >~ 1 raised to power 1
-"min(x, y, z)" * "max(x, y, z)"^2 * x^-1 * y^-1 * z^-1 >> 1 raised to power 1
-y * "max(x, y, z)"^-1 ~ 1 raised to power 2
-y * z^-1 ~ 1 raised to power -1
-Current goal solved!
-Current goal: Assuming: (x * ("min(x, y, z)" ^ -1)) >~ 1, ("max(x, y, z)" * (x ^ -1)) >~ 1, ("min(x, y, z)" * ("max(x, y, z)" ^ 2) * (x ^ -1) * (y ^ -1) * (z ^ -1)) >> 1, ("max(x, y, z)" * (y ^ -1)) >~ 1, ((x * ("min(x, y, z)" ^ -1)) ~ 1 OR (y * ("min(x, y, z)" ^ -1)) ~ 1 OR (z * ("min(x, y, z)" ^ -1)) ~ 1), (x * (y ^ -1)) ~ 1, ("max(x, y, z)" * (z ^ -1)) >~ 1, (y * ("min(x, y, z)" ^ -1)) >~ 1, (x * (z ^ -1)) >~ 1, (z * ("min(x, y, z)" ^ -1)) >~ 1, (z * ("max(x, y, z)" ^ -1)) ~ 1, prove: FALSE
-Simplifying hypotheses and conclusion in the current goal...
-Trying to obtain a contradiction by logarithmic linear arithmetic...
-A contradiction can be obtained by multiplying the following estimates:
-"min(x, y, z)" * "max(x, y, z)"^2 * x^-1 * y^-1 * z^-1 >> 1 raised to power 1
-x * z^-1 >~ 1 raised to power 2
-z * "min(x, y, z)"^-1 >~ 1 raised to power 1
-x * y^-1 ~ 1 raised to power -1
-z * "max(x, y, z)"^-1 ~ 1 raised to power 2
-Current goal solved!
-Current goal: Assuming: (y * ("min(x, y, z)" ^ -1)) >~ 1, (x * ("min(x, y, z)" ^ -1)) >~ 1, (z * ("min(x, y, z)" ^ -1)) >~ 1, ("max(x, y, z)" * (y ^ -1)) >~ 1, ("max(x, y, z)" * (z ^ -1)) >~ 1, (x * (y ^ -1)) >~ 1, ("max(x, y, z)" * (x ^ -1)) >~ 1, (y * ("min(x, y, z)" ^ -1)) ~ 1, (x * (z ^ -1)) ~ 1, ("min(x, y, z)" * ("max(x, y, z)" ^ 2) * (x ^ -1) * (y ^ -1) * (z ^ -1)) >> 1, (z * ("max(x, y, z)" ^ -1)) ~ 1, prove: FALSE
-Simplifying hypotheses and conclusion in the current goal...
-Trying to obtain a contradiction by logarithmic linear arithmetic...
-A contradiction can be obtained by multiplying the following estimates:
-"min(x, y, z)" * "max(x, y, z)"^2 * x^-1 * y^-1 * z^-1 >> 1 raised to power 1
-x * z^-1 ~ 1 raised to power 1
-y * "min(x, y, z)"^-1 >~ 1 raised to power 1
-z * "max(x, y, z)"^-1 ~ 1 raised to power 2
-All goals solved!
+Now that we know that `Q` is true, we would like to use this to simplify our goal, for instance simplifying `Q & R` to `Q`.  This can be done using the `SimpAll()` tactic:
+```
+>>> p.use(SimpAll())
+Simplified (P & R) | (P & S) | (Q & R) | (Q & S) to R | S using Q.
+Simplified R | S to True using R | S.
+Goal solved!
+1 goal remaining.
+```
+Here, the hypothesis `Q` was used to simplify the goal (using `sympy`'s powerful simplification tools), all the way down to `R | S`.  But this is precisely hypothesis `h2`, so on using that hypothesis as well, the conclusion was simplified to `True`, which of course closes off this goal.  This then lands us automatically in the first goal, which can be solved by the same method:
+```
+>>> p.use(SimpAll())
+Simplified (P & R) | (P & S) | (Q & R) | (Q & S) to R | S using P.
+Simplified R | S to True using R | S.
+Goal solved!
+Proof complete!
+```
+And here is the final proof:
+```
+>>> print(p.proof())
+example (P: bool) (Q: bool) (R: bool) (S: bool) (h1: P | Q) (h2: R | S): (P & R) | (P & S) | (Q & R) | (Q & S) := by
+  cases h1
+  . simp_all
+  simp_all
+```
+One can combine propositional tactics with linear arithmetic tactics.  Here is one example (using some propositional tactics we have not yet discussed, but whose purpose should be clear, and which one can look up [in this page](docs/tactics.md)):
+```
+>>> from main import *
+>>> p = split_exercise()
+Starting proof.  Current proof state:
+x: real
+y: real
+h1: (x > -1) & (x < 1)
+h2: (y > -2) & (y < 2)
+|- (x + y > -3) & (x + y < 3)
+>>> p.use(SplitHyp("h1"))
+Decomposing h1: (x > -1) & (x < 1) into components x > -1, x < 1.
+1 goal remaining.
+>>> p.use(SplitHyp("h2"))
+Decomposing h2: (y > -2) & (y < 2) into components y > -2, y < 2.
+1 goal remaining.
+>>> p.use(SplitGoal())
+Split into conjunctions: x + y > -3, x + y < 3
+2 goals remaining.
+>>> p.use(Linarith())
+Goal solved by linear arithmetic!
+1 goal remaining.
+>>> p.use(Linarith())
+Goal solved by linear arithmetic!
+Proof complete!
+>>> print(p.proof())
+example (x: real) (y: real) (h1: (x > -1) & (x < 1)) (h2: (y > -2) & (y < 2)): (x + y > -3) & (x + y < 3) := by
+  split_hyp h1
+  split_hyp h2
+  split_goal
+  . linarith
+  linarith
 ```

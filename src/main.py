@@ -62,6 +62,12 @@ def split_solution():
     p.use(Linarith())
     p.use(Linarith())
     
+def pigeonhole_exercise():
+    p = ProofAssistant()
+    x, y = p.vars("real", "x", "y")
+    p.assume(x + y > 5, "h")
+    p.begin_proof((x > 2) | (y > 3))
+    return p
 
 
 def ineq_exercise():
