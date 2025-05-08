@@ -1,4 +1,4 @@
-from sympy import Expr, S, Add, Mul, Pow, Symbol, Basic, Eq, sympify
+from sympy import Expr, S, Add, Mul, Pow, Symbol, Basic, Eq, sympify, Max
 from sympy.logic.boolalg import Boolean, Or, And, Not, true, false
 from sympy.core.relational import Relational, Rel
 from sympy.multipledispatch import dispatch
@@ -9,10 +9,10 @@ class OrderOfMagnitude(Basic):
     """
 
     def __add__(self, other):
-        return OrderAdd(self, other).doit()
+        return OrderMax(self, other).doit()
 
     def __radd__(self, other):
-        return OrderAdd(other, self).doit()
+        return OrderMax(other, self).doit()
 
     def __sub__(self, other):
         return FormalSub(self,other)
@@ -91,35 +91,35 @@ class OrderSymbol(OrderOfMagnitude, Symbol):
     """ Formal orders of magnitude."""
 
 
-class OrderAdd(OrderOfMagnitude, Expr):
+class OrderMax(OrderOfMagnitude, Expr):
     """ A class to handle addition of orders of magnitude. """
 
     def __new__(cls, *args):
         newargs = list(dict.fromkeys([Theta(arg) for arg in args]))
         if len(newargs) == 0:
-            raise ValueError("OrderAdd requires at least one argument.")
+            raise ValueError("OrderMax requires at least one argument.")
         if len(newargs) == 1:
             # if there's only one argument, just return it
             return newargs[0]
         
         # TODO: canonically sort arguments to increase ability to gather terms
-        
+
         obj = Expr.__new__(cls, *newargs)
-        obj.name = " + ".join([str(arg) for arg in newargs])
+        obj.name = "Max(" + ", ".join([str(arg) for arg in newargs]) + ")"
         return obj
 
     def doit(self):
-        # flatten nested OrderAdds
+        # flatten nested OrderMaxs
         newargs = []
         for arg in self.args:
-            if isinstance(arg, OrderAdd):
+            if isinstance(arg, OrderMax):
                 newargs.extend(arg.args)
             else:
                 newargs.append(arg)
 
         # TODO: canonically sort arguments to increase ability to gather terms
 
-        return OrderAdd(*newargs)
+        return OrderMax(*newargs)
 
     def __str__(self):
         return self.name
@@ -140,7 +140,7 @@ class OrderMul(OrderOfMagnitude, Expr):
         # TODO: canonically sort arguments to increase ability to gather terms
         
         obj = Expr.__new__(cls, *newargs)
-        obj.name = " * ".join([str(arg) for arg in newargs])
+        obj.name = "*".join([str(arg) for arg in newargs])
         return obj
 
     def doit(self):
@@ -204,7 +204,7 @@ class OrderPow(OrderOfMagnitude, Expr):
             return args[0]
         
         obj = Expr.__new__(cls, args[0], exp)
-        obj.name = f"{args[0]}^{exp}"
+        obj.name = f"{args[0]}**{exp}"
         return obj
 
     def doit(self):

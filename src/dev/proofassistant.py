@@ -12,6 +12,7 @@ class ProofAssistant:
         self.theorem_str = ""       # a description of the theorem
         self.proof_tree = None      # a ProofTree object
         self.current_node = None    # a ProofTree object, a node of proof_tree
+        self.auto_finish = True     # automatically finish the proof when all sorries are cleared
 
     def assume(self, assumption:Basic, name:str = "this"):
         if self.mode == "assumption":
@@ -20,6 +21,16 @@ class ProofAssistant:
             self.hypotheses[name] = assumption
         else:
             raise ValueError("Cannot add hypotheses in tactic mode.  Please switch to assumption mode.")
+
+    def auto_finish_on(self):
+        """ Automatically finish the proof when all sorries are cleared. """
+        print("Proof assistant will automatically exit Tactic mode when proof is complete."
+        self.auto_finish = True
+
+    def auto_finish_off(self):
+        """ Do not automatically finish the proof when all sorries are cleared. """
+        print("Proof assistant will stay in Tactic mode even when proof is complete.")
+        self.auto_finish = False
 
     def var(self, type:str, name:str = "this") -> Basic:
         """ Introduce a variable of a given type, stored as a Tuple wrapper around a sympy variable of the same type. """
@@ -91,6 +102,7 @@ class ProofAssistant:
         return self.current_node.proof_state.goal
         
     def abandon_proof(self):
+        """ Abandon the current proof, and clear hypotheses. """
         if self.mode == "tactic":
             self.mode = "assumption"
             self.proof_tree = None
@@ -100,6 +112,27 @@ class ProofAssistant:
         else:
             raise ValueError("Cannot abandon a proof in assumption mode.  Please start a proof first.")
     
+    def exit_proof(self):
+        """ Exit the current proof, and return to assumption mode (but do not clear hypotheses). """
+        if self.mode == "tactic":
+            self.mode = "assumption"
+            self.current_node = None
+            print("Exiting Tactic mode.")
+            print(self.current_proof_state())
+        else:
+            raise ValueError("You are already in assumption mode!")
+
+    def enter_proof(self):
+        """ Re-enter Tactic mode to view the proof. """
+        if self.mode == "assumption":
+            self.mode = "tactic"
+            self.current_node = self.proof_tree
+            print("Re-entering Tactic mode.  Current proof state:")
+            print(self.current_proof_state())
+        else:
+            raise ValueError("You are already in tactic mode!")
+
+
     def proof(self) -> str:
         if self.proof_tree is None:
             raise ValueError("No proof tree available.")
@@ -126,7 +159,10 @@ class ProofAssistant:
             elif before is not None:
                 self.current_node = before
             else:
-                self.mode = "assumption"
+            # all goals cleared!
+                if self.auto_finish:
+                    self.current_node = None
+                    self.mode = "assumption"
 
     # Move the current node
     def set_current_node(self, node:ProofTree):

@@ -1,6 +1,7 @@
 from tactic import *
 from linprog import Inequality, feasibility, verbose_feasibility
 from sympy import S, Eq, LessThan, StrictLessThan, GreaterThan, StrictGreaterThan
+from sympy.core.relational import Relational
 
     
 
@@ -31,32 +32,33 @@ class Linarith(Tactic):
                     inequalities.append(Inequality({hypothesis.var(): S(1)}, 'gt', S(0)))
                 elif hypothesis.var().is_nonnegative:
                     inequalities.append(Inequality({hypothesis.var(): S(1)}, 'geq', S(0)))
-            coeffs = (hypothesis.args[0] - hypothesis.args[1]).as_coefficients_dict()
+            elif isinstance(hypothesis, Relational):
+                coeffs = (hypothesis.args[0] - hypothesis.args[1]).as_coefficients_dict()
             
-            # Linarith ignores any relations that involve anything other than a real number.  (One could make a companion tactic, say Linalg, to handle linear equalities over vector spaces other than the reals.)
-            all_real = True
-            for var in coeffs.keys():
-                if not var.is_real:
-                    all_real = False
-                    break
-            if not all_real:
-                continue
+                # Linarith ignores any relations that involve anything other than a real number.  (One could make a companion tactic, say Linalg, to handle linear equalities over vector spaces other than the reals.)
+                all_real = True
+                for var in coeffs.keys():
+                    if not var.is_real:
+                        all_real = False
+                        break
+                if not all_real:
+                    continue
             
-            if S(1) in coeffs:
-                const = -coeffs[S(1)]
-                del coeffs[S(1)]
-            else:
-                const = -S(0)
-            if isinstance(hypothesis, Eq):
-                inequalities.append(Inequality(coeffs, 'eq', const))
-            elif isinstance(hypothesis, LessThan):
-                inequalities.append(Inequality(coeffs, 'leq', const))
-            elif isinstance(hypothesis, StrictLessThan):
-                inequalities.append(Inequality(coeffs, 'lt', const))
-            elif isinstance(hypothesis, GreaterThan):
-                inequalities.append(Inequality(coeffs, 'geq', const))
-            elif isinstance(hypothesis, StrictGreaterThan):
-                inequalities.append(Inequality(coeffs, 'gt', const))
+                if S(1) in coeffs:
+                    const = -coeffs[S(1)]
+                    del coeffs[S(1)]
+                else:
+                    const = -S(0)
+                if isinstance(hypothesis, Eq):
+                    inequalities.append(Inequality(coeffs, 'eq', const))
+                elif isinstance(hypothesis, LessThan):
+                    inequalities.append(Inequality(coeffs, 'leq', const))
+                elif isinstance(hypothesis, StrictLessThan):
+                    inequalities.append(Inequality(coeffs, 'lt', const))
+                elif isinstance(hypothesis, GreaterThan):
+                    inequalities.append(Inequality(coeffs, 'geq', const))
+                elif isinstance(hypothesis, StrictGreaterThan):
+                    inequalities.append(Inequality(coeffs, 'gt', const))
         
         if self.verbose:
             outcome = verbose_feasibility(inequalities)
