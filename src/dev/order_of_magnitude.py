@@ -1,8 +1,8 @@
-from sympy import Expr, S, Add, Mul, Pow, Symbol, Basic, sympify
-from sympy.core.decorators import _sympifyit, call_highest_priority
+from sympy import Expr, S, Add, Mul, Pow, Symbol, Basic, Eq, sympify
+from sympy.logic.boolalg import Boolean, Or, And, Not, true, false
+from sympy.multipledispatch import dispatch
 
-
-class OrderOfMagnitude:
+class OrderOfMagnitude(Basic):
     """
     Base class for “order of magnitude” expressions.  Any subclasses will also need to subclass from a sympy class such as Expr or Symbol.  All that this superclass does is intercept the arithmetic operations to redefine them.
     """
@@ -14,10 +14,10 @@ class OrderOfMagnitude:
         return OrderAdd(other, self).doit()
 
     def __sub__(self, other):
-        return NotImplementedError
+        return FormalSub(self,other)
     
     def __rsub__(self, other):
-        return NotImplementedError
+        return FormalSub(other,self)
 
     def __mul__(self, other):
         return OrderMul(self, other).doit()
@@ -36,6 +36,31 @@ class OrderOfMagnitude:
     
     def __rpow__(self, other):
         return NotImplementedError
+    
+    def __lt__(self, other):
+        return Ll(self, other).doit()
+    
+    def __le__(self, other):
+        return Lesssim(self, other).doit()
+    
+    def __gt__(self, other):
+        return Ll(other, self).doit()
+    
+    def __ge__(self, other):
+        return Lesssim(other, self).doit()
+
+class FormalSub(Expr):
+    """ A formal difference between two expressions.  This is a hack, to handle the fact that the default equality tester in Expr uses subtraction.  Otherwise, this class has no functionality. """
+    def __new__(cls, lhs, rhs):
+        obj = Expr.__new__(cls, lhs, rhs)
+        obj.name = f"FormalDiff({lhs}, {rhs})"
+        return obj
+
+    def __str__(self):
+        return f"FormalDiff({self.args[0]!r}, {self.args[1]!r})"
+    
+    def __repr__(self):
+        return f"FormalDiff({self.args[0]!r}, {self.args[1]!r})"
 
 
 class Theta(OrderOfMagnitude, Expr):
@@ -71,6 +96,7 @@ class Theta(OrderOfMagnitude, Expr):
     def __repr__(self):
         return f"Theta({self.args[0]!r})"
     
+
 
 class OrderSymbol(OrderOfMagnitude, Symbol):
     """ Formal orders of magnitude."""
@@ -110,8 +136,7 @@ class OrderAdd(OrderOfMagnitude, Expr):
         return self.name
     
     def __repr__(self):
-        # return str(self) # comment this out when debugging
-        return f"OrderAdd{self.args!r}"   
+        return str(self)   
         
 class OrderMul(OrderOfMagnitude, Expr):
     """ A class to handle multiplication of orders of magnitude. """
@@ -174,7 +199,7 @@ class OrderMul(OrderOfMagnitude, Expr):
         return self.name
     
     def __repr__(self):
-        return f"OrderMul({self.args!r})"
+        return str(self)   
 
 class OrderPow(OrderOfMagnitude, Expr):
     """ A class to handle exponentiation of orders of magnitude. """
@@ -205,5 +230,54 @@ class OrderPow(OrderOfMagnitude, Expr):
         
         return self
     
+    def __str__(self):
+        return self.name
+    
     def __repr__(self):
-        return f"OrderPow({self.args!r})"
+        return str(self)   
+
+class Ll(OrderOfMagnitude, Boolean):
+    def __new__(cls, *args):
+        assert len(args) == 2, f"Ll{args} requires exactly two arguments."
+        lhs = Theta(args[0])
+        rhs = Theta(args[1])
+        if Eq(lhs, rhs) == true:
+            return false
+        obj = Boolean.__new__(cls, lhs, rhs)
+        obj.name = f"{lhs} < {rhs}"
+        return obj
+    
+    def doit(self):
+        if Eq(self.args[0], self.args[1]) == true:
+            return false
+        return self
+    
+    def __str__(self):
+        return self.name
+    
+    def __repr__(self):
+        return str(self)   
+
+class Lesssim(OrderOfMagnitude, Boolean):
+    def __new__(cls, *args):
+        assert len(args) == 2, f"Lesssim{args} requires exactly two arguments."
+        lhs = Theta(args[0])
+        rhs = Theta(args[1])
+        if Eq(lhs, rhs) == true:
+            return true
+        obj = Boolean.__new__(cls, lhs, rhs)
+        obj.name = f"{lhs} <= {rhs}"
+        return obj
+    
+    def doit(self):
+        if Eq(self.args[0], self.args[1]) == true:
+            return true
+        return self
+    
+    def __str__(self):
+        return self.name
+    
+    def __repr__(self):
+        return str(self)   
+
+

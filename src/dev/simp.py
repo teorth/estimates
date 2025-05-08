@@ -21,6 +21,8 @@ def simp(goal: Basic, hyp: Basic) -> Basic:
 
         if isinstance(hyp, Not):
             new_goal = simplify(new_goal.subs(hyp.args[0], False))
+    
+    
 
     if new_goal is not goal:
         print(f"Simplified {goal} to {new_goal} using {hyp}.")
