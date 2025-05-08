@@ -1,4 +1,5 @@
 from prooftree import *
+from order_of_magnitude import *
 
 # A pseudo-Lean stype proof assistant.  The proof assistant will, at any time, be one of two modes:
 
@@ -15,9 +16,12 @@ class ProofAssistant:
         self.auto_finish = True     # automatically finish the proof when all sorries are cleared
 
     def assume(self, assumption:Basic, name:str = "this"):
+        """ Add a hypothesis to the list of assumptions. """
         if self.mode == "assumption":
             assert not name in self.hypotheses, f"The name {name} is already taken."
             # TODO: assert that all variables in the assumption are already introduced
+            if not isinstance(assumption, Boolean):
+                raise ValueError(f"Assumption {name} is not a proposition.")
             self.hypotheses[name] = assumption
         else:
             raise ValueError("Cannot add hypotheses in tactic mode.  Please switch to assumption mode.")
@@ -58,8 +62,10 @@ class ProofAssistant:
                     obj = Symbol(name, rational=True, nonnegative=True)
                 case "bool":
                     obj = Proposition(name)
+                case "order":
+                    obj = OrderSymbol(name)
                 case _:
-                    raise ValueError(f"Unknown type {type}.  Currently accepted types: 'int', 'pos_int', 'nonneg_int', 'real', 'pos_real', 'nonneg_real',  `rat`, `pos_rat`, `nonneg_rat`, 'bool'.")
+                    raise ValueError(f"Unknown type {type}.  Currently accepted types: 'int', 'pos_int', 'nonneg_int', 'real', 'pos_real', 'nonneg_real',  `rat`, `pos_rat`, `nonneg_rat`, 'bool', 'order'.")
             self.hypotheses[name] = Type(obj)
             return obj
         else:
@@ -120,6 +126,9 @@ class ProofAssistant:
                     
     def begin_proof(self, goal: Basic):
         if self.mode == "assumption":
+            if not isinstance(goal, Boolean):
+                raise ValueError(f"Goal {goal} is not a proposition.")
+            # TODO: assert that all variables in the goal are already introduced
             self.mode = "tactic"
             self.proof_tree = ProofTree(ProofState(goal, self.hypotheses))
             self.current_node = self.proof_tree
@@ -171,12 +180,14 @@ class ProofAssistant:
 
 
     def proof(self) -> str:
+        """ Return the current proof tree as a string."""
         if self.proof_tree is None:
             raise ValueError("No proof tree available.")
         else:
             return self.theorem_str + " := by" + "\n" + self.proof_tree.rstr_join(current_node=self.current_node)
 
     def status(self):
+        """ Print the current status of the proof. """
         n = self.proof_tree.num_sorries()
         if n == 0:
             print("Proof complete!")
@@ -185,8 +196,8 @@ class ProofAssistant:
         else:
             print(f"{n} goals remaining.")
 
-    # Apply a given tactic to the current proof state.  
     def use(self, tactic:Tactic):
+        """ Apply a tactic to the current proof state. """
         if self.mode == "tactic":
             self.current_node.use_tactic(tactic)
             self.status()
@@ -201,8 +212,8 @@ class ProofAssistant:
                     self.current_node = None
                     self.mode = "assumption"
 
-    # Move the current node
     def set_current_node(self, node:ProofTree):
+        """ Set the current node to a given node in the proof tree. """
         if self.mode == "tactic":
             if node in self.proof_tree.list_sorries():
                 self.current_node = node
@@ -215,8 +226,8 @@ class ProofAssistant:
             raise ValueError("Cannot set current node in assumption mode.")
 
 
-    # Move the current node to the next available goal
     def next_goal(self):
+        """ Move to the next goal in the proof tree. """
         if self.mode == "tactic":
             _,_,after = self.proof_tree.find_sorry(self.current_node)
             if after is not None:
@@ -226,8 +237,8 @@ class ProofAssistant:
         else:
             raise ValueError("Cannot move to next goal in assumption mode.")
     
-    # Move the current node to the previous available goal
     def previous_goal(self):
+        """ Move to the previous goal in the proof tree. """
         if self.mode == "tactic":
             _,before,_ = self.proof_tree.find_sorry(self.current_node)
             if before is not None:
@@ -237,8 +248,8 @@ class ProofAssistant:
         else:
             raise ValueError("Cannot move to previous goal in assumption mode.")
 
-    # Move the current node to the first available goal
     def first_goal(self):
+        """ Move to the first goal in the proof tree. """
         if self.mode == "tactic":
             first = self.proof_tree.first_sorry()
             if first is not None:
@@ -248,8 +259,8 @@ class ProofAssistant:
         else:
             raise ValueError("Cannot move to first goal in assumption mode.")
 
-    # Move the current node to the last available goal
     def last_goal(self):
+        """ Move to the last goal in the proof tree. """
         if self.mode == "tactic":
             last = self.proof_tree.last_sorry()
             if last is not None:
@@ -259,8 +270,8 @@ class ProofAssistant:
         else:
             raise ValueError("Cannot move to last goal in assumption mode.")
 
-    # Move back a node in the proof tree
     def go_back(self):
+        """ Move back a node in the proof tree. """
         if self.mode == "tactic":
             if self.current_node.parent is not None:
                 self.set_current_node(self.current_node.parent)
@@ -270,8 +281,8 @@ class ProofAssistant:
         else:
             raise ValueError("Cannot move back in assumption mode.")
 
-    # Move forward a node in the proof tree
     def go_forward(self, case=1):
+        """ Move forward a node in the proof tree. """
         if self.mode == "tactic":
             if len(self.current_node.children) == 0:
                 print("There are no more steps in this branch of the proof.")
@@ -309,7 +320,7 @@ class ProofAssistant:
                 return "Proof Assistant is in assumption mode.  No hypotheses."
             else:
                 output = f"Proof Assistant is in assumption mode.  Current hypotheses:\n"
-                output += "\n".join([str(hypothesis) for hypothesis in self.hypotheses])
+                output += "\n".join([describe(name, hypothesis) for name, hypothesis in self.hypotheses.items()])
                 return output
         else:
             output = f"Proof Assistant is in tactic mode.  Current proof state:\n"

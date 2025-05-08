@@ -27,6 +27,8 @@ def typeof(obj:Basic) -> str:
             return f"real"
     elif obj.is_Boolean:
         return f"bool"
+    elif isinstance(obj, OrderSymbol):
+        return f"order"
     else:
         return f"unknown"
 

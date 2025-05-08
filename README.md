@@ -255,3 +255,67 @@ example (x: real) (y: real) (h1: (x > -1) & (x < 1)) (h2: (y > -2) & (y < 2)): (
   . linarith
   linarith
 ```
+
+## Creating a new problem
+
+The previous demonstrations of the Proof Assistant used some "canned" examples which placed one directly in **Tactic Mode** with some pre-made hypotheses and goal.  To make one's own problem to solve, one begins with the Proof Assistant constructor:
+```
+>>> p = ProofAssistant()
+```
+This places the proof assistant in **Assumption Mode**.  Now one can add variables and assumptions.  For instance, to introduce a positive real variable `x`, one can use the `var()` method to write
+```
+>>> x = p.var("real", "x")
+```
+This creates a `sympy` Python variable `x`, which is real and can be manipulated symbolically using the full range of `sympy` methods:
+```
+>>> x
+x
+>>> x.is_real
+True
+>>> x+x
+2*x
+>>> from sympy import expand
+>>> expand((x+2)**2)
+x**2 + 4*x + 4
+>>> x<5
+x < 5
+>>> isinstance(x<5, Boolean)
+True
+```
+One can also use `vars()` to introduce multiple variables at once:
+```
+>>> y,z = p.vars("pos_int", "y", "z")   # "pos_int" means "positive integer"
+>>> y.is_positive
+True
+>>> (y+z).is_positive
+True
+>>> (x+y).is_positive
+>>> (x+y).is_real
+True
+```
+(Here, `(x+y).is_positive` returned `None`, reflecting the fact that the hypotheses do not allow one to easily assert that `x+y` is positive.)
+
+One can then add additional hypotheses using the `assume()` command:
+```
+>>> p.assume(x+y+z < 3, "h")
+>>> p.assume((x<y) & (y<z), "h2")
+>>> print(p)
+Proof Assistant is in assumption mode.  Current hypotheses:
+x: real
+y: pos_int
+z: pos_int
+h: x + y + z < 3
+h2: (x < y) & (y < z)
+```
+Now, one can start a goal with the `begin_proof()` command:
+```
+>>> p.begin_proof(x < 1)
+Starting proof.  Current proof state:
+x: real
+y: pos_int
+z: pos_int
+h: x + y + z < 3
+h2: (x < y) & (y < z)
+|- x < 1
+```
+Now one is in **Tactic Mode** and can use tactics as before.
