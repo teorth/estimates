@@ -5,7 +5,7 @@ from sympy import false, simplify_logic
 
 # Various tactics for handling propositional logic.
 
-class Constructor(Tactic):
+class SplitGoal(Tactic):
     # If the goal is a conjunction, split the goal into one goal for each conjunct.
 
     def activate(self, state: ProofState) -> list[ProofState]:
@@ -57,7 +57,7 @@ class Contrapose(Tactic):
             return "contrapose " + self.h
         
 
-class Obtain(Tactic):
+class SplitHyp(Tactic):
     # Given a hypothesis h that is a conjunction, replace that hypothesis with one hypothesis from each conjunct, either with a user-supplied list of names, or a default choice.
 
     def __init__(self, h: str = "this", *names:str):

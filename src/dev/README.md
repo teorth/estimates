@@ -2,6 +2,12 @@
 
 This project aims to develop (in Python) a lightweight proof assistant that is substantially less powerful than full proof assistants such as Lean, Isabelle or Coq, but which (hopefully) is easy to use to prove short, tedious tasks, such as verifying that one inequality or estimate follows from others.
 
+## Documentation links
+
+- [List of tactics](tactics.md)
+- [List of exercises and examples](exercises.md)
+- [List of navigation tools](navigation.md)
+
 ## Getting started
 
 To start the assistant in an interactive Python session:
@@ -70,7 +76,7 @@ Checking feasibility of the following inequalities:
 1*x > 0
 1*x + -2*y < 0
 Infeasible by summing the following:
-1*z > 0 multiplied by 1/4
+1*z > 0 multiplied by 1/4p0---899999999999999999
 1*x + -7*z >= 2 multiplied by 1/4
 1*y + -3*z < 1 multiplied by -1/2
 1*x + -2*y < 0 multiplied by -1/4
@@ -121,3 +127,90 @@ Linear arithmetic was unable to prove goal.
 Here, the task given was an impossible one: to deduce $x < 7z$ from the hypotheses that $x,y,z$ are positive reals with $x < 2y$ and $y < 3z+1$.  A specific counterexample $x=7/2$, $y=2$, $z=1/2$ was given to this problem.  (In this case, this means that the original problem was impossible to solve; but in general one cannot draw such a conclusion, because it may have been possible to establish the goal by using some non-inequality hypotheses).
 
 Now let us consider a slightly more complicated proof, in which some branching of cases is required.  
+```
+>>> from main import *
+>>> p = case_split_exercise()
+Starting proof.  Current proof state:
+P: bool
+Q: bool
+R: bool
+S: bool
+h1: P | Q
+h2: R | S
+|- (P & R) | (P & S) | (Q & R) | (Q & S)
+```
+Here, we have four atomic propositions (boolean variables) `P`, `Q`, `R`, `S`, with the hypothesis `h1` that either `P` or `Q` is true, as well as the hypothesis `h2` that either `R` or `S` is true.  The objective is then to prove that one of the four statements `P & R` (i.e., `P` and `R` are both true), `P & S`, `Q & R`, and `Q & S` is true.
+
+Here we can split the hypothesis `h1 : P | Q` into two cases:
+```
+>>> p.use(Cases("h1"))
+Splitting h1: P | Q into cases.
+2 goals remaining.
+```
+Let's now look at the current proof state:
+```
+>>> print(p)
+Proof Assistant is in tactic mode.  Current proof state:
+P: bool
+Q: bool
+R: bool
+S: bool
+h1: P
+h2: R | S
+|- (P & R) | (P & S) | (Q & R) | (Q & S)
+This is goal 1 of 2.
+```
+Note how the hypothesis `h1` has changed from `P | Q` to just `P`.  But this is just one of the two goals.  We can see this by looking at the current state of the proof:
+```
+>>> print(p.proof())
+example (P: bool) (Q: bool) (R: bool) (S: bool) (h1: P | Q) (h2: R | S): (P & R) | (P & S) | (Q & R) | (Q & S) := by
+  cases h1
+  . **sorry**
+  sorry 
+```
+The proof has now branched into a tree with two leaf nodes (marked ``sorry''), representing the two unresolved goals.  We are currently located at the first goal (as indicated by the asterisks).  We can move to the next goal:
+```
+>>> p.next_goal()
+Moved to goal 2 of 2.
+>>> print(p.proof())
+example (P: bool) (Q: bool) (R: bool) (S: bool) (h1: P | Q) (h2: R | S): (P & R) | (P & S) | (Q & R) | (Q & S) := by
+  cases h1
+  . sorry
+  **sorry**
+>>> print(p)
+Proof Assistant is in tactic mode.  Current proof state:
+P: bool
+Q: bool
+R: bool
+S: bool
+h1: Q
+h2: R | S
+|- (P & R) | (P & S) | (Q & R) | (Q & S)
+This is goal 2 of 2.
+```
+So we see that in this second branch of the proof tree, `h1` is now set to `Q`.  For further ways to navigate the proof tree, [see this page](navigation.md).
+
+Now that we know that `Q` is true, we would like to use this to simplify our goal, for instance simplifying `Q & R` to `Q`.  This can be done using the `SimpAll()` tactic:
+```
+>>> p.use(SimpAll())
+Simplified (P & R) | (P & S) | (Q & R) | (Q & S) to R | S using Q.
+Simplified R | S to True using R | S.
+Goal solved!
+1 goal remaining.
+```
+Here, the hypothesis `Q` was used to simplify the goal (using `sympy`'s powerful simplification tools), all the way down to `R | S`.  But this is precisely hypothesis `h2`, so on using that hypothesis as well, the conclusion was simplified to `True`, which of course closes off this goal.  This then lands us automatically in the first goal, which can be solved by the same method:
+```
+>>> p.use(SimpAll())
+Simplified (P & R) | (P & S) | (Q & R) | (Q & S) to R | S using P.
+Simplified R | S to True using R | S.
+Goal solved!
+Proof complete!
+```
+And here is the final proof:
+```
+>>> print(p.proof())
+example (P: bool) (Q: bool) (R: bool) (S: bool) (h1: P | Q) (h2: R | S): (P & R) | (P & S) | (Q & R) | (Q & S) := by
+  cases h1
+  . simp_all
+  simp_all
+```

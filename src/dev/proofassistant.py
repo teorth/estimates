@@ -24,7 +24,7 @@ class ProofAssistant:
 
     def auto_finish_on(self):
         """ Automatically finish the proof when all sorries are cleared. """
-        print("Proof assistant will automatically exit Tactic mode when proof is complete."
+        print("Proof assistant will automatically exit Tactic mode when proof is complete.")
         self.auto_finish = True
 
     def auto_finish_off(self):

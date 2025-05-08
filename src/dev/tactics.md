@@ -4,9 +4,20 @@ Tactics are methods to transform a given proof state into zero or more further p
 
 The proof assistant is designed to be easily extensible by the addition of further tactics. Please feel free to suggest or contribute ideas for such tactics.
 
-## Linarith
+## Propositional logic tactics
 
-**Syntax**: `Linarith(verbose = False)`
+### `Cases(hyp:str="this")`
+
+### `SplitGoal()`
+
+### `SplitHyp(hyp:str="this", *names:str)`
+
+### `Contrapose(hyp:str="this")`
+
+
+## Linear arithmetic tactics
+
+### `Linarith(verbose = False)`
 
 Attempts to resolve a goal as a linear combination of the equalities and inequalities present (either explicitly or implicitly) in the hypotheses.  It does this by the following steps:
 
@@ -89,3 +100,7 @@ Linear arithmetic was unable to prove goal.
 1 goal remaining.
 >>>
 ```
+
+## Simplification tactics
+
+### `SimpAll()`
