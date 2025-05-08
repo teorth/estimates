@@ -27,13 +27,21 @@ class Linarith(Tactic):
         inequalities = []
         for hypothesis in hypotheses:
             if isinstance(hypothesis, Type):  # check for positivity conditions to add to the inequalities
-               # print(f"Testing {hypothesis} for positivity.")
                 if hypothesis.var().is_positive:
                     inequalities.append(Inequality({hypothesis.var(): S(1)}, 'gt', S(0)))
                 elif hypothesis.var().is_nonnegative:
                     inequalities.append(Inequality({hypothesis.var(): S(1)}, 'geq', S(0)))
-                continue
             coeffs = (hypothesis.args[0] - hypothesis.args[1]).as_coefficients_dict()
+            
+            # Linarith ignores any relations that involve anything other than a real number.  (One could make a companion tactic, say Linalg, to handle linear equalities over vector spaces other than the reals.)
+            all_real = True
+            for var in coeffs.keys():
+                if not var.is_real:
+                    all_real = False
+                    break
+            if not all_real:
+                continue
+            
             if S(1) in coeffs:
                 const = -coeffs[S(1)]
                 del coeffs[S(1)]
