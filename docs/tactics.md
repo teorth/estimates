@@ -316,7 +316,6 @@ Some examples of supported simplifications:
 | `P` | `P` | `true`
 | `P` | `Not(P)` | `false`
 | `x >= y` | `x <= y` | `Eq(x,y)`
-| `x >= y` | `x < y` | `false`
 | `x >= y` | `Ne(x,y)` | `x > y`
 | `Max(x,y)` | `x <= y` | `y`
 | `Min(x,y)` | `x <= y` | `x`
