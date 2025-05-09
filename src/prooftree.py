@@ -6,14 +6,11 @@ from tactic import *
 
 
 
-# A proof tree consists of the following objects:
-
-## The current proof state
-## The parent proof state (or None, if this is the root)
-## The tactic used to transform this state into new states (or None, if the state is "sorried")
-## A list of proof states that are children of this state (representing the tasks left to do by the current tactic)
-
 class ProofTree:
+    """
+    A proof tree node representing a proof state and its children.
+    Each node has a proof state, a parent node, a tactic used to transform the proof state, and a list of child nodes.
+    """
     def __init__(self, proof_state: ProofState):
         """
         Initialize a proof tree node with a proof state.
@@ -30,14 +27,15 @@ class ProofTree:
         self.children.append(child)
         return child
     
-    def use_tactic(self, tactic: Tactic):
+    def use_tactic(self, tactic: Tactic) -> bool:
         """Apply a tactic to the proof state and create child nodes for each resulting proof state."""
         proof_state_list = tactic.activate(self.proof_state)
         if len(proof_state_list) == 1 and proof_state_list[0].eq(self.proof_state):
-            return # This tactic did nothing, so don't add a child node
+            return False # This tactic did nothing, so don't add a child node
         self.tactic = tactic
         for proof_state in proof_state_list:
             self.add_sorry(proof_state)
+        return True
         
     def rstr(self, indent:str = "  ", next_indent:str = "  ", current_node:'ProofTree' = None) -> list[str]:
         """

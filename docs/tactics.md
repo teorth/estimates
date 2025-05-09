@@ -30,7 +30,16 @@ Splitting h1: P | Q into cases.
 ### `SplitGoal()`
 ### `SplitHyp(hyp:str="this", *names:str)`
 
-`SplitGoal()` splits the goal (if it is a conjunction - several statements joined together by the "and" operator `&`) into one subgoal for each conjunct.  `SplitHyp(hyp,*names)` is similar but splits a hypothesis `hyp` (if it is a conjunction) into multiple new hypotheses (using the provided `names` if available, or using a default naming system otherwise.)
+`SplitGoal()` splits the goal into subgoals.  `SplitHyp(hyp,*names)` is similar but splits a hypothesis `hyp` (if it is a conjunction) into multiple new hypotheses (using the provided `names` if available, or using a default naming system otherwise.)
+
+Some examples of statements that can be split:
+
+| Statement | Splits into |
+| --------- | ------ |
+| `P & Q & R` | `P`, `Q`, `R` |
+| `Eq(x,Max(y,z))` | `x >= y`, `x >= z`, `Eq(x,y) \| Eq(x,z)`
+| `Eq(x,Min(y,z))` | `x <= y`, `x <= z`, `Eq(x,y) \| Eq(x,z)`
+
 
 Example:
 ```
@@ -180,6 +189,42 @@ z = 1/2
 Linear arithmetic was unable to prove goal.
 1 goal remaining.
 >>>
+```
+
+## Substitution and definition tactics
+
+### `Let(var:str, expr:Expr)`
+
+Introduces a new variable `var` and sets it equal to `expr`.  Of course, `expr` needs to be defined in terms of existing variables.  An additional hypothesis `var_def: var = expr` is introduced.
+
+### `Set(var:str, expr:Expr)`
+
+Same as `Let(var, expr)`, except that all other appearances of `expr` in the hypotheses are changed to `var`.
+
+Example:
+```
+>>> from main import *
+>>> p = min_max_exercise()
+Starting proof.  Current proof state:
+x: real
+y: real
+|- Min(x, y) <= Max(x, y)
+>>> x,y = p.get_vars("x","y")
+>>> p.use(Set("a", Min(x,y)))
+Setting a := Min(x, y).
+1 goal remaining.
+>>> p.use(Set("b", Min(x,y)))
+Setting b := Max(x, y).
+1 goal remaining.
+>>> print(p)
+Proof Assistant is in tactic mode.  Current proof state:
+x: real
+y: real
+a: real
+a_def: Eq(a, Min(x, y))
+b: real
+b_def: Eq(b, Max(x, y))
+|- a <= b
 ```
 
 ## Simplification tactics

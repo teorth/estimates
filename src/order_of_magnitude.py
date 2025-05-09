@@ -89,10 +89,11 @@ class Theta(OrderOfMagnitude, Expr):
 
 class OrderSymbol(OrderOfMagnitude, Symbol):
     """ Formal orders of magnitude."""
+    pass
 
 
 class OrderMax(OrderOfMagnitude, Expr):
-    """ A class to handle addition of orders of magnitude. """
+    """ A class to handle maxima (and hence also sums) of orders of magnitude. """
 
     def __new__(cls, *args):
         newargs = list(dict.fromkeys([Theta(arg) for arg in args]))
@@ -126,7 +127,46 @@ class OrderMax(OrderOfMagnitude, Expr):
     
     def __repr__(self):
         return str(self)   
+
+
+class OrderMin(OrderOfMagnitude, Expr):
+    """ A class to handle minima of orders of magnitude. """
+
+    def __new__(cls, *args):
+        newargs = list(dict.fromkeys([Theta(arg) for arg in args]))
+        if len(newargs) == 0:
+            raise ValueError("OrderMin requires at least one argument.")
+        if len(newargs) == 1:
+            # if there's only one argument, just return it
+            return newargs[0]
         
+        # TODO: canonically sort arguments to increase ability to gather terms
+
+        obj = Expr.__new__(cls, *newargs)
+        obj.name = "Min(" + ", ".join([str(arg) for arg in newargs]) + ")"
+        return obj
+
+    def doit(self):
+        # flatten nested OrderMaxs
+        newargs = []
+        for arg in self.args:
+            if isinstance(arg, OrderMin):
+                newargs.extend(arg.args)
+            else:
+                newargs.append(arg)
+
+        # TODO: canonically sort arguments to increase ability to gather terms
+
+        return OrderMin(*newargs)
+
+    def __str__(self):
+        return self.name
+    
+    def __repr__(self):
+        return str(self)   
+
+
+
 class OrderMul(OrderOfMagnitude, Expr):
     """ A class to handle multiplication of orders of magnitude. """
     def __new__(cls, *args):

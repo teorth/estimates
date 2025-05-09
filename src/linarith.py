@@ -7,16 +7,15 @@ from fractions import Fraction
     
 
 
-# A tactic to try to establish a goal via linear arithmetic.  
 class Linarith(Tactic):
+    """ A tactic to try to establish a goal via linear arithmetic.  Inspired by the linarith tactic in Lean."""
     def __init__ (self, verbose: bool = False):
         """
         :param verbose: If true, print the inequalities generated.
         """
         self.verbose = verbose
 
-    def activate(self, state: ProofState) -> list[ProofState]:
-        
+    def activate(self, state: ProofState) -> list[ProofState]:        
         # First, gather all the hypotheses that can generate inequalities.
         hypotheses = set()
         for hypothesis in state.list_hypotheses(variables=true):

@@ -1,8 +1,9 @@
 from proofassistant import *
 from propositional_tactics import *
 from linarith import *
-from sympy import Eq
+from sympy import Eq, Max, Min
 from simp import *
+from subst import *
 
 
 
@@ -95,4 +96,18 @@ def ineq_solution2():
     p = ineq_exercise2()
     p.use(SplitHyp("h2"))
     p.use(Linarith())
-    
+
+def min_max_exercise():
+    p = ProofAssistant()
+    x, y = p.vars("real", "x", "y")
+    p.begin_proof(Min(x,y) <= Max(x,y))
+    return p
+
+def min_max_solution():
+    p = min_max_exercise()
+    x,y = p.get_vars("x", "y")
+    p.use(Set("a", Min(x,y)))
+    p.use(Set("b", Max(x,y)))
+    p.use(SplitHyp("a_def"))
+    p.use(SplitHyp("b_def"))
+    p.use(Linarith())

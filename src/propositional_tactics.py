@@ -1,24 +1,52 @@
 from proposition import *
 from basic import *
 from tactic import *
-from sympy import false, simplify_logic
+from sympy import false, simplify_logic, Max, Min
+from order_of_magnitude import *
 
 # Various tactics for handling propositional logic.
+
+def get_conjuncts(expr: Expr) -> list[Expr]:
+    """
+    Get the conjuncts of an expression (after unpacking), or None if no conjuncts found
+    """
+    if isinstance(expr, And):
+        return expr.args
+    elif isinstance(expr, Eq):
+        conjuncts = []
+        if isinstance(expr.args[1], Max|OrderMax):
+            # x = Max(y,z) can be split into x >= y, x >= z, and (x == y) | (x == z)
+            disjuncts = []
+            for arg in expr.args[1].args:
+                conjuncts.append(expr.args[0] >= arg)
+                disjuncts.append(Eq(expr.args[0],arg))
+            conjuncts.append(Or(*disjuncts))
+            return conjuncts
+        elif isinstance(expr.args[1], Min|OrderMin):
+            # x = Min(y,z) can be split into x <= y, x <= z, and (x == y) | (x == z)
+            disjuncts = []
+            for arg in expr.args[1].args:
+                conjuncts.append(expr.args[0] <= arg)
+                disjuncts.append(Eq(expr.args[0],arg))
+            conjuncts.append(Or(*disjuncts))
+            return conjuncts
+    return None
 
 class SplitGoal(Tactic):
     """Split the goal into its conjuncts.  If the goal is a conjunction, split the goal into one goal for each conjunct."""
 
     def activate(self, state: ProofState) -> list[ProofState]:
-        if isinstance(state.goal, And):
-            print(f"Split into conjunctions: {", ".join([str(conjunct) for conjunct in state.goal.args])}")
+        conjuncts = get_conjuncts(state.goal)
+        if conjuncts is not None:
+            print(f"Split goal into {", ".join([str(conjunct) for conjunct in conjuncts])}")
             new_goals = []
-            for conjunct in state.goal.args:
+            for conjunct in conjuncts:
                 newstate = state.copy()
                 newstate.set_goal(conjunct)
                 new_goals.append(newstate)
             return new_goals
         else:
-            print("No conjunction to split.")
+            print(f"{str(state.goal)} cannot be split.")
             return [state.copy()]
     
     def __str__(self):
@@ -73,19 +101,21 @@ class SplitHyp(Tactic):
     def activate(self, state: ProofState) -> list[ProofState]:
         if self.h in state.hypotheses:
             hyp = state.hypotheses[self.h]
-            if not isinstance(hyp, And):
-                print(f"Obtain did nothing, as {describe(self.h, hyp)} is not a conjunction.")
+            conjuncts = get_conjuncts(hyp)
+            if conjuncts is not None:
+                print(f"Splitting {describe(self.h,hyp)} into {", ".join([str(conjunct) for conjunct in conjuncts])}.")
+                new_state = state.copy()
+                new_state.remove_hypothesis(self.h)
+                for i, conjunct in enumerate(conjuncts):
+                    if len(self.names) > i:
+                        name = self.names[i]
+                    else:
+                        name = self.h
+                    new_state.new_hypothesis(name, conjunct)
+                return [new_state]
+            else:
+                print(f"Cannot split {describe(self.h, hyp)}.")
                 return [state.copy()]
-            print(f"Decomposing {describe(self.h,hyp)} into components {", ".join([str(disjunct) for disjunct in hyp.args])}.")
-            new_state = state.copy()
-            new_state.remove_hypothesis(self.h)
-            for i, conjunct in enumerate(hyp.args):
-                if len(self.names) > i:
-                    name = self.names[i]
-                else:
-                    name = self.h
-                new_state.new_hypothesis(name, conjunct)
-            return [new_state]
         else:
             print(f"Cannot find hypothesis {self.h}.")
             return [state.copy()]

@@ -1,5 +1,6 @@
 from prooftree import *
 from order_of_magnitude import *
+from basic import *
 
 # A pseudo-Lean stype proof assistant.  The proof assistant will, at any time, be one of two modes:
 
@@ -43,31 +44,7 @@ class ProofAssistant:
         if self.mode == "assumption":
             while name in self.hypotheses:  # avoid namespace collisions
                 name += "'"
-            match type:
-                case "int":
-                    obj = Symbol(name, integer=True)
-                case "pos_int":
-                    obj = Symbol(name, integer=True, positive=True)
-                case "nonneg_int":
-                    obj = Symbol(name, integer=True, nonnegative=True)  
-                case "real":
-                    obj = Symbol(name, real=True)
-                case "pos_real":
-                    obj = Symbol(name, real=True, positive=True)
-                case "nonneg_real":
-                    obj = Symbol(name, real=True, nonnegative=True)
-                case "rat":
-                    obj = Symbol(name, rational=True)
-                case "pos_rat":
-                    obj = Symbol(name, rational=True, positive=True)
-                case "nonneg_rat":
-                    obj = Symbol(name, rational=True, nonnegative=True)
-                case "bool":
-                    obj = Proposition(name)
-                case "order":
-                    obj = OrderSymbol(name)
-                case _:
-                    raise ValueError(f"Unknown type {type}.  Currently accepted types: 'int', 'pos_int', 'nonneg_int', 'real', 'pos_real', 'nonneg_real',  `rat`, `pos_rat`, `nonneg_rat`, 'bool', 'order'.")
+            obj = new_var(type, name)
             self.hypotheses[name] = Type(obj)
             return obj
         else:
@@ -212,7 +189,8 @@ class ProofAssistant:
     def use(self, tactic:Tactic):
         """ Apply a tactic to the current proof state. """
         if self.mode == "tactic":
-            self.current_node.use_tactic(tactic)
+            if not self.current_node.use_tactic(tactic):
+                return  # Tactic did nothing, so don't change the current node
             self.status()
             _,before,after = self.proof_tree.find_sorry(self.current_node)
             if after is not None:
@@ -224,6 +202,8 @@ class ProofAssistant:
                 if self.auto_finish:
                     self.current_node = None
                     self.mode = "assumption"
+        else:
+            raise ValueError("Cannot apply tactics in assumption mode.  Please switch to tactic mode.")
 
     def set_current_node(self, node:ProofTree):
         """ Set the current node to a given node in the proof tree. """

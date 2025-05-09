@@ -114,7 +114,7 @@ h: x + y > 5
 |- (x > 2) | (y > 3)
 ```
 
-**Hint** Use the tactics `Contrapose()`, `SplitHyp()`, and `Linarith()`.
+**Hint**: Use the tactics `Contrapose()`, `SplitHyp()`, and `Linarith()`.
 
 ## Inequality exercise
 
@@ -143,7 +143,7 @@ h2: x >= y
 |- Eq(x, y)
 ```
 
-**Hint** Either `SimpAll()` or `Linarith()` will work here.
+**Hint**: Either `SimpAll()` or `Linarith()` will work here.
 
 ## Inequality exercise 2
 
@@ -173,3 +173,28 @@ h: x + y + z <= 3
 h2: (x >= y) & (y >= z)
 |- Eq(z, 1)
 ```
+
+## Min-max example
+
+**Informal version** If $x$, $y$ are real, then $\min(x,y) \leq \max(x,y)$.
+
+**Python code**:
+```
+def min_max_exercise():
+    p = ProofAssistant()
+    x, y = p.vars("real", "x", "y")
+    p.begin_proof(Min(x,y) <= Max(x,y))
+    return p
+```
+
+**In an interactive Python environment**:
+```
+>>> from main import *       
+>>> p = min_max_exercise()
+Starting proof.  Current proof state:
+x: real
+y: real
+|- Min(x, y) <= Max(x, y)
+```
+
+**Hint**: `Set()` $\min(x,y)$ and $\max(x,y)$ to new variables.  (You will first need to `get_var()` these variables to do this.)
