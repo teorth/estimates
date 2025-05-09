@@ -40,7 +40,7 @@ Splitting h1: P | Q into cases P, Q.
 
 ### `Option(n:int)`
 
-If the goal is a disjunction, replace it with the `n`th disjunct in that goal.
+If the goal is a disjunction (using the same table as in the `Cases()` tactic), replace it with the `n`th disjunct in that goal.
 
 Example:
 ```
@@ -110,6 +110,43 @@ example (x: real) (y: real) (h1: (x > -1) & (x < 1)) (h2: (y > -2) & (y < 2)): (
   split_goal
   . linarith
   linarith
+```
+
+### `Claim(expr:Boolean, name:str = "this")`
+
+Create a subgoal to prove `expr`, and then a further subgoal to establish the original goal with the additional hypothesis `name: expr`.  Similar to the "have" tactic in Lean.
+
+Example:
+```
+>>> from main import *        
+>>> p = ineq_exercise2()
+Starting proof.  Current proof state:
+x: real
+y: pos_int
+z: pos_int
+h: x + y + z <= 3
+h2: (x >= y) & (y >= z)
+|- Eq(z, 1)
+>>> x,z = p.get_vars("x", "z")
+>>> p.use(Claim(x >= z))      
+We claim that x >= z.
+2 goals remaining.
+>>> p.list_goals()
+Goal 1 of 2:
+x: real
+y: pos_int
+z: pos_int
+h: x + y + z <= 3
+h2: (x >= y) & (y >= z)
+|- x >= z
+Goal 2 of 2:
+x: real
+y: pos_int
+z: pos_int
+h: x + y + z <= 3
+h2: (x >= y) & (y >= z)
+this: x >= z
+|- Eq(z, 1)
 ```
 
 ### `Contrapose(hyp:str="this")`

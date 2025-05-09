@@ -230,3 +230,34 @@ class Option(Tactic):
         new_state = state.copy()
         new_state.set_goal(disjuncts[self.n-1])
         return [new_state]
+
+    def __str__(self):
+        return "option " + str(self.n)
+    
+
+class Claim(Tactic):
+    """
+    Similar to the `have` tactic in Lean.  Add a subgoal to prove, and then prove the original goal assuming the subgoal."""
+
+    def __init__(self, expr: Boolean, name: str="this"):
+        self.name = name
+        self.expr = expr
+
+    def activate(self, state: ProofState) -> list[ProofState]:
+        if not is_defined(self.expr, state.get_all_vars()):
+            raise ValueError(f"{str(self.expr)} is not defined in the current proof state.")
+        if not isinstance(self.expr, Boolean):
+            raise ValueError(f"{str(self.expr)} is not a proposition.")
+        first_state = state.copy()
+        first_state.set_goal(self.expr)
+        second_state = state.copy()
+        name = state.new(self.name)
+        second_state.hypotheses[name] = self.expr
+        print(f"We claim that {self.expr}.")
+        return [first_state, second_state]
+    
+    def __str__(self):
+        if self.name == "this":
+            return "claim " + str(self.expr)
+        else:
+            return "claim " + self.name + ": " + str(self.expr) 
