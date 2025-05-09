@@ -179,6 +179,22 @@ Goal solved by linear arithmetic!
 Proof complete!
 ```
 
+## `Trivial()`
+
+Closes a goal if it follows immediately from the hypotheses.
+
+Example:
+```
+>>> p = trivial_exercise()
+Starting proof.  Current proof state:
+x: real
+h: x > 0
+|- x >= 0
+>>> p.use(Trivial())
+Goal x >= 0 follows trivially from the hypotheses.
+Proof complete!
+```
+
 ## Linear arithmetic tactics
 
 ### `Linarith(verbose = False)`
@@ -265,6 +281,37 @@ Linear arithmetic was unable to prove goal.
 >>>
 ```
 
+### `LogLinarith(verbose = False)`
+
+Similar to `Linarith()`, but now applies to order of magnitude inequalities rather than inequalities regarding real numbers; and uses multiplicative operations rather than additive ones.
+
+Example:
+```
+>>> from main import *
+>>> p = loglinarith_exercise()
+Starting proof.  Current proof state:
+N: pos_int
+x: pos_real
+y: pos_real
+h1: x <= 2*N**2
+h2: y < 3*N
+|- Theta(x)*Theta(y) <= Theta(N)**4
+>>> p.use(LogLinarith(verbose=True))
+Checking feasibility of the following inequalities:
+Theta(N)**1 >= Theta(1)
+Theta(x)**1 * Theta(N)**-2 <= Theta(1)
+Theta(y)**1 * Theta(N)**-1 <= Theta(1)
+Theta(x)**1 * Theta(y)**1 * Theta(N)**-4 > Theta(1)
+Infeasible by multiplying the following:
+Theta(N)**1 >= Theta(1) raised to power 1
+Theta(x)**1 * Theta(N)**-2 <= Theta(1) raised to power -1
+Theta(y)**1 * Theta(N)**-1 <= Theta(1) raised to power -1
+Theta(x)**1 * Theta(y)**1 * Theta(N)**-4 > Theta(1) raised to power 1
+Proof complete!
+```
+
+Note that the hypothesis that `N` was a positive integer was incorporated as a hypothesis `Theta(N)**1 >= Theta(1)`.
+
 ## Substitution and definition tactics
 
 ### `Let(var:str, expr:Expr)`
@@ -301,13 +348,60 @@ b_def: Eq(b, Max(x, y))
 |- a <= b
 ```
 
+### `IsPositive(name:str|Basic=this)`
+### `IsNonnegative(name:str|Basic=this)`
+
+Makes the variable `name` positive or nonnegative, if this can be inferred from the hypotheses.
+
+Example:
+```
+>>> p = positive_exercise()
+Starting proof.  Current proof state:
+x: real
+h: x > 0
+|- x**2 > 0
+>>> p.use(IsPositive("x")) 
+x is now of type pos_real.
+Goal solved!
+Proof complete!
+```
+
+### `ApplyTheta(hyp:str="this", newhyp:str)`
+
+Applies `Theta` to a hypothesis `hyp` to obtain its asymptotic version, which is then named `newhyp` (default is `hyp+"_theta"`).  This can be useful in manipulating the asymptotic form of an inequality.
+
+Example:
+```
+>>> from main import *
+>>> p = loglinarith_hard_exercise()
+Starting proof.  Current proof state:
+N: pos_int
+x: pos_real
+y: pos_real
+h1: x <= 2*N**2 + 1
+h2: y < 3*N + 4
+|- Theta(x)*Theta(y) <= Theta(N)**3
+>>> p.use(ApplyTheta("h1"))
+Adding asymptotic version of h1: x <= 2*N**2 + 1 as h1_theta: Theta(x) <= Max(Theta(1), Theta(N)**2).
+1 goal remaining.
+>>> print(p)
+Proof Assistant is in tactic mode.  Current proof state:
+N: pos_int
+x: pos_real
+y: pos_real
+h1: x <= 2*N**2 + 1
+h2: y < 3*N + 4
+h1_theta: Theta(x) <= Max(Theta(1), Theta(N)**2)
+|- Theta(x)*Theta(y) <= Theta(N)**3
+```
+
 ## Simplification tactics
 
 ### `SimpAll()`
 
 Applies "obvious" simplifications to each hypothesis, using each of the other hypotheses in turn.  For instance, if the other hypothesis is of the form `P` and the current hypothesis is of the form `P|Q`, it gets simplified to `Q`.  Then, simplify the goal using all the other hypotheses.  If, in the course of doing so, a hypothesis turns into `false`, or the goal turns into `true`, complete the goal.
 
-"Expensive" simplifications that require linear algebra or SAT solving are not implemented in this tactic.
+"Expensive" simplifications that require linear algebra or SAT solving are not implemented in this tactic. On the other hand, sympy's native simplifier `simplify` is invoked; as a consequence, sometimes this tactic will perform simplification even in the presence of an irrelevant hypothesis.
 
 Some examples of supported simplifications:
 

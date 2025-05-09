@@ -1,4 +1,4 @@
-from sympy import Basic, Symbol
+from sympy import Basic, Symbol, true, false
 from proposition import *
 from order_of_magnitude import *
 
@@ -94,9 +94,12 @@ def describe( name:str, object:Basic ) -> str:
 
 def is_defined(expr:Expr, vars:set[Expr]) -> bool:
     """Check if expr is defined in terms of the set `vars` of other expressions"""
+    expr = S(expr)
     if expr in vars:
         return True
     if expr.is_number:
+        return True
+    if expr == true or expr == false:
         return True
     if len(expr.args) == 0:
         return False

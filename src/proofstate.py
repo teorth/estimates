@@ -61,6 +61,13 @@ class ProofState:
         else:
             raise ValueError(f"Hypothesis {name} is a hypothesis, not a variable.  Use get_hypothesis() to get the hypothesis.")
         
+    def get_var_name(self, var: Basic) -> str:
+        """ Get the name of a variable from the proof state. """
+        for name, obj in self.hypotheses.items():
+            if isinstance(obj, Type) and obj.var() == var:
+                return name
+        raise ValueError(f"Variable {var} not found in proof state.")
+        
     def get_all_vars(self) -> set[Basic]:
         """ Get all variables from the proof state. """
         vars = set()

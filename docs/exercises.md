@@ -198,3 +198,142 @@ y: real
 ```
 
 **Hint**: `Set()` $\min(x,y)$ and $\max(x,y)$ to new variables.  (You will first need to `get_var()` these variables to do this.)
+
+## Trivial example
+
+**Informal version** If $x$ is real and $x > 0$, then $x \geq 0$.
+
+**Python code**:
+```
+def trivial_exercise():
+    p = ProofAssistant()
+    x = p.var("real", "x")
+    p.assume(x>0, "h")
+    p.begin_proof(x >= 0)
+    return p
+```
+
+**In an interactive Python environment**:
+```
+>>> from main import *  
+>>> p = trivial_exercise()
+Starting proof.  Current proof state:
+x: real
+h: x > 0
+|- x >= 0
+```
+
+**Hint**: This is `Trivial()`.
+
+## Positive example
+
+**Informal version** If $x$ is real and $x>0$, then $x^2>0$.
+
+**Python code**:
+```
+def positive_exercise():
+    p = ProofAssistant()
+    x = p.var("real", "x")
+    p.assume(x>0, "h")
+    p.begin_proof(x**2 > 0)
+    return p
+```
+
+**In an interactive Python environment**:
+```
+>>> from main import *  
+>>> p = positive_exercise()
+Starting proof.  Current proof state:
+x: real
+h: x > 0
+|- x**2 > 0
+```
+
+**Hint**: Ensure that $x$ `IsPositive()`.
+
+## Nonnegative example
+
+**Informal version** If $x$ is real and $x \geq 0$, then $x^3 \geq 0$.
+
+**Python code**:
+```
+def nonnegative_exercise():
+    p = ProofAssistant()
+    x = p.var("real", "x")
+    p.assume(x>=0, "h")
+    p.begin_proof(x**3 >= 0)
+    return p
+```
+
+**In an interactive Python environment**:
+```
+>>> from main import *  
+>>> p = nonnegative_exercise()
+Starting proof.  Current proof state:
+x: real
+h: x >= 0
+|- x**3 >= 0
+```
+
+**Hint**: Ensure that $x$ `IsNonnegative()`.
+
+## Log linear arithmetic example (easy)
+
+**Informal version** If $N$ is a positive integer and $x,y$ are positive reals with $x \leq 2N^2$ and $y < 3N$, then $xy \lesssim N^4$.
+
+**Python code**:
+```
+def loglinarith_exercise():
+    p = ProofAssistant()
+    N = p.var("pos_int", "N")
+    x, y = p.vars("pos_real", "x", "y")
+    p.assume(x <= 2*N**2, "h1")
+    p.assume(y < 3*N, "h2")
+    p.begin_proof(lesssim(x*y, N**4))
+    return p
+```
+
+**In an interactive Python environment**:
+```
+>>> from main import *  
+>>> p = loglinarith_exercise()
+Starting proof.  Current proof state:
+N: pos_int
+x: pos_real
+y: pos_real
+h1: x <= 2*N**2
+h2: y < 3*N
+|- Theta(x)*Theta(y) <= Theta(N)**4
+```
+**Hint**: Can be directly handled by `LogLinarith()`.
+
+## Log linear arithmetic example (hard)
+
+**Informal version** If $N$ is a positive integer and $x,y$ are positive reals with $x \leq 2N^2+1$ and $y < 3N+4$, then $xy \lesssim N^3$.
+
+**Python code**:
+```
+def loglinarith_hard_exercise():
+    p = ProofAssistant()
+    N = p.var("pos_int", "N")
+    x, y = p.vars("pos_real", "x", "y")
+    p.assume(x <= 2*N**2+1, "h1")
+    p.assume(y < 3*N+4, "h2")
+    p.begin_proof(lesssim(x*y, N**3))
+    return p
+```
+
+**In an interactive Python environment**:
+```
+>>> from main import *  
+>>> p = loglinarith_hard_exercise()
+Starting proof.  Current proof state:
+N: pos_int
+x: pos_real
+y: pos_real
+h1: x <= 2*N**2 + 1
+h2: y < 3*N + 4
+|- Theta(x)*Theta(y) <= Theta(N)**3
+```
+
+**Hint**: `LogLinarith()` is not powerful enough to resolve this directly due to the `Max` operations implicitly arising from addition.  One may need to first `ApplyTheta()` to the hypotheses, and `Claim()` some additional useful facts such as `lesssim(1, N**2)` that can be used by `SimpAll()`.

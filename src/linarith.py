@@ -1,5 +1,5 @@
 from tactic import *
-from linprog import Inequality, feasibility, verbose_feasibility
+from linprog import Inequality, feasibility
 from sympy import S, Eq, LessThan, StrictLessThan, GreaterThan, StrictGreaterThan,Ne
 from sympy.core.relational import Relational
 from fractions import Fraction

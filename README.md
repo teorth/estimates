@@ -22,10 +22,10 @@ This project aims to develop (in Python) a lightweight proof assistant that is s
 To start the assistant in an interactive Python session:
 
 - Install Python and the following packages (unless they are already pre-installed):
-    - `sympy`, for intsance via `pip install sympy`
+    - `sympy`, for instance via `pip install sympy`
     - `z3-solver`, for instance via `pip install z3-solver` 
 - Download all the Python files in this directory.
-- In this directory, start Python from the command line to start an interactive Python session, and type `from main import *`
+- In the directory containing these files, start Python from the command line to start an interactive Python session, and type `from main import *`
 - To launch a new proof assistant, type `p = ProofAssistant()`.
 - Alternatively, to try one of the exercises, such as `linarith_exercise()`, type `p = linarith_exercise()`.  A list of exercises can be found [here](docs/exercises.md).
 

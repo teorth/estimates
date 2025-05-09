@@ -4,6 +4,8 @@ from linarith import *
 from sympy import Eq, Max, Min
 from simp import *
 from subst import *
+from test import *
+from log_linarith import *
 
 
 
@@ -111,3 +113,71 @@ def min_max_solution():
     p.use(SplitHyp("a_def"))
     p.use(SplitHyp("b_def"))
     p.use(Linarith())
+
+def positive_exercise():
+    p = ProofAssistant()
+    x = p.var("real", "x")
+    p.assume(x>0, "h")
+    p.begin_proof(x**2 > 0)
+    return p
+
+def positive_solution():
+    p = positive_exercise()
+    p.use(IsPositive("x"))
+
+def nonnegative_exercise():
+    p = ProofAssistant()
+    x = p.var("real", "x")
+    p.assume(x>=0, "h")
+    p.begin_proof(x**3 >= 0)
+    return p
+
+def nonnegative_solution():
+    p = nonnegative_exercise()
+    p.use(IsNonnegative("x"))
+
+def trivial_exercise():
+    p = ProofAssistant()
+    x = p.var("real", "x")
+    p.assume(x>0, "h")
+    p.begin_proof(x >= 0)
+    return p
+
+def trivial_solution():
+    p = trivial_exercise()
+    p.use(Trivial())   
+
+def loglinarith_exercise():
+    p = ProofAssistant()
+    N = p.var("pos_int", "N")
+    x, y = p.vars("pos_real", "x", "y")
+    p.assume(x <= 2*N**2, "h1")
+    p.assume(y < 3*N, "h2")
+    p.begin_proof(lesssim(x*y, N**4))
+    return p
+
+def loglinarith_solution():
+    p = loglinarith_exercise()
+    p.use(LogLinarith())   
+
+def loglinarith_hard_exercise():
+    p = ProofAssistant()
+    N = p.var("pos_int", "N")
+    x, y = p.vars("pos_real", "x", "y")
+    p.assume(x <= 2*N**2+1, "h1")
+    p.assume(y < 3*N+4, "h2")
+    p.begin_proof(lesssim(x*y, N**3))
+    return p
+
+def loglinarith_hard_solution():
+    p = loglinarith_hard_exercise()
+    p.use(ApplyTheta("h1"))
+    p.use(ApplyTheta("h2"))
+    N = p.get_var("N")
+    p.use(Claim(lesssim(1,N), "h3"))
+    p.use(LogLinarith())
+    p.use(Claim(lesssim(1,N**2), "h4"))
+    p.use(LogLinarith())
+    p.use(SimpAll())
+    p.use(LogLinarith())
+    

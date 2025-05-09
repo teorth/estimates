@@ -113,6 +113,7 @@ class ProofAssistant:
                     
     def begin_proof(self, goal: Basic):
         """ Start a proof with a given goal. """
+        goal = S(goal)  # convert to a sympy expression
         if self.mode == "assumption":
             if not isinstance(goal, Boolean):
                 raise ValueError(f"Goal {goal} is not a proposition.")
@@ -137,6 +138,10 @@ class ProofAssistant:
     def current_goal(self) -> str:
         """ Return the current goal. """
         return self.current_node.proof_state.goal
+    
+    def current_hypotheses(self) -> dict[str, Basic]:
+        """ Return the current hypotheses. """
+        return self.current_node.proof_state.hypotheses
         
     def abandon_proof(self):
         """ Abandon the current proof, and clear hypotheses. """
@@ -303,10 +308,12 @@ class ProofAssistant:
                 self.set_current_node(self.current_node.parent)
                 print(f"Undid previous tactic ({self.current_node.tactic}).")
                 self.current_node.tactic = None  # clear the tactic
+                self.current_node.children = []  # clear the children
             else:
                 if self.current_node.parent is not None:
                     print(f"Undid current tactic ({self.current_node.tactic}).")
                     self.current_node.tactic = None  # clear the tactic
+                    self.current_node.children = []  # clear the children
                 print("No tactics to undo.")
         else:
             raise ValueError("Cannot undo in assumption mode.")

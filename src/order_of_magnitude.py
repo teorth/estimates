@@ -229,6 +229,8 @@ class OrderMul(OrderOfMagnitude, Expr):
                     terms[arg.args[0]] += arg.args[1]
                 else:
                     terms[arg.args[0]] = arg.args[1] 
+            elif arg == Theta(1):
+                continue
             else:
                 if arg in terms:
                     terms[arg] += 1
@@ -266,14 +268,17 @@ class OrderPow(OrderOfMagnitude, Expr):
     """ A class to handle exponentiation of orders of magnitude. """
     def __new__(cls, *args):
         assert len(args) == 2, f"OrderPow{args} requires exactly two arguments."
+        base = S(args[0])
         exp = S(args[1])
         assert exp.is_number, f"Exponent {exp} must be a constant number."
-        assert isinstance(args[0], OrderOfMagnitude), f"Base {args[0]} must be an order of magnitude."
+        assert isinstance(base, OrderOfMagnitude), f"Base {base} must be an order of magnitude."
 
         if exp == S(0):
             return Theta(1)
         if exp == S(1):
             return args[0]
+        if base == Theta(1):
+            return Theta(1)
         
         obj = Expr.__new__(cls, args[0], exp)
         obj.name = f"{args[0]}**{exp}"
@@ -287,7 +292,7 @@ class OrderPow(OrderOfMagnitude, Expr):
         if isinstance(self.args[0],OrderPow):
             return (self.args[0].args[0]**(self.args[1]*self.args[0].args[1])).doit()
         if isinstance(self.args[0],OrderMul):
-            return OrderMul(*[expr.doit() for expr in self.args[0].args**self.args[1]]).doit()
+            return OrderMul(*[expr.doit()**self.args[1] for expr in self.args[0].args]).doit()
         
         return self
     
