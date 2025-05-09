@@ -192,6 +192,8 @@ Applies "obvious" simplifications to each hypothesis, using each of the other hy
 
 The set of simplifications performed is currently far from complete.  If you discover that a situation where an "obvious" simplification should have occurred, but didn't, please inform me (e.g., via a github issue) to see if it can be added to the simplification routine.
 
+**CAVEAT**:  This tactic uses `sympy`'s native simplifier, which does not fully guard against issues such as division by zero.  For instance, `x/x` will simplify to `1` even if `x` is not proven to be non-zero.  As such, the proofs using this simplifier may possibly have some edge cases that will require additional attention if this Proof Assistant-generated proof is to be converted to a fully verified proof.  
+
 Example:
 ```
 >>> from main import *

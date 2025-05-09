@@ -74,6 +74,10 @@ Return the variable named `name` (as a `sympy` `Basic` object)
 
 Return the variables named in `names` (as a `List` of `sympy` `Basic` object)
 
+## `p.get_all_vars() -> Set[Basic]`
+
+Return the variables in the hypotheses
+
 ## `p.var(type:str, name:str) -> Basic`
 
 Introduce a variable `name` of type `type`.  Only valid in assumption mode.  Currently supported variable types:

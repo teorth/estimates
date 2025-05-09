@@ -18,10 +18,12 @@ class ProofAssistant:
     def assume(self, assumption:Basic, name:str = "this"):
         """ Add a hypothesis to the list of assumptions. """
         if self.mode == "assumption":
-            assert not name in self.hypotheses, f"The name {name} is already taken."
-            # TODO: assert that all variables in the assumption are already introduced
             if not isinstance(assumption, Boolean):
-                raise ValueError(f"Assumption {name} is not a proposition.")
+                raise ValueError(f"Assumption {assumption} is not a proposition.")
+            if not is_defined(assumption, self.get_all_vars()):
+                raise ValueError(f"Assumption {assumption} is not defined in terms of the current variables.")
+            while name in self.hypotheses:  # avoid namespace collisions
+                name += "'"
             self.hypotheses[name] = assumption
         else:
             raise ValueError("Cannot add hypotheses in tactic mode.  Please switch to assumption mode.")
@@ -123,12 +125,20 @@ class ProofAssistant:
         for name in names:
             varlist.append(self.get_var(name))
         return varlist
+    
+    def get_all_vars(self) -> set[Basic]:
+        """ Get all variables from the list of assumptions (in Assumption mode) or proof state (in Tactic mode). """
+        if self.mode == "assumption":
+            return set([obj.var() for obj in self.hypotheses.values() if isinstance(obj, Type)])
+        else:
+            return self.get_state().get_all_vars()
                     
     def begin_proof(self, goal: Basic):
         if self.mode == "assumption":
             if not isinstance(goal, Boolean):
                 raise ValueError(f"Goal {goal} is not a proposition.")
-            # TODO: assert that all variables in the goal are already introduced
+            if not is_defined(goal, self.get_all_vars()):
+                raise ValueError(f"Goal {goal} is not defined in terms of the current variables.")
             self.mode = "tactic"
             self.proof_tree = ProofTree(ProofState(goal, self.hypotheses))
             self.current_node = self.proof_tree
@@ -164,7 +174,6 @@ class ProofAssistant:
             self.mode = "assumption"
             self.current_node = None
             print("Exiting Tactic mode.")
-            print(self.current_proof_state())
         else:
             raise ValueError("You are already in assumption mode!")
 

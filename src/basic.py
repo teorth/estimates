@@ -1,5 +1,6 @@
 from sympy import Basic, Symbol
 from proposition import *
+from order_of_magnitude import *
 
 # Some code to handle sympy classes
 
@@ -55,3 +56,15 @@ def describe( name:str, object:Basic ) -> str:
     """Return a string description of a named sympy object."""
     return f"{name}: {object}"
 
+def is_defined(expr:Expr, vars:set[Expr]) -> bool:
+    """Check if expr is defined in terms of the set `vars` of other expressions"""
+    if expr in vars:
+        return True
+    if expr.is_number:
+        return True
+    if len(expr.args) == 0:
+        return False
+    for arg in expr.args:
+        if not is_defined(arg, vars):
+            return False
+    return True

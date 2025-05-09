@@ -64,6 +64,14 @@ class ProofState:
             return obj.var()
         else:
             raise ValueError(f"Hypothesis {name} is a hypothesis, not a variable.  Use get_hypothesis() to get the hypothesis.")
+        
+    def get_all_vars(self) -> set[Basic]:
+        """ Get all variables from the proof state. """
+        vars = set()
+        for obj in self.hypotheses.values():
+            if isinstance(obj, Type):
+                vars.add(obj.var())
+        return vars
 
     def rename_hypothesis(self, old_name:str, new_name:str) -> str:
         """ Rename a hypothesis in the proof state. """
@@ -82,12 +90,6 @@ class ProofState:
                     return new_name
         else:
             raise ValueError(f"Hypothesis {old_name} not found in proof state.")
-
-    def var(self, name:str = "this") -> Basic:
-        # Return the sympy variable associated to this name, if it exists
-        assert name in self.hypotheses, f"Variable {name} not found in proof state."
-        assert isinstance(self.hypotheses[name], Type), f"{describe(name, self.hypotheses[name])} is a hypothesis, not a variable."
-        return self.hypotheses[name].var()
         
     def new_hypothesis(self, name:str, hypothesis:Basic) -> str:
         """ Add a new hypothesis to the proof state, updating the name if necessary.  Returns the name of the hypothesis. """
