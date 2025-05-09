@@ -1,6 +1,6 @@
 # A mathematical proof assistant 
 
-This project aims to develop (in Python) a lightweight proof assistant that is substantially less powerful than full proof assistants such as Lean, Isabelle or Coq, but which (hopefully) is easy to use to prove short, tedious tasks, such as verifying that one inequality or estimate follows from others.
+This project aims to develop (in Python) a lightweight proof assistant that is substantially less powerful than full proof assistants such as Lean, Isabelle or Coq, but which (hopefully) is easy to use to prove short, tedious tasks, such as verifying that one inequality or estimate follows from others.  One specific intention of this assistant is to provide support for [asymptotic estimates](asymptotic.md).
 
 ## Documentation links
 
@@ -8,6 +8,7 @@ This project aims to develop (in Python) a lightweight proof assistant that is s
 - [List of exercises and examples](docs/exercises.md)
 - [List of navigation tools](docs/navigation.md)
 - [Linear programming code](docs/linprog.md)
+- [Implementation details for asymptotic orders of magnitude](docs/asymptotic.md)
 
 ## Other links
 
