@@ -7,6 +7,7 @@ This project aims to develop (in Python) a lightweight proof assistant that is s
 - [List of tactics](docs/tactics.md)
 - [List of exercises and examples](docs/exercises.md)
 - [List of navigation tools](docs/navigation.md)
+- [Linear programming code](docs/linprog.md)
 
 ## Other links
 
@@ -14,7 +15,7 @@ This project aims to develop (in Python) a lightweight proof assistant that is s
     - A [companion post](https://terrytao.wordpress.com/2025/05/04/orders-of-infinity/) on the algebraic structure of orders of infinity - Terence Tao - May 4 2025
 - [Version 0.0: A proof-of-concept prototype](src/ver_0_0/README.md)
 - [Version 1.0: A rudimentary proof assistant](src/ver_1_0/README.md)
-    -  As a byproduct of this version, an [exact linear programming proof certificate tool](src/ver_1_0/linprog/README.md) was written.
+    -  As a byproduct of this version, an [exact linear programming proof certificate tool](docs/linprog.md) was written.
 
 ## Getting started
 
@@ -94,7 +95,7 @@ Proof complete!
 This gives more details as to what `Linarith` actually did:
 * First, it argued by contradiction, by taking the negation $x \geq 7z+2$ of the goal $x < 7z+2$ and added it to the hypotheses.
 * Then, it converted all the inequalities that were explicit or implicit in the hypotheses into a "linear programming" form in which the variables are on the left-hand side, and constants on the right-hand side.  For instance, the assertion that `x` was a positive real became $1*x>0$, and the assertion $y < 3z$ became $1*y + -3*z < 1$.
-* Finally, it sought a linear combination of these inequalities that would lead to an absurd inequality, in this case $0 < 1$.
+* Finally, it used [exact linear programming](docs/linprog.md) to seek out a linear combination of these inequalities that would lead to an absurd inequality, in this case $0 < 1$.
 
 One can also inspect the final proof after solving the problem by using the `proof()` method, although in this case the proof is extremely simple:
 ```
