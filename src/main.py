@@ -80,5 +80,19 @@ def ineq_exercise():
 
 def ineq_solution():
     p = ineq_exercise()
-    p.use(SimpAll())
+    p.use(SimpAll())   # can also use p.use(Linarith())
 
+def ineq_exercise2():
+    p = ProofAssistant()
+    x = p.var("real", "x")
+    y,z = p.vars("pos_int", "y", "z")
+    p.assume(x+y+z <= 3, "h")
+    p.assume((x>=y) & (y>=z), "h2")
+    p.begin_proof(Eq(z,1))
+    return p
+
+def ineq_solution2():
+    p = ineq_exercise2()
+    p.use(SplitHyp("h2"))
+    p.use(Linarith())
+    

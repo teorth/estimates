@@ -7,28 +7,18 @@ from basic import *
 class ProofState:
     def __init__(self, goal: Basic, hypotheses:dict[str, Basic] = None):
         """
-        Initialize a proof state with a name, a goal, and an optional list of hypotheses.
-        
-        :param name: The name of the proof state.
-        :param goal: The goal of the proof state.
-        :param hypotheses: A list of hypotheses for the proof state (optional).
+        Initialize a proof state with a goal, and an optional list of hypotheses.
         """
         self.goal = goal
         self.hypotheses = hypotheses if hypotheses is not None else {}
 
     def set_goal(self, goal: Basic):
-        """
-        Set the goal of the proof state.
-        
-        :param goal: The new goal for the proof state.
-        """
+        """ Set the goal of the proof state. """
         self.goal = goal
 
     def copy(self) -> 'ProofState':
         """
         Create a copy of the proof state.
-        
-        :return: A new ProofState object with the same goal and hypotheses.
         """
         return ProofState(self.goal, self.hypotheses.copy())
     
@@ -81,7 +71,7 @@ class ProofState:
             else:
                 if isinstance(self.hypotheses[old_name], Type):
                     raise ValueError(f"Hypothesis {old_name} is a variable declaration.  Renaming variables is currently unimplemented.")
-                    # May be best to keep this functionality disabled, as things get confusing if the proofstate name and the sympy name for a variable are permitted to diverge.  Alternatively, if one renames a proofstate variable, one could create a sympy variable with the new name and swap all occurrences of the old name with the new name.  This would be a bit of a pain to implement, though.
+                    # May be best to keep this functionality disabled, as things get confusing if the proofstate name and the sympy name for a variable are permitted to diverge.  Alternatively, if one renames a proofstate variable, one could create a sympy variable with the new name and swap all occurrences of the old name with the new name.  This may be a bit of a pain to implement, though.
                 else:
                     hyp  = self.hypotheses[old_name]
                     del self.hypotheses[old_name]

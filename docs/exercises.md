@@ -115,3 +115,61 @@ h: x + y > 5
 ```
 
 **Hint** Use the tactics `Contrapose()`, `SplitHyp()`, and `Linarith()`.
+
+## Inequality exercise
+
+**Informal version** If $x,y$ are real numbers with $x \leq y$ and $y \leq x$, then $x=y$.
+
+**Python code**:
+```
+def ineq_exercise():
+    p = ProofAssistant()
+    x, y = p.vars("real", "x", "y")
+    p.assume(x <= y, "h1")
+    p.assume(x >= y, "h2")
+    p.begin_proof(Eq(x,y))
+    return p
+```
+
+**In an interactive Python environment**:
+```
+>>> from main import *              
+>>> p = ineq_exercise()
+Starting proof.  Current proof state:
+x: real
+y: real
+h1: x <= y
+h2: x >= y
+|- Eq(x, y)
+```
+
+**Hint** Either `SimpAll()` or `Linarith()` will work here.
+
+## Inequality exercise 2
+
+**Informal version** If $x$ is real and $y,z$ are positive integers with $x \geq y \geq z$ and $x+y+z \leq 3$, then $z=1$.
+
+**Python code**:
+```
+def ineq_exercise2():
+    p = ProofAssistant()
+    x = p.var("real", "x")
+    y,z = p.vars("pos_int", "y", "z")
+    p.assume(x+y+z <= 3, "h")
+    p.assume((x>=y) & (y>=z), "h2")
+    p.begin_proof(Eq(z,1))
+    return p
+```
+
+**In an interactive Python environment**:
+```
+>>> from main import *
+>>> p = ineq_exercise2()
+Starting proof.  Current proof state:
+x: real
+y: pos_int
+z: pos_int
+h: x + y + z <= 3
+h2: (x >= y) & (y >= z)
+|- Eq(z, 1)
+```

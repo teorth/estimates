@@ -6,7 +6,7 @@ from sympy import false, simplify_logic
 # Various tactics for handling propositional logic.
 
 class SplitGoal(Tactic):
-    # If the goal is a conjunction, split the goal into one goal for each conjunct.
+    """Split the goal into its conjuncts.  If the goal is a conjunction, split the goal into one goal for each conjunct."""
 
     def activate(self, state: ProofState) -> list[ProofState]:
         if isinstance(state.goal, And):
@@ -25,7 +25,8 @@ class SplitGoal(Tactic):
         return "split_goal"
     
 class Contrapose(Tactic):
-    # Given a hypothesis h, replace the goal with the negation of h, and h with the negation of the goal.  If h is not already a hypothesis, this becomes a proof by contradiction, adding the negation of the goal as a hypothesis, and "false" as the goal.
+    """
+    Contrapose the goal and a hypothesis.  If the hypothesis is a proposition, replace the goal with the negation of the hypothesis, and the hypothesis with the negation of the goal.  If the hypothesis is not a proposition, this becomes a proof by contradiction, adding the negation of the goal as a hypothesis, and "false" as the goal."""
 
     def __init__(self, h: str = "this"):
         """
@@ -58,7 +59,8 @@ class Contrapose(Tactic):
         
 
 class SplitHyp(Tactic):
-    # Given a hypothesis h that is a conjunction, replace that hypothesis with one hypothesis from each conjunct, either with a user-supplied list of names, or a default choice.
+    """
+    Split a hypothesis into its conjuncts.  If the hypothesis is a conjunction, split the hypothesis into one hypothesis for each conjunct.  The new hypotheses will be named according to the names supplied in the constructor."""
 
     def __init__(self, h: str = "this", *names:str):
         """
@@ -97,14 +99,12 @@ class SplitHyp(Tactic):
             else:
                 return "split_hyp " + self.h + " " + ", ".join(self.names)
 
-# Take a hypothesis that is a disjunction, and split it into its disjuncts, creating a separate goal for each disjunct.
 class Cases(Tactic):
+    """
+    Split a hypothesis into its disjuncts.  If the hypothesis is a disjunction, split the hypothesis into one goal for each disjunct."""
     
-    def __init__(self, h: str = "this"):
-        """
-        :param h: The name of the hypothesis to use for cases.
-        """
-        self.h = h
+    def __init__(self, hyp: str = "this"):
+        self.h = hyp
     
     def activate(self, state: ProofState) -> list[ProofState]:
         if self.h in state.hypotheses:

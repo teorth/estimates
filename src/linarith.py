@@ -1,7 +1,8 @@
 from tactic import *
 from linprog import Inequality, feasibility, verbose_feasibility
-from sympy import S, Eq, LessThan, StrictLessThan, GreaterThan, StrictGreaterThan
+from sympy import S, Eq, LessThan, StrictLessThan, GreaterThan, StrictGreaterThan,Ne
 from sympy.core.relational import Relational
+from fractions import Fraction
 
     
 
@@ -21,55 +22,98 @@ class Linarith(Tactic):
         for hypothesis in state.list_hypotheses(variables=true):
             if isinstance(hypothesis, Eq|LessThan|StrictLessThan|GreaterThan|StrictGreaterThan|Type):
                 hypotheses.add(hypothesis)
-        if isinstance(state.goal, Eq|LessThan|StrictLessThan|GreaterThan|StrictGreaterThan):
-            hypotheses.add(Not(state.goal))
-
-        # Now, build the inequalities from the hypotheses.
-        inequalities = []
-        for hypothesis in hypotheses:
-            if isinstance(hypothesis, Type):  # check for positivity conditions to add to the inequalities
-                if hypothesis.var().is_positive:
-                    inequalities.append(Inequality({hypothesis.var(): S(1)}, 'gt', S(0)))
-                elif hypothesis.var().is_nonnegative:
-                    inequalities.append(Inequality({hypothesis.var(): S(1)}, 'geq', S(0)))
-            elif isinstance(hypothesis, Relational):
-                coeffs = (hypothesis.args[0] - hypothesis.args[1]).as_coefficients_dict()
-            
-                # Linarith ignores any relations that involve anything other than a real number.  (One could make a companion tactic, say Linalg, to handle linear equalities over vector spaces other than the reals.)
-                all_real = True
-                for var in coeffs.keys():
-                    if not var.is_real:
-                        all_real = False
-                        break
-                if not all_real:
-                    continue
-            
-                if S(1) in coeffs:
-                    const = -coeffs[S(1)]
-                    del coeffs[S(1)]
-                else:
-                    const = -S(0)
-                if isinstance(hypothesis, Eq):
-                    inequalities.append(Inequality(coeffs, 'eq', const))
-                elif isinstance(hypothesis, LessThan):
-                    inequalities.append(Inequality(coeffs, 'leq', const))
-                elif isinstance(hypothesis, StrictLessThan):
-                    inequalities.append(Inequality(coeffs, 'lt', const))
-                elif isinstance(hypothesis, GreaterThan):
-                    inequalities.append(Inequality(coeffs, 'geq', const))
-                elif isinstance(hypothesis, StrictGreaterThan):
-                    inequalities.append(Inequality(coeffs, 'gt', const))
         
-        if self.verbose:
-            outcome = verbose_feasibility(inequalities)
-        else:
-            outcome, dict = feasibility(inequalities)
+        # the different hypothesis scenarios to consider.  Usually it is just one scenario, but when trying to prove an equality, there are two counterfactorial scenarios to consider, depending on whether the LHS is greater than or less than the RHS.
+        scenarios = [hypotheses]
+        if isinstance(state.goal, Ne|LessThan|StrictLessThan|GreaterThan|StrictGreaterThan):
+            scenarios[0].add(Not(state.goal))
+        elif isinstance(state.goal, Eq):
+            scenarios.append(hypotheses.copy())
+            scenarios[0].add(StrictLessThan(state.goal.args[0], state.goal.args[1]))
+            scenarios[1].add(StrictLessThan(state.goal.args[1], state.goal.args[0]))
+        
+        found_counterexample = False
+        proofs = []
+        inequalities_list = []
 
-        if outcome:
-            print("Linear arithmetic was unable to prove goal.")
+        for scenario in scenarios:
+            # Now, build the inequalities from the hypotheses.
+            inequalities = []
+            if false in scenario:
+                continue # No need to consider a scenario that has a false hypothesis.
+            for hypothesis in scenario:
+                if isinstance(hypothesis, Type):  # check for positivity conditions to add to the inequalities
+                    if hypothesis.var().is_positive:
+                        if hypothesis.var().is_integer:
+                            inequalities.append(Inequality({hypothesis.var(): S(1)}, 'geq', S(1))) # the integrality gap!
+                        else:
+                            inequalities.append(Inequality({hypothesis.var(): S(1)}, 'gt', S(0)))
+                    elif hypothesis.var().is_nonnegative:
+                        inequalities.append(Inequality({hypothesis.var(): S(1)}, 'geq', S(0)))
+                elif isinstance(hypothesis, Relational):
+                    coeffs = (hypothesis.args[0] - hypothesis.args[1]).as_coefficients_dict()
+            
+                    # Linarith ignores any relations that involve anything other than a real number.  (One could make a companion tactic, say Linalg, to handle linear equalities over vector spaces other than the reals.)
+                    all_real = True
+                    for var in coeffs.keys():
+                        if not var.is_real:
+                            all_real = False
+                            break
+                    if not all_real:
+                        continue
+            
+                    if S(1) in coeffs:
+                        const = -coeffs[S(1)]
+                        del coeffs[S(1)]
+                    else:
+                        const = -S(0)
+                    if isinstance(hypothesis, Eq):
+                        inequalities.append(Inequality(coeffs, 'eq', const))
+                    elif isinstance(hypothesis, LessThan):
+                        inequalities.append(Inequality(coeffs, 'leq', const))
+                    elif isinstance(hypothesis, StrictLessThan):
+                        inequalities.append(Inequality(coeffs, 'lt', const))
+                    elif isinstance(hypothesis, GreaterThan):
+                        inequalities.append(Inequality(coeffs, 'geq', const))
+                    elif isinstance(hypothesis, StrictGreaterThan):
+                        inequalities.append(Inequality(coeffs, 'gt', const))
+
+            inequalities_list.append(inequalities)
+            outcome, dict = feasibility(inequalities)
+            if outcome:
+                found_counterexample = True
+                break
+            else:
+                proofs.append(dict)
+
+        if found_counterexample:
+            if self.verbose:
+                print("Checking feasibility of the following inequalities:")
+                for ineq in inequalities:
+                    print(ineq)
+                print("Feasible with the following values:")
+                for var, value in dict.items():
+                    print(f"{var} = {value}")
+            else:
+                print("Linear arithmetic was unable to prove goal.")
             return [state.copy()]
         else:
-            print("Goal solved by linear arithmetic!")
+            if self.verbose:
+                n = 0
+                for inequalities in inequalities_list:
+                    print("Checking feasibility of the following inequalities:")
+                    for ineq in inequalities:
+                        print(ineq)
+                    print("Infeasible by summing the following:")
+                    dict = proofs[n] 
+                    for ineq, coeff in dict.items():
+                        if not coeff == Fraction(0,1):
+                            print(f"{ineq} multiplied by {coeff}")
+                    n += 1
+                if n == 0:
+                    print("Conclusion followed tautologically from hypotheses.")
+            else:
+                print("Goal solved by linear arithmetic!")
             return []
 
 

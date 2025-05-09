@@ -297,25 +297,26 @@ True
 
 One can then add additional hypotheses using the `assume()` command:
 ```
->>> p.assume(x+y+z < 3, "h")
->>> p.assume((x<y) & (y<z), "h2")
+>>> p.assume(x+y+z <= 3, "h")
+>>> p.assume((x>=y) & (y>=z), "h2")
 >>> print(p)
 Proof Assistant is in assumption mode.  Current hypotheses:
 x: real
 y: pos_int
 z: pos_int
-h: x + y + z < 3
-h2: (x < y) & (y < z)
+h: x + y + z <= 3
+h2: (x >= y) & (y >= z)
 ```
 Now, one can start a goal with the `begin_proof()` command:
 ```
->>> p.begin_proof(x < 1)
+>>> p.begin_proof(Eq(z,1))
 Starting proof.  Current proof state:
 x: real
 y: pos_int
 z: pos_int
 h: x + y + z < 3
-h2: (x < y) & (y < z)
-|- x < 1
+h2: (x >= y) & (y >= z)
+|- Eq(z, 1)
 ```
+(Here we are using `sympy`'s symbolic equality relation `Eq`, because Python has reserved the `=` and `==` operators for other purposes.)
 Now one is in **Tactic Mode** and can use tactics as before.

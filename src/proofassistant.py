@@ -11,8 +11,8 @@ class ProofAssistant:
         self.mode = "assumption"
         self.hypotheses = {}        # a dictionary of (str, Basic) pairs
         self.theorem_str = ""       # a description of the theorem
-        self.proof_tree = None      # a ProofTree object
-        self.current_node = None    # a ProofTree object, a node of proof_tree
+        self.proof_tree = None      # a ProofTree object: the root of the proof
+        self.current_node = None    # a ProofTree object, a node of self.proof_tree
         self.auto_finish = True     # automatically finish the proof when all sorries are cleared
 
     def assume(self, assumption:Basic, name:str = "this"):
@@ -84,6 +84,7 @@ class ProofAssistant:
             raise ValueError("Cannot introduce variables in tactic mode.  Please switch to assumption mode.")
 
     def clear_hypotheses(self):
+        """ Clear the list of hypotheses. """
         if self.mode == "assumption":
             self.hypotheses = {}  # clear the hypotheses
         else:
@@ -134,6 +135,7 @@ class ProofAssistant:
             return self.get_state().get_all_vars()
                     
     def begin_proof(self, goal: Basic):
+        """ Start a proof with a given goal. """
         if self.mode == "assumption":
             if not isinstance(goal, Boolean):
                 raise ValueError(f"Goal {goal} is not a proposition.")
@@ -152,9 +154,11 @@ class ProofAssistant:
             raise ValueError("Cannot start a proof in tactic mode.  Please switch to assumption mode.")   
 
     def current_proof_state(self) -> ProofState:
+        """ Return the current proof state. """
         return self.current_node.proof_state
     
     def current_goal(self) -> str:
+        """ Return the current goal. """
         return self.current_node.proof_state.goal
         
     def abandon_proof(self):
