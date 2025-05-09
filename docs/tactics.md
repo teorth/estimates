@@ -305,9 +305,21 @@ b_def: Eq(b, Max(x, y))
 
 ### `SimpAll()`
 
-Applies "obvious" simplifications to each hypothesis, using each of the other hypotheses in turn.  For instance, if the other hypothesis is of the form `P` and the current hypothesis is of the form `P|Q`, it gets simplified to `Q`.  Then, simplify the goal using all the other hypotheses.  If, in the course of doing so, a hypothesis turns into `False`, or the goal turns into `True`, complete the goal.
+Applies "obvious" simplifications to each hypothesis, using each of the other hypotheses in turn.  For instance, if the other hypothesis is of the form `P` and the current hypothesis is of the form `P|Q`, it gets simplified to `Q`.  Then, simplify the goal using all the other hypotheses.  If, in the course of doing so, a hypothesis turns into `false`, or the goal turns into `true`, complete the goal.
 
 "Expensive" simplifications that require linear algebra or SAT solving are not implemented in this tactic.
+
+Some examples of supported simplifications:
+
+| Statement | Hypothesis | Simplification
+| --------- | ---------- | --------------
+| `P` | `P` | `true`
+| `P` | `Not(P)` | `false`
+| `x >= y` | `x <= y` | `Eq(x,y)`
+| `x >= y` | `x < y` | `false`
+| `x >= y` | `Ne(x,y)` | `x > y`
+| `Max(x,y)` | `x <= y` | `y`
+| `Min(x,y)` | `x <= y` | `x`
 
 The set of simplifications performed is currently far from complete.  If you discover that a situation where an "obvious" simplification should have occurred, but didn't, please inform me (e.g., via a github issue) to see if it can be added to the simplification routine.
 

@@ -1,6 +1,6 @@
 from tactic import *
-from sympy import Basic, simplify, Not, Eq
-from sympy.core.relational import Relational, Rel
+from sympy import Basic, simplify, Not, Eq, Min, Max
+from sympy.core.relational import Relational, Rel, LessThan, StrictLessThan, GreaterThan, StrictGreaterThan
 
 #  The simplifier
 
@@ -10,6 +10,12 @@ def rsimp(goal: Basic, hyp: Basic) -> Basic:
 
     new_args = [rsimp(arg, hyp) for arg in goal.args]
 
+    if goal == hyp:
+        return true
+    
+    if Not(goal) == hyp:
+        return false
+    
     if isinstance(goal, Relational) and isinstance(hyp, Relational):
         if goal.args[0] == hyp.args[0] and goal.args[1] == hyp.args[1]:
             s = 1
@@ -30,7 +36,21 @@ def rsimp(goal: Basic, hyp: Basic) -> Basic:
                 for rel, signset in sign.items(): # hypothesis refines goal
                     if goalset == signset:
                         return Rel(goal.args[0], goal.args[1], rel)
-        
+
+    if isinstance(hyp, LessThan|StrictLessThan|GreaterThan|StrictGreaterThan):
+        if hyp.lts != hyp.gts:
+            if hyp.lts in goal.args and hyp.gts in goal.args:
+                if isinstance(goal, Max|OrderMax):
+                    # can remove a copy of hyp.lts
+                    l = list(goal.args)
+                    l.remove(hyp.lts)
+                    return goal.func(*l)
+                if isinstance(goal, Min|OrderMin):
+                    # can remove a copy of hyp.gts
+                    l = list(goal.args)
+                    l.remove(hyp.gts)
+                    return goal.func(*l)
+
     if goal.args == ():
         return goal
     else:
