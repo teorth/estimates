@@ -85,7 +85,7 @@ Checking feasibility of the following inequalities:
 1*x > 0
 1*x + -2*y < 0
 Infeasible by summing the following:
-1*z > 0 multiplied by 1/4p0---899999999999999999
+1*z > 0 multiplied by 1/4
 1*x + -7*z >= 2 multiplied by 1/4
 1*y + -3*z < 1 multiplied by -1/2
 1*x + -2*y < 0 multiplied by -1/4
