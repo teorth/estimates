@@ -36,7 +36,10 @@ class OrderOfMagnitude(Basic):
         return OrderPow(self, other).doit()
     
     def __rpow__(self, other):
-        return NotImplementedError
+        return NotImplementedError 
+    
+    def as_real_imag(self, deep=True, **hints):
+        return (self,S(0))
     
 class FormalSub(Expr):
     """ A formal difference between two expressions.  This is a hack, to handle the fact that the default equality tester in Expr uses subtraction.  Otherwise, this class has no functionality. """
@@ -74,6 +77,21 @@ class Theta(OrderOfMagnitude, Expr):
             obj.name = f"Theta(1)" 
             return obj
         
+        if isinstance(expr, Add|Max):
+            if all([arg.is_positive for arg in expr.args]):
+                # Distribute the Theta operator over the sum or max
+                return OrderMax(*[Theta(arg) for arg in expr.args]).doit()
+        
+        if isinstance(expr, Mul):
+            if all([arg.is_positive for arg in expr.args]):
+                # Distribute the Theta operator over the product
+                return OrderMul(*[Theta(arg) for arg in expr.args]).doit()
+        
+        if isinstance(expr, Pow):
+            if expr.args[0].is_positive and expr.args[1].is_number and expr.args[1].is_rational:
+                # Distribute the Theta operator over the power
+                return OrderPow(Theta(expr.args[0]), expr.args[1]).doit()
+
         # otherwise wrap the general symbolic expr
         obj = Expr.__new__(cls, expr)
         obj.name = f"Theta({expr!r})"
@@ -83,8 +101,10 @@ class Theta(OrderOfMagnitude, Expr):
         return f"Theta({self.args[0]!r})"
     
     def __repr__(self):
-        return f"Theta({self.args[0]!r})"
+        return str(self)
     
+    def _sympystr(self, printer):
+        return str(self)
 
 
 class OrderSymbol(OrderOfMagnitude, Symbol):
@@ -128,6 +148,8 @@ class OrderMax(OrderOfMagnitude, Expr):
     def __repr__(self):
         return str(self)   
 
+    def _sympystr(self, printer):
+        return str(self)
 
 class OrderMin(OrderOfMagnitude, Expr):
     """ A class to handle minima of orders of magnitude. """
@@ -165,6 +187,8 @@ class OrderMin(OrderOfMagnitude, Expr):
     def __repr__(self):
         return str(self)   
 
+    def _sympystr(self, printer):
+        return str(self)
 
 
 class OrderMul(OrderOfMagnitude, Expr):
@@ -230,6 +254,9 @@ class OrderMul(OrderOfMagnitude, Expr):
     def __repr__(self):
         return str(self)   
 
+    def _sympystr(self, printer):
+        return str(self)
+
 class OrderPow(OrderOfMagnitude, Expr):
     """ A class to handle exponentiation of orders of magnitude. """
     def __new__(cls, *args):
@@ -264,6 +291,9 @@ class OrderPow(OrderOfMagnitude, Expr):
     
     def __repr__(self):
         return str(self)   
+
+    def _sympystr(self, printer):
+        return str(self)
 
 def ll(expr1:Expr, expr2:Expr) -> Relational:
     """
