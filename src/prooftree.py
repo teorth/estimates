@@ -30,15 +30,20 @@ class ProofTree:
         self.children.append(child)
         return child
     
-    # apply a tactic and create children nodes with the resulting indicated proof states
     def use_tactic(self, tactic: Tactic):
-        self.tactic = tactic
+        """Apply a tactic to the proof state and create child nodes for each resulting proof state."""
         proof_state_list = tactic.activate(self.proof_state)
+        if len(proof_state_list) == 1 and proof_state_list[0].eq(self.proof_state):
+            return # This tactic did nothing, so don't add a child node
+        self.tactic = tactic
         for proof_state in proof_state_list:
             self.add_sorry(proof_state)
         
-    # Recursively generate a list of strings representing of the proof tree, with indentation for each level.  Highlight the node if it is the current node
     def rstr(self, indent:str = "  ", next_indent:str = "  ", current_node:'ProofTree' = None) -> list[str]:
+        """
+        Return a string representation of the proof tree, with indentation for each level.
+        Highlight the node if it is the current node.
+        """
         if self.tactic == None:
             if self == current_node:
                 return [indent + "**sorry**"]
@@ -98,12 +103,11 @@ class ProofTree:
         else:
             return sorries[len(sorries)-1]
 
-    # recursively trace through the proof tree to find
-    #
-    ## whether the target appeared in the tree
-    ## the last "sorry" node before a given target (if present), or the last "sorry" node, period
-    ## the first "sorry" after the given target (if present), or the first "sorry" node, period
     def find_sorry(self, target:'ProofTree') -> tuple[bool, 'ProofTree', 'ProofTree']:
+        """
+        Recursively find the last sorry before a target and the first sorry after a target.
+        Also returns whether the target was found in the tree.
+        """
         if self == target:
             for child in self.children:
                 _, _, first = child.find_sorry(target)
@@ -130,12 +134,11 @@ class ProofTree:
                     before = last_before
         return (found_target, before, after)
     
-    # recursively trace through the proof tree to find
-    #
-    ## whether the target appeared in the tree
-    ## how many sorries appeared before the target (if present), or the total number of sorries, period 
-    ## how many sorries appeared after the target (if present), or the total number of sorries, period
     def count_sorries(self, target:'ProofTree') -> tuple[bool, int, int]:
+        """
+        Recursively count the number of sorries before and after a target in the proof tree.
+        Also returns whether the target was found in the tree.
+        """
         if self == target:
             before = 0
             after = 0

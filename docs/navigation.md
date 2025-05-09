@@ -34,6 +34,10 @@ Go back a step in the proof (to a step that was already handled by some tactic).
 
 Go forward to the `n`th branch in the proof immediately following the current step.  (This assumes that the current step generated at least `n` new proof states.)
 
+## `p.undo()`
+
+Go back a step in the proof and clear the tactic.  (Cannot be reversed.)
+
 ## `p.auto_finish_on()`
 
 Automatically finish a proof when all goals are completed. (This is the default.)

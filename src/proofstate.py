@@ -22,6 +22,12 @@ class ProofState:
         """
         return ProofState(self.goal, self.hypotheses.copy())
     
+    def eq(self, other: 'ProofState') -> bool:
+        """
+        Check if two proof states are equal.
+        """
+        return self.goal == other.goal and self.hypotheses == other.hypotheses
+    
     def new(self, name:str) -> str:
         """ returns the first unused version of name (adding primes as needed) that isn't already claimed as a hypothesis """
         new_name = name

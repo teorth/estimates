@@ -316,6 +316,20 @@ class ProofAssistant:
         else:
             raise ValueError("Cannot move forward in assumption mode.")
 
+    def undo(self):
+        """ Undo the last step in the proof tree. """
+        if self.mode == "tactic":
+            if self.current_node.parent is not None:
+                self.set_current_node(self.current_node.parent)
+                print(f"Undid previous tactic ({self.current_node.tactic}).")
+                self.current_node.tactic = None  # clear the tactic
+            else:
+                if self.current_node.parent is not None:
+                    print(f"Undid current tactic ({self.current_node.tactic}).")
+                    self.current_node.tactic = None  # clear the tactic
+                print("No tactics to undo.")
+        else:
+            raise ValueError("Cannot undo in assumption mode.")
 
     def list_goals(self):
         """ Print all the goals in the proof tree. """
