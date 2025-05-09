@@ -37,9 +37,13 @@ class OrderOfMagnitude(Basic):
     
     def __rpow__(self, other):
         return NotImplementedError 
+
+    def __abs__(self):
+        return self
     
     def as_real_imag(self, deep=True, **hints):
         return (self,S(0))
+    
     
 class FormalSub(Expr):
     """ A formal difference between two expressions.  This is a hack, to handle the fact that the default equality tester in Expr uses subtraction.  Otherwise, this class has no functionality. """
@@ -109,7 +113,8 @@ class Theta(OrderOfMagnitude, Expr):
 
 class OrderSymbol(OrderOfMagnitude, Symbol):
     """ Formal orders of magnitude."""
-    pass
+    def _eval_abs(self):
+        return self
 
 
 class OrderMax(OrderOfMagnitude, Expr):
@@ -299,28 +304,28 @@ def ll(expr1:Expr, expr2:Expr) -> Relational:
     """
     The formal assertion that expr1 is asymptotically much less than expr2.
     """
-    return Theta(expr1) < Theta(expr2)
+    return Theta(abs(expr1)) < Theta(expr2)
 Expr.ll = ll
 
 def lesssim(expr1:Expr, expr2:Expr) -> Relational:
     """
     The formal assertion that expr1 is less than or comparable to expr2.
     """
-    return Theta(expr1) <= Theta(expr2)
+    return Theta(abs(expr1)) <= Theta(expr2)
 Expr.lesssim = lesssim
 
 def gg(expr1:Expr, expr2:Expr) -> Relational:
     """
     The formal assertion that expr1 is asymptotically much greater than expr2.
     """
-    return Theta(expr1) > Theta(expr2)
+    return Theta(expr1) > Theta(abs(expr2))
 Expr.gg = gg
 
 def gtrsim(expr1:Expr, expr2:Expr) -> Relational:
     """
     The formal assertion that expr1 is greater than or comparable to expr2.
     """
-    return Theta(expr1) >= Theta(expr2)
+    return Theta(expr1) >= Theta(abs(expr2))
 Expr.gtrsim = gtrsim
 
 def asymp(expr1:Expr, expr2:Expr) -> Relational:

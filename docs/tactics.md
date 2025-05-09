@@ -8,7 +8,18 @@ The proof assistant is designed to be easily extensible by the addition of furth
 
 ### `Cases(hyp:str="this")`
 
-Takes a hypothesis `hyp` that is a disjunction (several statements joined together by the "or" operator `|`) and splits into one subgoal for each disjunct, in which the hypothesis `hyp` is replaced by that disjunct.
+Takes a hypothesis `hyp` that can be split into a disjunction of several statements, and splits into one subgoal for each disjunct, in which the hypothesis `hyp` is replaced by that disjunct.
+
+Some examples of statements that can be split into disjuncts:
+
+| Statement | Splits into disjuncts 
+| --------- | ------ 
+| `P \| Q \| R` | `P`, `Q`, `R` 
+| `x <= Max(y,z)` | `x <= y`, `x <= z`
+| `x < Max(y,z)` | `x < y`, `x < z`
+| `Min(x,y) <= z` | `x <= z`, `y <= z`
+| `Min(x,y) < z` | `x < z`, `y < z`
+
 
 Example:
 ```
@@ -23,8 +34,31 @@ h1: P | Q
 h2: R | S
 |- (P & R) | (P & S) | (Q & R) | (Q & S)
 >>> p.use(Cases("h1"))
-Splitting h1: P | Q into cases.
+Splitting h1: P | Q into cases P, Q.
 2 goals remaining.
+```
+
+### `Option(n:int)`
+
+If the goal is a disjunction, replace it with the `n`th disjunct in that goal.
+
+Example:
+```
+>>> from main import *     
+>>> p = min_max_exercise()
+Starting proof.  Current proof state:
+x: real
+y: real
+|- Min(x, y) <= Max(x, y)
+>>> p.use(Option(1))
+Replacing goal Min(x, y) <= Max(x, y) with option 1: Min(x, y) <= x.
+1 goal remaining.
+>>> p.use(Option(1))
+Replacing goal Min(x, y) <= x with option 1: True.
+1 goal remaining.
+>>> p.use(SimpAll())
+Goal solved!
+Proof complete!
 ```
 
 ### `SplitGoal()`
@@ -32,14 +66,17 @@ Splitting h1: P | Q into cases.
 
 `SplitGoal()` splits the goal into subgoals.  `SplitHyp(hyp,*names)` is similar but splits a hypothesis `hyp` (if it is a conjunction) into multiple new hypotheses (using the provided `names` if available, or using a default naming system otherwise.)
 
-Some examples of statements that can be split:
+Some examples of statements that can be split into conjuncts:
 
-| Statement | Splits into |
-| --------- | ------ |
-| `P & Q & R` | `P`, `Q`, `R` |
-| `Eq(x,Max(y,z))` | `x >= y`, `x >= z`, `Eq(x,y) \| Eq(x,z)`
+| Statement | Splits into conjuncts 
+| --------- | ------ 
+| `P & Q & R` | `P`, `Q`, `R` 
+| `Eq(x,Max(y,z))` | `x >= y`, `x >= z`, `Eq(x,y) \| Eq(x,z)` 
 | `Eq(x,Min(y,z))` | `x <= y`, `x <= z`, `Eq(x,y) \| Eq(x,z)`
-
+| `x <= Min(y,z)` | `x <= y`, `x <= z`
+| `x < Min(y,z)` | `x < y`, `x < z`
+| `Max(x,y) <= z` | `x <= z`, `y <= z`
+| `Max(x,y) < z` | `x < z`, `y < z`
 
 Example:
 ```

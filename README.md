@@ -152,7 +152,7 @@ Here, we have four atomic propositions (boolean variables) `P`, `Q`, `R`, `S`, w
 Here we can split the hypothesis `h1 : P | Q` into two cases:
 ```
 >>> p.use(Cases("h1"))
-Splitting h1: P | Q into cases.
+Splitting h1: P | Q into cases P, Q.
 2 goals remaining.
 ```
 Let's now look at the current proof state:

@@ -1,7 +1,7 @@
 from proposition import *
 from basic import *
 from tactic import *
-from sympy import false, simplify_logic, Max, Min
+from sympy import false, simplify_logic, Max, Min, LessThan, StrictLessThan, GreaterThan, StrictGreaterThan
 from order_of_magnitude import *
 
 # Various tactics for handling propositional logic.
@@ -10,10 +10,10 @@ def get_conjuncts(expr: Expr) -> list[Expr]:
     """
     Get the conjuncts of an expression (after unpacking), or None if no conjuncts found
     """
+    conjuncts = []
     if isinstance(expr, And):
         return expr.args
     elif isinstance(expr, Eq):
-        conjuncts = []
         if isinstance(expr.args[1], Max|OrderMax):
             # x = Max(y,z) can be split into x >= y, x >= z, and (x == y) | (x == z)
             disjuncts = []
@@ -30,7 +30,62 @@ def get_conjuncts(expr: Expr) -> list[Expr]:
                 disjuncts.append(Eq(expr.args[0],arg))
             conjuncts.append(Or(*disjuncts))
             return conjuncts
+    elif isinstance(expr, LessThan|StrictLessThan):
+        if isinstance(expr.args[1], Min|OrderMin):
+            # x < Min(y,z) can be split into x < y and x < z
+            for arg in expr.args[1].args:
+                conjuncts.append(Rel(expr.args[0], arg, expr.rel_op))
+            return conjuncts
+        elif isinstance(expr.args[0], Max|OrderMax):
+            # Max(x,y) < z can be split into x < z and y < z
+            for arg in expr.args[0].args:
+                conjuncts.append(Rel(arg, expr.args[1], expr.rel_op))
+            return conjuncts
+    elif isinstance(expr, GreaterThan|StrictGreaterThan):
+        if isinstance(expr.args[1], Max|OrderMax):
+            # x > Max(y,z) can be split into x > y and x > z
+            for arg in expr.args[1].args:
+                conjuncts.append(Rel(expr.args[0], arg, expr.rel_op))
+            return conjuncts
+        elif isinstance(expr.args[0], Min|OrderMin):
+            # Min(x,y) > z can be split into x > z and y > z
+            for arg in expr.args[0].args:
+                conjuncts.append(Rel(arg, expr.args[1], expr.rel_op))
+            return conjuncts
+
     return None
+
+def get_disjuncts(expr: Expr) -> list[Expr]:
+    """
+    Get the disjuncts of an expression (after unpacking), or None if no disjuncts found
+    """
+    disjuncts = []
+    if isinstance(expr, Or):
+        return expr.args
+    elif isinstance(expr, LessThan|StrictLessThan):
+        if isinstance(expr.args[1], Max|OrderMax):
+            # x < Max(y,z) can be split into x < y or x < z
+            for arg in expr.args[1].args:
+                disjuncts.append(Rel(expr.args[0], arg, expr.rel_op))
+            return disjuncts
+        elif isinstance(expr.args[0], Min|OrderMin):
+            # Min(x,y) < z can be split into x < z and y < z
+            for arg in expr.args[0].args:
+                disjuncts.append(Rel(arg, expr.args[1], expr.rel_op))
+            return disjuncts
+    elif isinstance(expr, GreaterThan|StrictGreaterThan):
+        if isinstance(expr.args[1], Min|OrderMin):
+            # x > Min(y,z) can be split into x > y or x > z
+            for arg in expr.args[1].args:
+                disjuncts.append(Rel(expr.args[0], arg, expr.rel_op))
+            return disjuncts
+        elif isinstance(expr.args[0], Max|OrderMax):
+            # Max(x,y) > z can be split into x > z and y > z
+            for arg in expr.args[0].args:
+                disjuncts.append(Rel(arg, expr.args[1], expr.rel_op))
+            return disjuncts
+    return None
+
 
 class SplitGoal(Tactic):
     """Split the goal into its conjuncts.  If the goal is a conjunction, split the goal into one goal for each conjunct."""
@@ -139,12 +194,13 @@ class Cases(Tactic):
     def activate(self, state: ProofState) -> list[ProofState]:
         if self.h in state.hypotheses:
             hyp = state.hypotheses[self.h]
-            if not isinstance(hyp, Or):
-                print(f"Cases did nothing, as {describe(self.h, hyp)} is not a disjunction.")
+            disjuncts = get_disjuncts(hyp)
+            if disjuncts == None:
+                print(f"Unable to split {hyp} into cases.")
                 return [state.copy()]
-            print(f"Splitting {describe(self.h,hyp)} into cases.")
+            print(f"Splitting {describe(self.h,hyp)} into cases {", ".join([str(disjunct) for disjunct in disjuncts])}.")
             new_goals = []
-            for disjunct in hyp.args:
+            for disjunct in disjuncts:
                 new_state = state.copy()
                 new_state.hypotheses[self.h] = disjunct
                 new_goals.append(new_state)
@@ -155,3 +211,22 @@ class Cases(Tactic):
         
     def __str__(self):
         return "cases " + self.h
+
+class Option(Tactic):
+    """
+    If the goal is a disjunction, replace it with one of its disjuncts."""
+
+    def __init__(self, n: int = 1):
+        assert n > 0, f"Argument {n} of Option() must be positive."
+        self.n = n
+
+    def activate(self, state: ProofState) -> list[ProofState]:
+        disjuncts = get_disjuncts(state.goal)
+        if disjuncts is None:
+            raise ValueError(f"Goal {state.goal} did not split into a disjunction.")
+        if self.n > len(disjuncts):
+            raise ValueError(f"Goal {state.goal} only hhad {len(disjuncts)} disjuncts.")
+        print(f"Replacing goal {state.goal} with option {self.n}: {disjuncts[self.n-1]}.")
+        new_state = state.copy()
+        new_state.set_goal(disjuncts[self.n-1])
+        return [new_state]
