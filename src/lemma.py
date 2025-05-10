@@ -42,16 +42,22 @@ class Amgm(Lemma):
     The arithmetic mean-geometric mean inequality.  This is a sample lemma to test the code.
     """
 
-    def __init__(self, x : Basic, y : Basic):
-        self.x = S(x)
-        self.y = S(y)
-        assert self.x.is_nonnegative, "x must be a nonnegative expression."
-        assert self.y.is_nonnegative, "y must be a nonnegative expression." 
+    def __init__(self, *vars : Basic):
+        assert len(vars) > 0, "At least one variable is required."
+        self.vars = [S(x) for x in vars]
+        for x in vars:
+            assert x.is_nonnegative, f"{x} must be a nonnegative expression."
         
     def apply(self, state: ProofState) -> Basic:
-        assert is_defined(self.x, state.get_all_vars()), f"{self.x} is not defined in the current proof state."
-        assert is_defined(self.y, state.get_all_vars()), f"{self.y} is not defined in the current proof state."
-        return (self.x*self.y)**(1/2) <= (self.x+self.y)/2
-    
+        for x in self.vars:
+            assert is_defined(x, state.get_all_vars()), f"{x} is not defined in the current proof state."
+        prod = 1
+        sum = 0
+        for x in self.vars:
+            prod *= x
+            sum += x
+        return prod**(1/len(self.vars)) <= sum/len(self.vars)
+            
     def __str__(self):
-        return f"am_gm({self.x}, {self.y})"
+        return f"am_gm(" + ", ".join(str(x) for x in self.vars) + ")"
+   

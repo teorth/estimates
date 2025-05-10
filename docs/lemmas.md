@@ -4,9 +4,9 @@ Lemmas are methods that generate proven propositional sentences assuming that an
 
 Currently only a proof of concept lemma is in place.  The plan is to have an extensive library of lemmas for various mathematical applications.
 
-## Amgm(x,y)
+## Amgm(x_1, ..., x_n)
 
-The arithmetic mean-geometric mean inequality $(xy)^{1/2} \leq \frac{x+y}{2}$.  Needs $x,y$ to be non-negative in order to be applied.
+The arithmetic mean-geometric mean inequality $(x_1 \dots X_n)^{1/n} \leq \frac{x_1+\dots+x_n}{2}$.  Needs the $x_i$ to be non-negative in order to be applied.
 
 Example:
 ```
