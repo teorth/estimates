@@ -181,3 +181,15 @@ def loglinarith_hard_solution():
     p.use(SimpAll())
     p.use(LogLinarith())
     
+
+def amgm_exercise():
+    p = ProofAssistant()
+    x, y = p.vars("nonneg_real", "x", "y")
+    p.begin_proof(2*x*y <= x**2 + y**2)
+    return p
+
+def amgm_solution():
+    p = amgm_exercise()
+    x,y = p.get_vars("x", "y")
+    p.use_lemma(Amgm(x**2,y**2))
+    p.use(SimpAll())

@@ -337,3 +337,28 @@ h2: y < 3*N + 4
 ```
 
 **Hint**: `LogLinarith()` is not powerful enough to resolve this directly due to the `Max` operations implicitly arising from addition.  One may need to first `ApplyTheta()` to the hypotheses, and `Claim()` some additional useful facts such as `lesssim(1, N**2)` that can be used by `SimpAll()`.
+
+## Arithmetic mean-geometric mean inequality example
+
+**Informal version** If $x,y$ are non-negative reals, then $2xy \leq x^2+y^2$.
+
+**Python code**:
+```
+def amgm_exercise():
+    p = ProofAssistant()
+    x, y = p.vars("nonneg_real", "x", "y")
+    p.begin_proof(2*x*y <= x**2 + y**2)
+    return p
+```
+
+**In an interactive Python environment**:
+```
+>>> from main import *  
+>>> p = amgm_exercise()
+Starting proof.  Current proof state:
+x: nonneg_real
+y: nonneg_real
+|- 2*x*y <= x**2 + y**2
+```
+
+**Hint**: Apply the `Amgm()` lemma, as listed on the [lemmas page](lemmas.md).

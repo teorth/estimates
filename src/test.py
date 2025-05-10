@@ -1,5 +1,6 @@
 from sympy import Basic, LessThan, StrictLessThan, GreaterThan, StrictGreaterThan, Ne
 from sympy.core.relational import Relational
+from sympy.logic.boolalg import Implies
 from proofstate import *
 from basic import *
 from tactic import *
@@ -12,37 +13,9 @@ def test(hypotheses: set[Basic], goal: Basic) -> bool:
     if goal == true:
         return True
     
-    if false in hypotheses:
-        return True # ex falso quodlibet
-    
-    if goal in hypotheses:
-        return True
-    
-    if isinstance(goal, Relational):
-        if goal.reversed in hypotheses:
+    for hyp in hypotheses:
+        if Implies(hyp, goal):
             return True
-        
-        if isinstance(goal, StrictLessThan):
-            return test(hypotheses, Relational(goal.args[1], goal.args[0], '>'))
-        elif isinstance(goal, LessThan):
-            return test(hypotheses, Relational(goal.args[1], goal.args[0], '>='))
-        elif isinstance(goal, StrictGreaterThan):
-            if goal.args[0].is_positive and goal.args[1] == S(0):
-                return True
-        elif isinstance(goal, GreaterThan):
-            if goal.args[0].is_nonnegative and goal.args[1] == S(0):
-                return True
-            if goal.args[0].is_positive and goal.args[0].is_integer and goal.args[1] == S(1):
-                return True # The integrality gap!
-            if test(hypotheses, Relational(goal.args[0], goal.args[1], '>')):
-                return True
-            if test(hypotheses, Relational(goal.args[0], goal.args[1], '==')):
-                return True
-        elif isinstance(goal, Ne):
-            if test(hypotheses, Relational(goal.args[0], goal.args[1], '>')):
-                return True
-            if test(hypotheses, Relational(goal.args[0], goal.args[1], '<')):
-                return True
 
     return False
 

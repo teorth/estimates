@@ -1,6 +1,7 @@
 from prooftree import *
 from order_of_magnitude import *
 from basic import *
+from lemma import *
 
 # A pseudo-Lean stype proof assistant.  The proof assistant will, at any time, be one of two modes:
 
@@ -193,6 +194,8 @@ class ProofAssistant:
 
     def use(self, tactic:Tactic):
         """ Apply a tactic to the current proof state. """
+        if not(isinstance(tactic, Tactic)):
+            raise ValueError(f"Tactic {tactic} is not a valid tactic.")
         if self.mode == "tactic":
             if not self.current_node.use_tactic(tactic):
                 return  # Tactic did nothing, so don't change the current node
@@ -209,6 +212,10 @@ class ProofAssistant:
                     self.mode = "assumption"
         else:
             raise ValueError("Cannot apply tactics in assumption mode.  Please switch to tactic mode.")
+
+    def use_lemma(self, lemma:Lemma, name:str = "this"):
+        """ Apply a lemma to the current proof state. """
+        self.use(UseLemma(name, lemma))
 
     def set_current_node(self, node:ProofTree):
         """ Set the current node to a given node in the proof tree. """

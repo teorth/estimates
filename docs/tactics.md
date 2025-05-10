@@ -444,3 +444,13 @@ Simplified R | S to True using R | S.
 Goal solved!
 Proof complete!
 ```
+
+## Lemmas
+
+### `UseLemma(name:str, lemma:Lemma)`
+
+Invokes a lemma and places it as a hypothesis under the name `name`.
+
+One can use `p.use_lemma(lemma, name)` as a synonym for `p.use(UseLemma(name,lemma))`.  In that case, `name` will default to `this`.
+
+For a list of lemmas, see [this page](lemmas.md).
