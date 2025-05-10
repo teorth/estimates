@@ -68,19 +68,19 @@ List all the goals remaining.
 
 ## `p.get_hypothesis(hyp:str) -> Basic`
 
-Return the assumption or hypothesis named `hyp` (as a `sympy` `Basic` object)
+Return the assumption or hypothesis named `hyp` (as a `sympy` `Basic` objects).
 
 ## `p.get_var(name:str) -> Basic`
 
-Return the variable named `name` (as a `sympy` `Basic` object)
+Return the variable named `name` (as a `sympy` `Basic` object).
 
 ## `p.get_vars(*names:str) -> List[Basic]`
 
-Return the variables named in `names` (as a `List` of `sympy` `Basic` object)
+Return the variables named in `names` (as a `List` of `sympy` `Basic` objects).
 
 ## `p.get_all_vars() -> Set[Basic]`
 
-Return the variables in the hypotheses
+Return the variables in the hypotheses.
 
 ## `p.var(type:str, name:str) -> Basic`
 

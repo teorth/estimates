@@ -179,7 +179,7 @@ Goal solved by linear arithmetic!
 Proof complete!
 ```
 
-## `Trivial()`
+### `Trivial()`
 
 Closes a goal if it follows immediately from the hypotheses.
 
