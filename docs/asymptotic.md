@@ -6,7 +6,9 @@ One of the original motivations for this proof assistant was to create an enviro
 - $X \ll Y$ (also written $X = o(Y)$), which asserts that for every constant $\varepsilon >0$, one has $|X| \leq \varepsilon Y$ if a suitable asymptotic parameter is large enough.
 - $X \asymp Y$ (also written $X = \Theta(Y)$), which asserts that $X \lesssim Y \lesssim X$.
 
-This is implemented within `sympy` as follows.  One first defines a new type of sympy expression, which I call `OrderOfMagnitude`, and corresponds to the space ${\mathcal O}$ discussed in [this blog post](https://terrytao.wordpress.com/2025/05/04/orders-of-infinity/).  These expressions are not numbers, but still support several algebraic operations, such as addition, multiplication, raising to numerical real exponents, and order comparison.  There is then an operation `Theta` that maps positive real `sympy` expressions to `OrderOfMagnitude` expressions, which then allows one to interpret the above asymptotic statements:
+This is implemented within `sympy` as follows.  One first defines a new type of sympy expression, which I call `OrderOfMagnitude`, and corresponds to the space ${\mathcal O}$ discussed in [this blog post](https://terrytao.wordpress.com/2025/05/04/orders-of-infinity/).  These expressions are not numbers, but still support several algebraic operations, such as addition, multiplication, raising to numerical real exponents, and order comparison.  However, we caution that there is no notion of zero or subtraction in ${\mathcal O}$ (though for technical `sympy` reasons we implement a purely formal subtraction operation with no mathematical content).
+
+There is then an operation `Theta` that maps positive real `sympy` expressions to `OrderOfMagnitude` expressions, which then allows one to interpret the above asymptotic statements:
 
 - $X \lesssim Y$ is formalized as `lesssim(X,Y)`, which is syntactic sugar for `Theta(Abs(X)) <= Theta(Y)`.
 - $X \ll Y$ is formalized as `ll(X,Y)`, which is syntactic sugar for `Theta(Abs(X)) < Theta(Y)`.

@@ -41,6 +41,7 @@ class OrderOfMagnitude(Basic):
     def __abs__(self):
         return self
     
+    # Needed to implement this as some default sympy routines required computing real and imaginary parts.
     def as_real_imag(self, deep=True, **hints):
         return (self,S(0))
     
@@ -66,6 +67,8 @@ class Theta(OrderOfMagnitude, Expr):
     """
 
     def __new__(cls, expr):
+        #TODO: respect sympy's evaluate flag
+
         # turn python constants into Sympy objects
         expr = sympify(expr)
 
@@ -121,6 +124,7 @@ class OrderMax(OrderOfMagnitude, Expr):
     """ A class to handle maxima (and hence also sums) of orders of magnitude. """
 
     def __new__(cls, *args):
+        #TODO: respect sympy's evaluate flag
         newargs = list(dict.fromkeys([Theta(arg) for arg in args]))
         if len(newargs) == 0:
             raise ValueError("OrderMax requires at least one argument.")
@@ -160,6 +164,8 @@ class OrderMin(OrderOfMagnitude, Expr):
     """ A class to handle minima of orders of magnitude. """
 
     def __new__(cls, *args):
+        #TODO: respect sympy's evaluate flag
+
         newargs = list(dict.fromkeys([Theta(arg) for arg in args]))
         if len(newargs) == 0:
             raise ValueError("OrderMin requires at least one argument.")
@@ -199,6 +205,8 @@ class OrderMin(OrderOfMagnitude, Expr):
 class OrderMul(OrderOfMagnitude, Expr):
     """ A class to handle multiplication of orders of magnitude. """
     def __new__(cls, *args):
+        #TODO: respect sympy's evaluate flag
+
         newargs = [Theta(arg) for arg in args]
         if len(newargs) == 0:
             raise ValueError("OrderMul requires at least one argument.")
@@ -267,6 +275,8 @@ class OrderMul(OrderOfMagnitude, Expr):
 class OrderPow(OrderOfMagnitude, Expr):
     """ A class to handle exponentiation of orders of magnitude. """
     def __new__(cls, *args):
+        #TODO: respect sympy's evaluate flag
+
         assert len(args) == 2, f"OrderPow{args} requires exactly two arguments."
         base = S(args[0])
         exp = S(args[1])

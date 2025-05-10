@@ -329,7 +329,7 @@ For a full list of navigation commands that one can perform in either **Assumpti
 
 ## Lemmas
 
-In addition to general proof tactics, I plan to build a [library of lemmas](docs/lemmas.md) that can be used for more specialized applications.  Here is one example, using an arithmetic mean geometric mean lemma $(xy)^{1/2} \leq \frac{x+y}{2}$ to prove a slight variant of that lemma:
+In addition to general proof tactics, I plan to build a [library of lemmas](docs/lemmas.md) that can be used for more specialized applications.  Here is one example, using an arithmetic mean geometric mean lemma $(x_1+\dots+x_n)^{1/n} \leq \frac{x_1+\dots+x_n}{n}$ to prove a slight variant of that lemma:
 ```
 >>> from main import *
 >>> p = amgm_exercise()
