@@ -15,6 +15,7 @@ This project aims to develop (in Python) a lightweight proof assistant that is s
 
 - [Blog post explaining the project](https://terrytao.wordpress.com/2025/05/01/a-proof-of-concept-tool-to-verify-estimates/) - Terence Tao, May 1 2025
     - A [companion post](https://terrytao.wordpress.com/2025/05/04/orders-of-infinity/) on the algebraic structure of orders of infinity - Terence Tao - May 4 2025
+    - [A followup blog post](https://terrytao.wordpress.com/2025/05/09/a-tool-to-verify-estimates-ii-a-flexible-proof-assistant/) describing version 2.0 of the proof assistant - Terence Tao - May 9 2025
 - [Version 0.0: A proof-of-concept prototype](src/ver_0_0/README.md)
 - [Version 1.0: A rudimentary proof assistant](src/ver_1_0/README.md)
     -  As a byproduct of this version, an [exact linear programming proof certificate tool](docs/linprog.md) was written.
@@ -324,6 +325,8 @@ h2: (x >= y) & (y >= z)
 (Here we are using `sympy`'s symbolic equality relation `Eq`, because Python has reserved the `=` and `==` operators for other purposes.)
 Now one is in **Tactic Mode** and can use tactics as before.
 
+For a full list of navigation commands that one can perform in either **Assumption Mode** or **Tactic Mode**, see [this page](docs/navigation.md).
+
 ## Lemmas
 
 In addition to general proof tactics, I plan to build a [library of lemmas](docs/lemmas.md) that can be used for more specialized applications.  Here is one example, using an arithmetic mean geometric mean lemma $(xy)^{1/2} \leq \frac{x+y}{2}$ to prove a slight variant of that lemma:
@@ -345,7 +348,7 @@ Proof complete!
 
 ## Contributions and feedback
 
-I would be happy to receive contributions and feedback on this tool, either as Github issues and pull requests, or the associated blog post.  Examples of such contributions can include
+I would be happy to receive contributions and feedback on this tool, either as Github issues and pull requests, or the [associated blog post](https://terrytao.wordpress.com/2025/05/09/a-tool-to-verify-estimates-ii-a-flexible-proof-assistant/).  Examples of such contributions can include
 
 - Bug reports and corrections
 - Suggestions or submissions of exercises (or problems which are currently difficult to solve with the existing tactics and lemmas, but which can suggest new tactics and lemmas to implement)
