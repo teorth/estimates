@@ -336,7 +336,7 @@ h2: y < 3*N + 4
 |- Theta(x)*Theta(y) <= Theta(N)**3
 ```
 
-**Hint**: `LogLinarith()` is not powerful enough to resolve this directly due to the `Max` operations implicitly arising from addition.  One may need to first `ApplyTheta()` to the hypotheses, and `Claim()` some additional useful facts such as `lesssim(1, N**2)` that can be used by `SimpAll()`.
+**Hint**: `LogLinarith()` is powerful enough to resolve this directly. Alternatively, one can `ApplyTheta()` to the hypotheses, and `Claim()` some additional useful facts such as `lesssim(1, N**2)` that can be used by `SimpAll()`.
 
 ## Arithmetic mean-geometric mean inequality example
 
