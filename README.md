@@ -2,8 +2,9 @@
 
 This project aims to develop (in Python) a lightweight proof assistant that is substantially less powerful than full proof assistants such as Lean, Isabelle or Rocq, but which (hopefully) is easy to use to prove short, tedious tasks, such as verifying that one inequality or estimate follows from others.  One specific intention of this assistant is to provide support for [asymptotic estimates](docs/asymptotic.md).
 
-## Documentation links
+## Documentation links (current version)
 
+- [A blog post describing the project](https://terrytao.wordpress.com/2025/05/09/a-tool-to-verify-estimates-ii-a-flexible-proof-assistant/) - Terence Tao - May 9 2025
 - [List of tactics](docs/tactics.md)
 - [List of exercises and examples](docs/exercises.md)
 - [List of navigation tools](docs/navigation.md)
@@ -11,11 +12,10 @@ This project aims to develop (in Python) a lightweight proof assistant that is s
 - [Implementation details for asymptotic orders of magnitude](docs/asymptotic.md)
 - [List of lemmas](docs/lemmas.md)
 
-## Other links
+## Older versions and posts
 
-- [Blog post explaining the project](https://terrytao.wordpress.com/2025/05/01/a-proof-of-concept-tool-to-verify-estimates/) - Terence Tao, May 1 2025
+- [Original blog post explaining the project](https://terrytao.wordpress.com/2025/05/01/a-proof-of-concept-tool-to-verify-estimates/) - Terence Tao, May 1 2025
     - A [companion post](https://terrytao.wordpress.com/2025/05/04/orders-of-infinity/) on the algebraic structure of orders of infinity - Terence Tao - May 4 2025
-    - [A followup blog post](https://terrytao.wordpress.com/2025/05/09/a-tool-to-verify-estimates-ii-a-flexible-proof-assistant/) describing version 2.0 of the proof assistant - Terence Tao - May 9 2025
 - [Version 0.0: A proof-of-concept prototype](src/ver_0_0/README.md)
 - [Version 1.0: A rudimentary proof assistant](src/ver_1_0/README.md)
     -  As a byproduct of this version, an [exact linear programming proof certificate tool](docs/linprog.md) was written.
