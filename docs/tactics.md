@@ -39,6 +39,39 @@ Splitting h1: P | Q into cases P, Q.
 2 goals remaining.
 ```
 
+### `ByCases(statement:Boolean, name:str = "this")`
+
+Similar to `Cases()`, but splits into cases based on whether `statement` is true or false.  In either case, the resulting assertion is named `name` (or the next available name, if this name is taken).
+
+Example:
+```
+>>> from main import *
+>>> p = bracket_submult_exercise()
+Starting proof.  Current proof state:
+x: real
+y: real
+|- Theta(x**2*y**2 + 1)**1/2 <= Theta(x**2 + 1)**1/2*Theta(y**2 + 1)**1/2
+>>> p.use(ByCases(Eq(x,0)))
+Splitting into cases this: Eq(x, 0) and this: Ne(x, 0).
+2 goals remaining.
+>>> print(p)
+Proof Assistant is in tactic mode.  Current proof state:
+x: real
+y: real
+this: Eq(x, 0)
+|- Theta(x**2*y**2 + 1)**1/2 <= Theta(x**2 + 1)**1/2*Theta(y**2 + 1)**1/2
+This is goal 1 of 2.
+>>> p.next_goal()
+Moved to goal 2 of 2.
+>>> print(p)
+Proof Assistant is in tactic mode.  Current proof state:
+x: real
+y: real
+this: Ne(x, 0)
+|- Theta(x**2*y**2 + 1)**1/2 <= Theta(x**2 + 1)**1/2*Theta(y**2 + 1)**1/2
+This is goal 2 of 2.
+```
+
 ### `Option(n:int)`
 
 If the goal is a disjunction (using the same table as in the `Cases()` tactic), replace it with the `n`th disjunct in that goal.
@@ -367,8 +400,9 @@ b_def: Eq(b, Max(x, y))
 
 ### `IsPositive(name:str|Basic=this)`
 ### `IsNonnegative(name:str|Basic=this)`
+### `IsNonzero(name:str|Basic=this)`
 
-Makes the variable `name` positive or nonnegative, if this can be inferred from the hypotheses.
+Makes the variable `name` positive, nonnegative, or non-zero, if this can be inferred from the hypotheses.
 
 Example:
 ```

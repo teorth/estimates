@@ -365,13 +365,13 @@ y: nonneg_real
 
 ## Bracket submultiplicativity example
 
-**Informal version** If $x,y$ are non-zero reals, then $\langle x y \rangle \lesssim \langle x \rangle \langle y\rangle$, where $\langle x \rangle := (1+|x|^2)^{1/2}$ is the ``Japanese bracket''.
+**Informal version** If $x,y$ are reals, then $\langle x y \rangle \lesssim \langle x \rangle \langle y\rangle$, where $\langle x \rangle := (1+|x|^2)^{1/2}$ is the ``Japanese bracket''.
 
 **Python code**:
 ```
 def bracket_submult_exercise():
     p = ProofAssistant()
-    x, y = p.vars("nonzero_real", "x", "y") # the non-zero hypothesis is a hack, because we do not assign 0 an order of magnitude
+    x, y = p.vars("real", "x", "y") 
     p.begin_proof(lesssim(bracket(x*y), bracket(x)*bracket(y)))
     return p
 ```
@@ -381,14 +381,12 @@ def bracket_submult_exercise():
 >>> from main import *
 >>> p = bracket_submult_exercise()
 Starting proof.  Current proof state:
-x: nonzero_real
-y: nonzero_real
-|- Max(Theta(1), Theta(x**2)*Theta(y**2))**1/2 <= Max(Theta(1), Theta(x**2))**1/2*Max(Theta(1), Theta(y**2))**1/2
+x: real
+y: real
+|- Theta(x**2*y**2 + 1)**1/2 <= Theta(x**2 + 1)**1/2*Theta(y**2 + 1)**1/2
 ```
 
-**Hint**: This can be one-shotted by `LogLinarith()`.
-
-Note: annoyingly, the current framework can only handle the case when $x,y$ are non-zero.  This is because we are not assigning an order of magnitude to 0.  In the future, we may develop the notion of an extended order of magnitude which assigns an order of $-\infty$ to $0$, but this could be a little tricky.
+**Hint**: Due to the fact that `x`, `y` could vanish, one cannot directly simplify the order of magnitudes here because we do not assign an order of magnitude to 0.  Hence, one must first split `ByCases()` depending on whether `x` or `y` vanish.  If they do, then `SimpAll()` will work (but generate some warnings due to `sympy`'s simplifier trying to use some non-positive substitutions). Otherwise, one can ensure that `x` `IsNonzero()`, and similarly for `y`, at which point `LogLinarith()`. will work.
 
 ## Littlewood-Paley example
 

@@ -1,7 +1,7 @@
 from tactic import *
 from linprog import Inequality, feasibility
 from sympy import S, Eq, LessThan, StrictLessThan, GreaterThan, StrictGreaterThan,Ne
-from sympy.core.relational import Relational
+from sympy.core.relational import Relational, Rel
 from fractions import Fraction
 from order_of_magnitude import *
 from itertools import product

@@ -213,12 +213,19 @@ def amgm_solution():
 
 def bracket_submult_exercise():
     p = ProofAssistant()
-    x, y = p.vars("nonzero_real", "x", "y") # the non-zero hypothesis is a hack, because we do not assign 0 an order of magnitude
+    x, y = p.vars("real", "x", "y")
     p.begin_proof(lesssim(bracket(x*y), bracket(x)*bracket(y)))
     return p
 
 def bracket_submult_solution():
     p = bracket_submult_exercise()
+    x,y = p.get_vars("x", "y")
+    p.use(ByCases(Eq(x,0)))
+    p.use(SimpAll())  # generates some warnings from the simplifier
+    p.use(ByCases(Eq(y,0)))
+    p.use(SimpAll())
+    p.use(IsNonzero("x"))
+    p.use(IsNonzero("y"))
     p.use(LogLinarith())
 
 def littlewood_paley_exercise():

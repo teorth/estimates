@@ -219,6 +219,35 @@ class Cases(Tactic):
     def __str__(self):
         return "cases " + self.h
 
+
+class ByCases(Tactic):
+    """
+    Split into two cases, depending on whether an assertin is true or false."""
+    
+    def __init__(self, statement:Boolean, name : str = "this"):
+        self.statement = statement
+        self.name = name
+    
+    def activate(self, state: ProofState) -> list[ProofState]:
+        if not isinstance(self.statement, Boolean):
+            raise ValueError(f"{str(self.statement)} is not a proposition.")
+        name = state.new(self.name)
+        new_states = []
+        new_state = state.copy()
+        new_state.hypotheses[name] = self.statement
+        new_states.append(new_state)
+        new_state = state.copy()
+        new_state.hypotheses[name] = Not(self.statement)
+        new_states.append(new_state)
+        print(f"Splitting into cases {describe(name,self.statement)} and {describe(name,Not(self.statement))}.")
+        return new_states
+        
+    def __str__(self):
+        if self.name == "this":
+            return "by_cases " + str(self.statement)
+        else:
+            return "by_cases " + describe(str.name, self.statement)
+
 class Option(Tactic):
     """
     If the goal is a disjunction, replace it with one of its disjuncts."""

@@ -176,7 +176,7 @@ class IsPositive(Tactic):
     
 class IsNonnegative(Tactic):
     """
-    Makes a variable positive by searching for hypotheses that imply positivity.
+    Makes a variable nonnegative by searching for hypotheses that imply nonnegativity.
     """
 
     def __init__(self, name: str|Basic="this"):
@@ -204,7 +204,7 @@ class IsNonnegative(Tactic):
         elif var.is_real:
             newvar = new_var("nonneg_real", name)
         else:
-            raise ValueError(f"INCONSISTENCY: {name}:{typeof} was somehow proven positive, which is impossible.")
+            raise ValueError(f"INCONSISTENCY: {name}:{typeof} was somehow proven nonnegative, which is impossible.")
         
         print(f"{name} is now of type {typeof(newvar)}.")
         newstate = state.copy()
@@ -223,3 +223,54 @@ class IsNonnegative(Tactic):
     
     def __str__(self):
         return f"is_nonnegative {self.name}"
+    
+
+class IsNonzero(Tactic):
+    """
+    Makes a variable nonzero by searching for hypotheses that imply nonvanishing.
+    """
+
+    def __init__(self, name: str|Basic="this"):
+        self.name = name
+
+    def activate(self, state: ProofState) -> list[ProofState]:
+        if isinstance(self.name, str):
+            name = self.name
+            var = state.get_var(name)
+        else:
+            var = self.name
+            name = state.get_var_name(var)
+        if var.is_nonzero:
+            print(f"{name} is already a nonzero type.")
+            return [state.copy()]
+
+        if not state.test(var != 0):
+            print(f"Cannot prove {name} is nonzero.")
+            return [state.copy()]
+
+        if var.is_integer:
+            newvar = new_var("nonzero_int", name)
+        elif var.is_rational:
+            newvar = new_var("nonzero_rat", name)
+        elif var.is_real:
+            newvar = new_var("nonzero_real", name)
+        else:
+            raise ValueError(f"INCONSISTENCY: {name}:{typeof} was somehow proven positive, which is impossible.")
+        
+        print(f"{name} is now of type {typeof(newvar)}.")
+        newstate = state.copy()
+        for other_name, other_var in state.hypotheses.items():
+            if other_name == name:
+                newstate.hypotheses[name] = Type(newvar)
+            else:
+                newstate.hypotheses[other_name] = other_var.subs(var, newvar)
+        newstate.set_goal(newstate.goal.subs(var, newvar))
+
+        if newstate.goal == true:
+            print(f"Goal solved!")
+            return []
+        else:
+            return [newstate]
+    
+    def __str__(self):
+        return f"is_nonzero {self.name}"

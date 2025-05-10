@@ -1,6 +1,5 @@
-from sympy import Expr, S, Add, Mul, Pow, Symbol, Basic, Eq, sympify, Max
-from sympy.logic.boolalg import Boolean, Or, And, Not, true, false
-from sympy.core.relational import Relational, Rel
+from sympy import Expr, S, Add, Mul, Pow, Symbol, Basic, Eq, sympify, Max, Abs
+from sympy.core.relational import Relational
 
 class OrderOfMagnitude(Basic):
     """
@@ -75,8 +74,10 @@ class Theta(OrderOfMagnitude, Expr):
         if isinstance(expr, OrderOfMagnitude):
             return expr
         
-        assert expr.is_positive, f"Cannot form Θ({expr}), as expression is not known to be positive."
-
+        if not expr.is_positive:
+            print(f"Warning: a non-positive argument {str(expr)} was passed to Theta.")
+            expr = Abs(expr)  # needed to pacify sympy's simplifier, but in general one should avoid nonpositive arguments to Theta
+        
         if expr.is_number:
             # all positive constants collapse to Theta(1)
             obj = Expr.__new__(cls, S.One)
