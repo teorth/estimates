@@ -1,6 +1,15 @@
 from sympy import Expr, S, Add, Mul, Pow, Symbol, Basic, Eq, sympify, Max, Abs
 from sympy.core.relational import Relational
 
+class Undefined(Expr):
+    """A marker that says “– is not defined”, but is still technically a `Expr` for the purposes of sympy operations.
+    Return this value (and optionally, print a warning), rather than an error, when performing an operation that is not defined."""
+    def __str__(self):
+        return "⊥"
+    
+    def __repr__(self):
+        return "⊥" 
+    
 class OrderOfMagnitude(Basic):
     """
     Base class for “order of magnitude” expressions.  Any subclasses will also need to subclass from a sympy class such as Expr or Symbol.  All that this superclass does is intercept the arithmetic operations to redefine them.
@@ -13,10 +22,10 @@ class OrderOfMagnitude(Basic):
         return OrderMax(other, self).doit()
 
     def __sub__(self, other):
-        return FormalSub(self,other)
+        return Undefined()
     
     def __rsub__(self, other):
-        return FormalSub(other,self)
+        return Undefined()
 
     def __mul__(self, other):
         return OrderMul(self, other).doit()
@@ -34,7 +43,7 @@ class OrderOfMagnitude(Basic):
         return OrderPow(self, other).doit()
     
     def __rpow__(self, other):
-        return NotImplementedError 
+        return Undefined() 
 
     def __abs__(self):
         return self
@@ -43,20 +52,7 @@ class OrderOfMagnitude(Basic):
     def as_real_imag(self, deep=True, **hints):
         return (self,S(0))
     
-    
-class FormalSub(Expr):
-    """ A formal difference between two expressions.  This is a hack, to handle the fact that the default equality tester in Expr uses subtraction.  Otherwise, this class has no functionality. """
-    def __new__(cls, lhs, rhs):
-        obj = Expr.__new__(cls, lhs, rhs)
-        obj.name = f"FormalSub({lhs}, {rhs})"
-        return obj
-
-    def __str__(self):
-        return self.name
-    
-    def __repr__(self):
-        return self.name
-    
+        
 
 class Theta(OrderOfMagnitude, Expr):
     """
@@ -76,7 +72,7 @@ class Theta(OrderOfMagnitude, Expr):
         
         if not expr.is_positive:
             print(f"Warning: a non-positive argument {str(expr)} was passed to Theta.")
-            expr = Abs(expr)  # needed to pacify sympy's simplifier, but in general one should avoid nonpositive arguments to Theta
+            return Undefined()
         
         if expr.is_number:
             # all positive constants collapse to Theta(1)
@@ -127,7 +123,8 @@ class OrderMax(OrderOfMagnitude, Expr):
         #TODO: respect sympy's evaluate flag
         newargs = list(dict.fromkeys([Theta(arg) for arg in args]))
         if len(newargs) == 0:
-            raise ValueError("OrderMax requires at least one argument.")
+            print("Warning: OrderMax was passed no arguments.")
+            return Undefined()
         if len(newargs) == 1:
             # if there's only one argument, just return it
             return newargs[0]
@@ -168,7 +165,8 @@ class OrderMin(OrderOfMagnitude, Expr):
 
         newargs = list(dict.fromkeys([Theta(arg) for arg in args]))
         if len(newargs) == 0:
-            raise ValueError("OrderMin requires at least one argument.")
+            print("Warning: OrderMin was passed no arguments.")
+            return Undefined()
         if len(newargs) == 1:
             # if there's only one argument, just return it
             return newargs[0]
@@ -209,7 +207,7 @@ class OrderMul(OrderOfMagnitude, Expr):
 
         newargs = [Theta(arg) for arg in args]
         if len(newargs) == 0:
-            raise ValueError("OrderMul requires at least one argument.")
+            return Theta(1)
         if len(newargs) == 1:
             # if there's only one argument, just return it
             return newargs[0]
@@ -277,11 +275,17 @@ class OrderPow(OrderOfMagnitude, Expr):
     def __new__(cls, *args):
         #TODO: respect sympy's evaluate flag
 
-        assert len(args) == 2, f"OrderPow{args} requires exactly two arguments."
+        if len(args) != 2:
+            print(f"OrderPow{args} requires exactly two arguments.")
+            return Undefined()
         base = S(args[0])
         exp = S(args[1])
-        assert exp.is_number, f"Exponent {exp} must be a constant number."
-        assert isinstance(base, OrderOfMagnitude), f"Base {base} must be an order of magnitude."
+        if not exp.is_number:
+            print(f"Exponent {exp} must be a number.")
+            return Undefined()
+        if not isinstance(base, OrderOfMagnitude):
+            print(f"Base {base} must be an order of magnitude.")
+            return Undefined()
 
         if exp == S(0):
             return Theta(1)
