@@ -19,6 +19,7 @@ Some examples of statements that can be split into disjuncts:
 | `x < Max(y,z)` | `x < y`, `x < z`
 | `Min(x,y) <= z` | `x <= z`, `y <= z`
 | `Min(x,y) < z` | `x < z`, `y < z`
+| `LittlewoodPaley(x,y,z)` | `x = Max(y,z)`, `y = Max(x,z)`, `z = Max(x,y)`
 
 
 Example:

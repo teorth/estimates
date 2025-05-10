@@ -18,6 +18,8 @@ Various laws of asymptotic arithmetic have been encoded within the syntax of `sy
 
 (A technical note: to avoid some unwanted applications of `sympy`'s native simplifier (in particular, those applications that involve subtraction, which we leave purely formal for orders of magnitude), and to force certain type inferences to work, `OrderOfMagnitude` overrides the usual `Add`, `Mul`, `Pow`, `Max`, and `Min` operations with custom alternatives `OrderAdd`, `OrderMul`, `OrderPow`, `OrderMax`, `OrderMin`.)
 
+An abstract order of magnitude can be created using the `OrderSymbol(name)` constructor, similar to the `Symbol()` constructor in `sympy` (but with attributes such as `is_positive` set to false, with the exception of the default flag `is_commutative`).
+
 Here is a simple example of the proof assistant establishing an asymptotic estimate. Informally, one is given a positive integer $N$ and positive reals $x,y$ such that $x \leq 2N^2$ and $y < 3N$, and the task is to conclude that $xy \lesssim N^4$.
 
 ```

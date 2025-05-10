@@ -6,6 +6,7 @@ from simp import *
 from subst import *
 from test import *
 from log_linarith import *
+from littlewood_paley import *
 
 
 
@@ -209,3 +210,27 @@ def amgm_solution():
     x,y = p.get_vars("x", "y")
     p.use_lemma(Amgm(x**2,y**2))
     p.use(SimpAll())
+
+def bracket_submult_exercise():
+    p = ProofAssistant()
+    x, y = p.vars("nonzero_real", "x", "y") # the non-zero hypothesis is a hack, because we do not assign 0 an order of magnitude
+    p.begin_proof(lesssim(bracket(x*y), bracket(x)*bracket(y)))
+    return p
+
+def bracket_submult_solution():
+    p = bracket_submult_exercise()
+    p.use(LogLinarith())
+
+def littlewood_paley_exercise():
+    p = ProofAssistant()
+    N_1, N_2, N_3 = p.vars("order", "N_1", "N_2", "N_3")
+    p.assume(LittlewoodPaley(N_1,N_2,N_3), "h")
+    p.begin_proof(Min(N_1,N_2,N_3) * Max(N_1,N_2,N_3)**2 <= N_1*N_2*N_3)
+    return p
+
+def littlewood_paley_solution():
+    p = littlewood_paley_exercise()
+    p.use(Cases("h"))
+    p.use(LogLinarith())
+    p.use(LogLinarith())
+    p.use(LogLinarith())

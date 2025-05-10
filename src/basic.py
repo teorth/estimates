@@ -14,6 +14,8 @@ def typeof(obj:Basic) -> str:
             return f"pos_int"
         elif obj.is_nonnegative:
             return f"nonneg_int"
+        elif obj.is_nonzero:
+            return f"nonzero_int"
         else:
             return f"int"
     elif obj.is_rational:
@@ -21,6 +23,8 @@ def typeof(obj:Basic) -> str:
             return f"pos_rat"
         elif obj.is_nonnegative:
             return f"nonneg_rat"
+        elif obj.is_nonzero:
+            return f"nonzero_rat"
         else:
             return f"rat"
     elif obj.is_real:
@@ -28,6 +32,8 @@ def typeof(obj:Basic) -> str:
             return f"pos_real"
         elif obj.is_nonnegative:
             return f"nonneg_real"
+        elif obj.is_nonzero:
+            return f"nonzero_real"
         else:
             return f"real"
     elif obj.is_Boolean:
@@ -49,24 +55,30 @@ def new_var(type:str, name:str) -> Expr:
             return Symbol(name, integer=True, positive=True)
         case "nonneg_int":
             return Symbol(name, integer=True, nonnegative=True)  
+        case "nonzero_int":
+            return Symbol(name, integer=True, nonzero=True)
         case "real":
             return Symbol(name, real=True)
         case "pos_real":
             return Symbol(name, real=True, positive=True)
         case "nonneg_real":
             return Symbol(name, real=True, nonnegative=True)
+        case "nonzero_real":
+            return Symbol(name, real=True, nonzero=True)
         case "rat":
             return Symbol(name, rational=True)
         case "pos_rat":
             return Symbol(name, rational=True, positive=True)
         case "nonneg_rat":
             return Symbol(name, rational=True, nonnegative=True)
+        case "nonzero_rat":
+            return Symbol(name, rational=True, nonzero=True)
         case "bool":
             return Proposition(name)
         case "order":
             return OrderSymbol(name)
         case _:
-            raise ValueError(f"Unknown type {type}.  Currently accepted types: 'int', 'pos_int', 'nonneg_int', 'real', 'pos_real', 'nonneg_real',  `rat`, `pos_rat`, `nonneg_rat`, 'bool', 'order'.")
+            raise ValueError(f"Unknown type {type}.  Currently accepted types: 'int', 'pos_int', 'nonneg_int', `nonzero_int`, 'real', 'pos_real', 'nonneg_real', 'nonzero_real', 'rat', 'pos_rat`, 'nonneg_rat', 'nonzero_rat', 'bool', 'order'.")
 
 
 class Type(Basic):

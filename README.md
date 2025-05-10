@@ -10,6 +10,7 @@ This project aims to develop (in Python) a lightweight proof assistant that is s
 - [List of navigation tools](docs/navigation.md)
 - [Linear programming code](docs/linprog.md)
 - [Implementation details for asymptotic orders of magnitude](docs/asymptotic.md)
+- [Some support for Littlewood-Paley type frequency estimation](docs/littlewood_paley.md)
 - [List of lemmas](docs/lemmas.md)
 
 ## Older versions and posts

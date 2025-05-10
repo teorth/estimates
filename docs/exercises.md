@@ -362,3 +362,58 @@ y: nonneg_real
 ```
 
 **Hint**: Apply the `Amgm()` lemma, as listed on the [lemmas page](lemmas.md).
+
+## Bracket submultiplicativity example
+
+**Informal version** If $x,y$ are non-zero reals, then $\langle x y \rangle \lesssim \langle x \rangle \langle y\rangle$, where $\langle x \rangle := (1+|x|^2)^{1/2}$ is the ``Japanese bracket''.
+
+**Python code**:
+```
+def bracket_submult_exercise():
+    p = ProofAssistant()
+    x, y = p.vars("nonzero_real", "x", "y") # the non-zero hypothesis is a hack, because we do not assign 0 an order of magnitude
+    p.begin_proof(lesssim(bracket(x*y), bracket(x)*bracket(y)))
+    return p
+```
+
+**In an interactive Python environment**:
+```
+>>> from main import *
+>>> p = bracket_submult_exercise()
+Starting proof.  Current proof state:
+x: nonzero_real
+y: nonzero_real
+|- Max(Theta(1), Theta(x**2)*Theta(y**2))**1/2 <= Max(Theta(1), Theta(x**2))**1/2*Max(Theta(1), Theta(y**2))**1/2
+```
+
+**Hint**: This can be one-shotted by `LogLinarith()`.
+
+Note: annoyingly, the current framework can only handle the case when $x,y$ are non-zero.  This is because we are not assigning an order of magnitude to 0.  In the future, we may develop the notion of an extended order of magnitude which assigns an order of $-\infty$ to $0$, but this could be a little tricky.
+
+## Littlewood-Paley example
+
+**Informal version** If $N_1,N_2,N_3$ are orders of magnitude obeying the [Littlewood-Paley property](littlewood_paley.md), then $\min(N_1,N_2,N_3) \max(N_1,N_2,N_3)^2 \lesssim N_1 N_2 N_3$.
+
+**Python code**:
+```
+def littlewood_paley_exercise():
+    p = ProofAssistant()
+    N_1, N_2, N_3 = p.vars("order", "N_1", "N_2", "N_3")
+    p.assume(LittlewoodPaley(N_1,N_2,N_3), "h")
+    p.begin_proof(Min(N_1,N_2,N_3) * Max(N_1,N_2,N_3)**2 <= N_1*N_2*N_3)
+    return p
+```
+
+**In an interactive Python environment**:
+```
+>>> from main import *
+>>> p = littlewood_paley_exercise()
+Starting proof.  Current proof state:
+N_1: order
+N_2: order
+N_3: order
+h: LittlewoodPaley(N_1, N_2, N_3)
+|- Max(N_1, N_2, N_3)**2*Min(N_1, N_2, N_3) <= N_1*N_2*N_3
+```
+
+**Hint**: Case split the Littlewood-Paley hypothesis then apply `LogLinarith()`.

@@ -3,12 +3,13 @@ from basic import *
 from tactic import *
 from sympy import false, simplify_logic, Max, Min, LessThan, StrictLessThan, GreaterThan, StrictGreaterThan
 from order_of_magnitude import *
+from littlewood_paley import *
 
 # Various tactics for handling propositional logic.
 
 def get_conjuncts(expr: Expr) -> list[Expr]:
     """
-    Get the conjuncts of an expression (after unpacking), or None if no conjuncts found
+    Get the conjuncts of an expression (after unpacking), or None if no conjuncts found.
     """
     conjuncts = []
     if isinstance(expr, And):
@@ -52,7 +53,6 @@ def get_conjuncts(expr: Expr) -> list[Expr]:
             for arg in expr.args[0].args:
                 conjuncts.append(Rel(arg, expr.args[1], expr.rel_op))
             return conjuncts
-
     return None
 
 def get_disjuncts(expr: Expr) -> list[Expr]:
@@ -84,6 +84,13 @@ def get_disjuncts(expr: Expr) -> list[Expr]:
             for arg in expr.args[0].args:
                 disjuncts.append(Rel(arg, expr.args[1], expr.rel_op))
             return disjuncts
+    elif isinstance(expr, LittlewoodPaley):
+        disjuncts = []
+        n = len(expr.args)
+        for i in range(n):
+            disjuncts.append(Eq(expr.args[i], Max( *[expr.args[j] for j in range(n) if j != i]) ))
+        return disjuncts
+
     return None
 
 

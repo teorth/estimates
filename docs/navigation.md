@@ -89,12 +89,15 @@ Introduce a variable `name` of type `type`.  Only valid in assumption mode.  Cur
 * `"real"` - real numbers
     * `"pos_real"` - positive real numbers
     * `"nonneg_real"` - nonnegative real numbers
+    * `"nonzero_real"` - nonzero real numbers
 * `"int"` - integers
     * `"pos_int"` - positive integers (natural numbers, in some contexts)
     * `"nonneg_int"` - nonnegative integers (natural numbers, in some other contexts)
+    * `"nonzero_int"` - nonzero integers
 * `"rat"` - rational numbers
     * `"pos_rat"` - positive rationals
-    * `"noneg_rat"` - nonnegative rationals
+    * `"nonneg_rat"` - nonnegative rationals
+    * `"nonzero_rat"` - nonzero rationals
 * `"bool"` - boolean variables
 * `"order"` - an order of magnitude (necessarily positive)
 
