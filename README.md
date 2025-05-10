@@ -1,6 +1,6 @@
 # A mathematical proof assistant (Version 2.0)
 
-This project aims to develop (in Python) a lightweight proof assistant that is substantially less powerful than full proof assistants such as Lean, Isabelle or Rocq, but which (hopefully) is easy to use to prove short, tedious tasks, such as verifying that one inequality or estimate follows from others.  One specific intention of this assistant is to provide support for [asymptotic estimates](asymptotic.md).
+This project aims to develop (in Python) a lightweight proof assistant that is substantially less powerful than full proof assistants such as Lean, Isabelle or Rocq, but which (hopefully) is easy to use to prove short, tedious tasks, such as verifying that one inequality or estimate follows from others.  One specific intention of this assistant is to provide support for [asymptotic estimates](docs/asymptotic.md).
 
 ## Documentation links
 
