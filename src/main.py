@@ -180,7 +180,23 @@ def loglinarith_hard_solution():
     p.use(LogLinarith())
     p.use(SimpAll())
     p.use(LogLinarith())
-    
+
+def loglinarith_hard_solution2():
+    p = loglinarith_hard_exercise()
+    p.use(LogLinarith())
+
+def loglinarith_imposssible_example():
+    p = ProofAssistant()
+    N = p.var("pos_int", "N")
+    x, y = p.vars("pos_real", "x", "y")
+    p.assume(x <= 2*N**2+1, "h1")
+    p.assume(y < 3*N+4, "h2")
+    p.begin_proof(lesssim(x*y, N**2))
+    return p
+
+def loglinarith_failure_example():
+    p = loglinarith_imposssible_example()
+    p.use(LogLinarith(verbose=True))
 
 def amgm_exercise():
     p = ProofAssistant()

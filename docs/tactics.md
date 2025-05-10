@@ -283,34 +283,50 @@ Linear arithmetic was unable to prove goal.
 
 ### `LogLinarith(verbose = False)`
 
-Similar to `Linarith()`, but now applies to order of magnitude inequalities rather than inequalities regarding real numbers; and uses multiplicative operations rather than additive ones.
+Similar to `Linarith()`, but now applies to order of magnitude inequalities rather than inequalities regarding real numbers; and uses multiplicative operations rather than additive ones.  Additive relations between order of magnitudes (which are converted to `OrderMax` expressions) are case split.  (Caution: this means that the run time of this method increases exponentially with the number of additions present.)
 
 Example:
 ```
 >>> from main import *
->>> p = loglinarith_exercise()
+>>> p = loglinarith_imposssible_example()
 Starting proof.  Current proof state:
 N: pos_int
 x: pos_real
 y: pos_real
-h1: x <= 2*N**2
-h2: y < 3*N
-|- Theta(x)*Theta(y) <= Theta(N)**4
+h1: x <= 2*N**2 + 1
+h2: y < 3*N + 4
+|- Theta(x)*Theta(y) <= Theta(N)**2
 >>> p.use(LogLinarith(verbose=True))
+Identified the following disjunctions of asymptotic inequalities that we need to obtain a contradiction from:
+['Theta(x)**1 * Max(Theta(1), Theta(N)**2)**-1 <= Theta(1)']
+['Theta(N)**1 >= Theta(1)']
+['Theta(y)**1 * Max(Theta(1), Theta(N))**-1 <= Theta(1)']
+['Theta(x)**1 * Theta(y)**1 * Theta(N)**-2 > Theta(1)']
+['Max(Theta(1), Theta(N))**-1 <= Theta(1)']
+['Theta(N)**1 * Max(Theta(1), Theta(N))**-1 <= Theta(1)']
+['Max(Theta(1), Theta(N))**-1 = Theta(1)', 'Theta(N)**1 * Max(Theta(1), Theta(N))**-1 = Theta(1)']
+['Max(Theta(1), Theta(N)**2)**-1 <= Theta(1)']
+['Theta(N)**2 * Max(Theta(1), Theta(N)**2)**-1 <= Theta(1)']
+['Max(Theta(1), Theta(N)**2)**-1 = Theta(1)', 'Theta(N)**2 * Max(Theta(1), Theta(N)**2)**-1 = Theta(1)']
 Checking feasibility of the following inequalities:
+Theta(x)**1 * Max(Theta(1), Theta(N)**2)**-1 <= Theta(1)
 Theta(N)**1 >= Theta(1)
-Theta(x)**1 * Theta(N)**-2 <= Theta(1)
-Theta(y)**1 * Theta(N)**-1 <= Theta(1)
-Theta(x)**1 * Theta(y)**1 * Theta(N)**-4 > Theta(1)
-Infeasible by multiplying the following:
-Theta(N)**1 >= Theta(1) raised to power 1
-Theta(x)**1 * Theta(N)**-2 <= Theta(1) raised to power -1
-Theta(y)**1 * Theta(N)**-1 <= Theta(1) raised to power -1
-Theta(x)**1 * Theta(y)**1 * Theta(N)**-4 > Theta(1) raised to power 1
-Proof complete!
+Theta(y)**1 * Max(Theta(1), Theta(N))**-1 <= Theta(1)
+Theta(x)**1 * Theta(y)**1 * Theta(N)**-2 > Theta(1)
+Max(Theta(1), Theta(N))**-1 <= Theta(1)
+Theta(N)**1 * Max(Theta(1), Theta(N))**-1 <= Theta(1)
+Theta(N)**1 * Max(Theta(1), Theta(N))**-1 = Theta(1)
+Max(Theta(1), Theta(N)**2)**-1 <= Theta(1)
+Theta(N)**2 * Max(Theta(1), Theta(N)**2)**-1 <= Theta(1)
+Theta(N)**2 * Max(Theta(1), Theta(N)**2)**-1 = Theta(1)
+Feasible with the following values, for an unbounded order of magnitude X:
+Theta(x) = X**1/2
+Theta(y) = X**1/4
+Max(Theta(1), Theta(N)) = X**1/4
+Max(Theta(1), Theta(N)**2) = X**1/2
+Theta(N) = X**1/4
 ```
-
-Note that the hypothesis that `N` was a positive integer was incorporated as a hypothesis `Theta(N)**1 >= Theta(1)`.
+In this case, the problem is not solvable, and an explicit asymptotic counterexample was provided.  Note that the hypothesis that `N` was a positive integer was incorporated as a hypothesis `Theta(N)**1 >= Theta(1)`.
 
 ## Substitution and definition tactics
 

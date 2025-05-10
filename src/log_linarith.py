@@ -4,6 +4,7 @@ from sympy import S, Eq, LessThan, StrictLessThan, GreaterThan, StrictGreaterTha
 from sympy.core.relational import Relational
 from fractions import Fraction
 from order_of_magnitude import *
+from itertools import product
 
 class ApplyTheta(Tactic):
     """ A tactic to apply the Theta function to an hypothesis. """
@@ -92,6 +93,60 @@ def order_str(self: Inequality) -> str:
 Inequality.order_str = order_str
 
 
+def inequality_of(hyp: Expr) -> Inequality:
+    """ Convert a hypothesis into an Inequality.  Implicitly assumes that the hypothesis is a relation (but not unequality) involving orders of magnitude. """ 
+                
+    coeffs = extract_monomials(hyp.args[0]/hyp.args[1])
+            
+    if isinstance(hyp, Eq):
+        return Inequality(coeffs, 'eq', S(0))
+    elif isinstance(hyp, LessThan):
+        return Inequality(coeffs, 'leq', S(0))
+    elif isinstance(hyp, StrictLessThan):
+        return Inequality(coeffs, 'lt', S(0))
+    elif isinstance(hyp, GreaterThan):
+        return Inequality(coeffs, 'geq', S(0))
+    elif isinstance(hyp, StrictGreaterThan):
+        return Inequality(coeffs, 'gt', S(0))
+
+def max_objects(expr: Basic) -> set[Basic]:
+    """ Returns a set of the objects in the expression that are of type OrderMax. """
+    if isinstance(expr, OrderMax):
+        objects = {expr}
+        for arg in expr.args:
+            objects.update(max_objects(arg))
+        return objects
+    elif isinstance(expr, OrderMin|OrderMul):
+        objects = set()
+        for arg in expr.args:
+            objects.update(max_objects(arg))
+        return objects
+    elif isinstance(expr, OrderPow):
+        return max_objects(expr.args[0])
+    elif isinstance(expr, Relational):
+        objects = max_objects(expr.args[0])
+        objects.update(max_objects(expr.args[1]))
+        return objects
+    else:
+        return set()
+
+def min_objects(expr: Basic) -> list[Basic]:
+    """ Returns a list of the objects in the expression that are of type OrderMin. """
+    if isinstance(expr, OrderMin):
+        objects = {expr}
+        for arg in expr.args:
+            objects.update(min_objects(arg))
+        return objects
+    elif isinstance(expr, OrderMax|OrderMul):
+        objects = set()
+        for arg in expr.args:
+            objects.update(min_objects(arg))
+        return objects
+    elif isinstance(expr, OrderPow):
+        return min_objects(expr.args[0])
+    else:
+        return set()
+
 class LogLinarith(Tactic):
     """ A tactic to try to establish a goal via logaithmic linear arithmetic for asymptotic inequalities.  Inspired by the linarith tactic in Lean."""
     def __init__ (self, verbose: bool = False):
@@ -102,68 +157,87 @@ class LogLinarith(Tactic):
 
     def activate(self, state: ProofState) -> list[ProofState]:        
         # First, gather all the hypotheses that can generate inequalities.
+        if false in state.list_hypotheses() or state.goal == true:
+            print("Goal trivially follows from hypotheses.")
+            return []
+
         hypotheses = set()
+
         for hypothesis in state.list_hypotheses(variables=true):
-            if isinstance(hypothesis, Eq|LessThan|StrictLessThan|GreaterThan|StrictGreaterThan|Type):
+            if isinstance(hypothesis, Eq|LessThan|StrictLessThan|GreaterThan|StrictGreaterThan|Ne|Type):
                 hypotheses.add(hypothesis)
+        if isinstance(state.goal, Eq|LessThan|StrictLessThan|GreaterThan|StrictGreaterThan|Ne):
+            hypotheses.add(Not(state.goal))
         
-        # the different hypothesis scenarios to consider.  Usually it is just one scenario, but when trying to prove an equality, there are two counterfactorial scenarios to consider, depending on whether the LHS is greater than or less than the RHS.
-        scenarios = [hypotheses]
-        if isinstance(state.goal, Ne|LessThan|StrictLessThan|GreaterThan|StrictGreaterThan):
-            scenarios[0].add(Not(state.goal))
-        elif isinstance(state.goal, Eq):
-            scenarios.append(hypotheses.copy())
-            scenarios[0].add(StrictLessThan(state.goal.args[0], state.goal.args[1]))
-            scenarios[1].add(StrictLessThan(state.goal.args[1], state.goal.args[0]))
-        
+        # Now gather a list of inequalities for each hypothesis.  In most cases, only one inequality is generated.
+        inequality_lists = []
+        max_objects_set = set()
+        min_objects_set = set()
+        for hypothesis in hypotheses:
+            # convert the hypothesis to an asymptotic form, which in the case of unequalities generates two hypotheses.
+            newhypotheses = []
+            if isinstance(hypothesis, Type):  # check for positivity conditions to add to the inequalities
+                if hypothesis.var().is_positive and hypothesis.var().is_integer:
+                    newhypotheses = [Rel( Theta(hypothesis.var()), Theta(1), ">=")] # the integrality gap!
+                else:
+                    continue
+            elif isinstance(hypothesis, Relational):
+                # Obtain the associated relation involving orders of magnitude.
+                if isinstance(hypothesis.args[0], OrderOfMagnitude) and isinstance(hypothesis.args[1], OrderOfMagnitude):
+                    if isinstance(hypothesis, Ne):
+                        newhypotheses = [Rel( Theta(hypothesis.args[0]), Theta(hypothesis.args[1]), "<" ), [Rel( Theta(hypothesis.args[0]), Theta(hypothesis.args[1]), ">" )]]
+                    else:
+                        newhypotheses = [hypothesis]
+                elif hypothesis.args[0].is_positive and hypothesis.args[1].is_positive:
+                    if isinstance(hypothesis, LessThan|StrictLessThan):
+                        # Note that Theta turns strict inequalities into non-strict ones.
+                        newhypotheses = [Rel( Theta(hypothesis.args[0]), Theta(hypothesis.args[1]), "<=" )]
+                    elif isinstance(hypothesis, GreaterThan|StrictGreaterThan):
+                        newhypotheses = [Rel( Theta(hypothesis.args[1]), Theta(hypothesis.args[0]), ">=" )]
+                    elif isinstance(hypothesis, Eq):
+                        newhypotheses = [Rel( Theta(hypothesis.args[0]), Theta(hypothesis.args[1]), "=" )]
+                    else:
+                        continue
+            else:
+                continue
+
+            newhypotheses = [hyp for hyp in newhypotheses if hyp != false]  # remove false hypotheses
+
+            if len(newhypotheses) == 0:
+                print("Goal trivially follows from hypotheses.")
+                return []
+            
+            for newhypothesis in newhypotheses:
+                max_objects_set.update(max_objects(newhypothesis))
+                min_objects_set.update(min_objects(newhypothesis))
+
+            # Now, convert the new hypotheses into inequalities.
+            inequality_lists.append([inequality_of(newhypothesis) for newhypothesis in newhypotheses])
+
+        # For each max object and min object, add further inequalities
+        for max_object in max_objects_set:
+            extra_inequality = []
+            for arg in max_object.args:
+                inequality_lists.append([inequality_of(Rel(arg, max_object, "<="))])
+                extra_inequality.append(inequality_of(Rel(arg, max_object, "==")))
+            inequality_lists.append(extra_inequality)
+        for min_object in min_objects_set:
+            extra_inequality = []
+            for arg in min_object.args:
+                inequality_lists.append([inequality_of(Rel(arg, min_object, ">="))])
+                extra_inequality.append(inequality_of(Rel(arg, min_object, "==")))
+            inequality_lists.append(extra_inequality)        
+
+        if self.verbose:
+            print("Identified the following disjunctions of asymptotic inequalities that we need to obtain a contradiction from:")
+            for inequalities in inequality_lists:
+                print( [order_str(ineq) for ineq in inequalities])
+
+        # Now, iterate over all possible combinations of inequalities, and check if they are feasible.
         found_counterexample = False
         proofs = []
-        inequalities_list = []
 
-        for scenario in scenarios:
-            # Now, build the inequalities from the hypotheses.
-            inequalities = []
-            if false in scenario:
-                continue # No need to consider a scenario that has a false hypothesis.
-            for hypothesis in scenario:
-                newhypothesis = None
-                if isinstance(hypothesis, Type):  # check for positivity conditions to add to the inequalities
-                    if hypothesis.var().is_positive and hypothesis.var().is_integer:
-                        newhypothesis = Rel( Theta(hypothesis.var()), Theta(1), ">=") # the integrality gap!
-                elif isinstance(hypothesis, Relational):
-                    # Obtain the associated relation involving orders of magnitude.
-                    if isinstance(hypothesis.args[0], OrderOfMagnitude) and isinstance(hypothesis.args[1], OrderOfMagnitude):
-                        newhypothesis = hypothesis
-                    elif hypothesis.args[0].is_positive and hypothesis.args[1].is_positive:
-                        if isinstance(hypothesis, LessThan|StrictLessThan):
-                            # Note that Theta turns strict inequalities into non-strict ones.
-                            newhypothesis = Rel( Theta(hypothesis.args[0]), Theta(hypothesis.args[1]), "<=" )
-                        elif isinstance(hypothesis, GreaterThan|StrictGreaterThan):
-                            newhypothesis = Rel( Theta(hypothesis.args[1]), Theta(hypothesis.args[0]), ">=" )
-                        elif isinstance(hypothesis, Eq):
-                            newhypothesis = Rel( Theta(hypothesis.args[0]), Theta(hypothesis.args[1]), "=" )
-                            
-                if newhypothesis is None:
-                    continue
-                
-
-                coeffs = extract_monomials(newhypothesis.args[0]/newhypothesis.args[1])
-            
-                if isinstance(newhypothesis, Eq):
-                    inequalities.append(Inequality(coeffs, 'eq', S(0)))
-                elif isinstance(newhypothesis, LessThan):
-                    inequalities.append(Inequality(coeffs, 'leq', S(0)))
-                elif isinstance(newhypothesis, StrictLessThan):
-                    inequalities.append(Inequality(coeffs, 'lt', S(0)))
-                elif isinstance(newhypothesis, GreaterThan):
-                    inequalities.append(Inequality(coeffs, 'geq', S(0)))
-                elif isinstance(newhypothesis, StrictGreaterThan):
-                    inequalities.append(Inequality(coeffs, 'gt', S(0)))
-
-            # TODO: figure out how to also deal with MAX terms: a tropical_linarith
-
-            inequalities_list.append(inequalities)
-
+        for inequalities in product(*inequality_lists):
             outcome, dict = feasibility(inequalities)
             if outcome:
                 found_counterexample = True
@@ -185,7 +259,7 @@ class LogLinarith(Tactic):
         else:
             if self.verbose:
                 n = 0
-                for inequalities in inequalities_list:
+                for inequalities in product(*inequality_lists):
                     print("Checking feasibility of the following inequalities:")
                     for ineq in inequalities:
                         print(order_str(ineq))

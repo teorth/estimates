@@ -1,7 +1,6 @@
 from sympy import Expr, S, Add, Mul, Pow, Symbol, Basic, Eq, sympify, Max
 from sympy.logic.boolalg import Boolean, Or, And, Not, true, false
 from sympy.core.relational import Relational, Rel
-from sympy.multipledispatch import dispatch
 
 class OrderOfMagnitude(Basic):
     """
