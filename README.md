@@ -1,4 +1,4 @@
-# A mathematical proof assistant 
+# A mathematical proof assistant (Version 2.0)
 
 This project aims to develop (in Python) a lightweight proof assistant that is substantially less powerful than full proof assistants such as Lean, Isabelle or Coq, but which (hopefully) is easy to use to prove short, tedious tasks, such as verifying that one inequality or estimate follows from others.  One specific intention of this assistant is to provide support for [asymptotic estimates](asymptotic.md).
 
@@ -322,3 +322,33 @@ h2: (x >= y) & (y >= z)
 ```
 (Here we are using `sympy`'s symbolic equality relation `Eq`, because Python has reserved the `=` and `==` operators for other purposes.)
 Now one is in **Tactic Mode** and can use tactics as before.
+
+## Lemmas
+
+In addition to general proof tactics, I plan to build a [library of lemmas](docs/lemmas.md) that can be used for more specialized applications.  Here is one example, using an arithmetic mean geometric mean lemma $(xy)^{1/2} \leq \frac{x+y}{2}$ to prove a slight variant of that lemma:
+```
+>>> from main import *
+>>> p = amgm_exercise()
+Starting proof.  Current proof state:
+x: nonneg_real
+y: nonneg_real
+|- 2*x*y <= x**2 + y**2
+>>> x,y = p.get_vars("x","y")
+>>> p.use_lemma(Amgm(x**2,y**2))
+Applying lemma am_gm(x**2, y**2) to conclude this: x**1.0*y**1.0 <= x**2/2 + y**2/2.
+1 goal remaining.
+>>> p.use(SimpAll())
+Goal solved!
+Proof complete!
+```
+
+## Contributions and feedback
+
+I would be happy to receive contributions and feedback on this tool, either as Github issues and pull requests, or the associated blog post.  Examples of such contributions can include
+
+- Bug reports
+- Suggestions or submissions of exercises (or problems which are currently difficult to solve with the existing tactics and lemmas, but which can suggest new tactics and lemmas to implement)
+- Suggestions or submissions for new tactics
+- Suggestions or submissions for new lemmas
+- Suggestions or submissions for new data types
+- Suggestions or submissions of new user interfaces

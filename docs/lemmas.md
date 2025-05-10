@@ -7,3 +7,20 @@ Currently only a proof of concept lemma is in place.  The plan is to have an ext
 ## Amgm(x,y)
 
 The arithmetic mean-geometric mean inequality $(xy)^{1/2} \leq \frac{x+y}{2}$.  Needs $x,y$ to be non-negative in order to be applied.
+
+Example:
+```
+>>> from main import *
+>>> p = amgm_exercise()
+Starting proof.  Current proof state:
+x: nonneg_real
+y: nonneg_real
+|- 2*x*y <= x**2 + y**2
+>>> x,y = p.get_vars("x","y")
+>>> p.use_lemma(Amgm(x**2,y**2))
+Applying lemma am_gm(x**2, y**2) to conclude this: x**1.0*y**1.0 <= x**2/2 + y**2/2.
+1 goal remaining.
+>>> p.use(SimpAll())
+Goal solved!
+Proof complete!
+```
