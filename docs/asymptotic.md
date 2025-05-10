@@ -16,9 +16,9 @@ There is then an operation `Theta` that maps positive real `sympy` expressions t
 
 Various laws of asymptotic arithmetic have been encoded within the syntax of `sympy`, for instance `Theta(C)` simplifies to `Theta(1)` for any numerical constant `C`, `Theta(X+Y)` simplifies to `Max(Theta(X),Theta(Y))`, and so forth.
 
-**Technical note**: to avoid some unwanted applications of `sympy`'s native simplifier (in particular, those applications that involve subtraction, which we leave purely formal for orders of magnitude), and to force certain type inferences to work, `OrderOfMagnitude` overrides the usual `Add`, `Mul`, `Pow`, `Max`, and `Min` operations with custom alternatives `OrderAdd`, `OrderMul`, `OrderPow`, `OrderMax`, `OrderMin`.)
+**Technical note**: to avoid some unwanted applications of `sympy`'s native simplifier (in particular, those applications that involve subtraction, which we leave purely formal for orders of magnitude), and to force certain type inferences to work, `OrderOfMagnitude` overrides the usual `Add`, `Mul`, `Pow`, `Max`, and `Min` operations with custom alternatives `OrderAdd`, `OrderMul`, `OrderPow`, `OrderMax`, `OrderMin`.
 
-**Technical note**: We technically permit `Theta` to take non-positive values, but a warning will be sent if this happens.  `sympy`'s native simplifier will sometimes trigger this warning.
+**Technical note**: We technically permit `Theta` to take non-positive values, but a warning will be sent if this happens and an `Undefined()` element will be generated.  (`sympy`'s native simplifier will sometimes trigger this warning.)  Similarly for other undefined operations, such as `OrderMax` or `OrderMin` applied to an empty tuple.
 
 An abstract order of magnitude can be created using the `OrderSymbol(name)` constructor, similar to the `Symbol()` constructor in `sympy` (but with attributes such as `is_positive` set to false, with the exception of the default flag `is_commutative`).
 
