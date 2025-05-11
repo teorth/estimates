@@ -5,6 +5,7 @@ from sympy import false, simplify_logic, Max, Min, LessThan, StrictLessThan, Gre
 from order_of_magnitude import *
 from littlewood_paley import *
 from sympy.core.relational import Rel
+from test import *
 
 # Various tactics for handling propositional logic.
 
@@ -290,8 +291,21 @@ class Claim(Tactic):
         second_state = state.copy()
         name = state.new(self.name)
         second_state.hypotheses[name] = self.expr
-        print(f"We claim that {self.expr}.")
-        return [first_state, second_state]
+
+        if first_state.test(first_state.goal,verbose=false):
+            if second_state.test(second_state.goal,verbose=false):
+                print(f"Goal follows trivially after observing {self.expr}.")
+                return []
+            else:
+                print(f"Observe that {self.expr} holds.")
+                return [second_state]
+        else:
+            if second_state.test(second_state.goal, verbose=false):
+                print(f"Clearly, it suffices to show {self.expr}.")
+                return [first_state]
+            else:            
+                print(f"We claim that {self.expr}.")
+                return [first_state, second_state]
     
     def __str__(self):
         if self.name == "this":

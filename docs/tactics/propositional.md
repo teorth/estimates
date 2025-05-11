@@ -142,7 +142,7 @@ example (x: real) (y: real) (h1: (x > -1) & (x < 1)) (h2: (y > -2) & (y < 2)): (
 
 ## `Claim(expr:Boolean, name:str = "this")`
 
-Create a subgoal to prove `expr`, and then a further subgoal to establish the original goal with the additional hypothesis `name: expr`.  Similar to the "have" tactic in Lean.
+Create a subgoal to prove `expr`, and then a further subgoal to establish the original goal with the additional hypothesis `name: expr`.  Similar to the "have" tactic in Lean.  If either of the two subclaim goals follows trivially from their respective hypotheses, that subgoal will be removed.
 
 Example:
 ```

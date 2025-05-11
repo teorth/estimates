@@ -153,11 +153,13 @@ def min_objects(expr: Basic) -> list[Basic]:
 
 class LogLinarith(Tactic):
     """ A tactic to try to establish a goal via logaithmic linear arithmetic for asymptotic inequalities.  Inspired by the linarith tactic in Lean."""
-    def __init__ (self, verbose: bool = False):
+    def __init__ (self, verbose: bool = False, split_max : bool = True):
         """
         :param verbose: If true, print the inequalities generated.
+        :param split_max: If true, split the max objects into their components.  This makes the tactic more powerful, but also slower.
         """
         self.verbose = verbose
+        self.split_max = split_max
 
     def activate(self, state: ProofState) -> list[ProofState]:        
         # First, gather all the hypotheses that can generate inequalities.
@@ -216,10 +218,12 @@ class LogLinarith(Tactic):
             if len(newhypotheses) == 0:
                 print("Goal trivially follows from hypotheses.")
                 return []
-            
-            for newhypothesis in newhypotheses:
-                max_objects_set.update(max_objects(newhypothesis))
-                min_objects_set.update(min_objects(newhypothesis))
+
+            # If we are splitting max objects, do so.   
+            if self.split_max:        
+                for newhypothesis in newhypotheses:
+                    max_objects_set.update(max_objects(newhypothesis))
+                    min_objects_set.update(min_objects(newhypothesis))
 
             # Now, convert the new hypotheses into inequalities.
             inequality_lists.append([inequality_of(newhypothesis) for newhypothesis in newhypotheses])
@@ -287,4 +291,7 @@ class LogLinarith(Tactic):
 
 
     def __str__(self):
-        return "log_linarith"
+        if self.split_max:
+            return "log_linarith!"
+        else:
+            return "log_linarith"

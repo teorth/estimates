@@ -84,9 +84,9 @@ Linear arithmetic was unable to prove goal.
 >>>
 ```
 
-## `LogLinarith(verbose = False)`
+## `LogLinarith(verbose = False, splitmax = True)`
 
-Similar to `Linarith()`, but now applies to order of magnitude inequalities rather than inequalities regarding real numbers; and uses multiplicative operations rather than additive ones.  Additive relations between order of magnitudes (which are converted to `OrderMax` expressions) are case split.  (Caution: this means that the run time of this method increases exponentially with the number of additions present.)
+Similar to `Linarith()`, but now applies to order of magnitude inequalities rather than inequalities regarding real numbers; and uses multiplicative operations rather than additive ones.  Additive relations between order of magnitudes (which are converted to `OrderMax` expressions) are case split, unless `splitmax' is set to `False`.  (Caution: splitting maxmima (and minima) means that the run time of this method increases exponentially with the number of additions/maxima/minima present.)
 
 Example:
 ```

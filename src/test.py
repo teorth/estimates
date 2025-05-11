@@ -5,26 +5,28 @@ from proofstate import *
 from basic import *
 from tactic import *
 
-def test(hypotheses: set[Basic], goal: Basic) -> bool:
+def test(hypotheses: set[Basic], goal: Basic, verbose:bool = true) -> bool:
     """
     Check if a goal follows immediately from the stated hypotheses, including from the implicit ones.
     """
 
-    if goal == true:
+    simp_goal = goal.simplify()
+    if simp_goal == true:
         return True
     
     for hyp in hypotheses:
-        if Implies(hyp, goal) == True:
-            print(f"Goal {goal} follows from hypothesis {hyp}!")
+        if Implies(hyp.simplify(), simp_goal) == True:
+            if verbose:
+                print(f"Goal {goal} follows from hypothesis {hyp}!")
             return True
 
     return False
 
-def state_test(state: ProofState, goal:Basic) -> bool:
+def state_test(state: ProofState, goal:Basic, verbose:bool = true) -> bool:
     """
     Check if a goal follows immediately from the stated hypotheses, including from the implicit ones.
     """
-    return test(state.hypotheses.values(), goal)
+    return test(state.hypotheses.values(), goal, verbose)
 
 ProofState.test = state_test
 
