@@ -487,3 +487,39 @@ hy: Eq(y, w**2)
 ```
 
 **Hint**: One can `Subst()` the hypotheses `hx`, `hy` into the goal, either in forward or in reverse.
+
+## Substitution example II
+
+**Informal version** If $x,y,z \leq N$ and $N=10$, then $x+y+z \leq N^2$.
+
+**Python code**:
+```
+def subst_all_example():
+    p = ProofAssistant()
+    N = p.var("pos_int", "N")
+    x, y, z = p.vars("real", "x", "y", "z")
+    p.assume(x <= N, "hx")
+    p.assume(y <= N, "hy")
+    p.assume(z <= N, "hz")
+    p.assume(Eq(N,10), "hN")
+    p.begin_proof(x+y+z <= N**2)
+    return p
+```
+
+**In an interactive Python environment**:
+```
+>>> from main import *     
+>>> p = subst_all_example()
+Starting proof.  Current proof state:
+N: pos_int
+x: real
+y: real
+z: real
+hx: x <= N
+hy: y <= N
+hz: z <= N
+hN: Eq(N, 10)
+|- x + y + z <= N**2
+```
+
+**Hint**: A single `SubstAll()` will make this problem fall to `Linarith()`.

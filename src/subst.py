@@ -79,7 +79,6 @@ class Subst(Tactic):
         self.hyp = hyp
         self.target = target
         self.reversed = reversed
-        # we don't guard against `hyp` and `target` matching; it is unlikely to be a useful move, but is technically valid.
 
     def activate(self, state: ProofState) -> list[ProofState]:
         if self.hyp not in state.hypotheses:
@@ -87,20 +86,29 @@ class Subst(Tactic):
         hyp = state.hypotheses[self.hyp]
         if not isinstance(hyp, Eq):
             raise ValueError(f"{self.hyp} is not an equality hypothesis.")
-        
+        if self.hyp == self.target:
+            print("Warning: substituting a hypothesis into itself will lose information.")
+
         if self.target is None:
             target = state.goal
         else:
             if self.target not in state.hypotheses:
                 raise ValueError(f"{self.target} is not a hypothesis in the current proof state.")
             target = state.hypotheses[self.target]
+            if isinstance(target, Type):
+                raise ValueError(f"Cannot target a variable declaration for substitution.")
         
         if self.reversed:
             newtarget = target.subs(hyp.rhs, hyp.lhs)
-            print(f"Substituted {self.hyp} in reverse to replace {target} with {newtarget}.")
+            if newtarget != target:
+                print(f"Substituted {self.hyp} in reverse to replace {target} with {newtarget}.")
         else:
             newtarget = target.subs(hyp.lhs, hyp.rhs)
-            print(f"Substituted {self.hyp} to replace {target} with {newtarget}.")
+            if newtarget != target:
+                print(f"Substituted {self.hyp} to replace {target} with {newtarget}.")
+
+        if newtarget == target:
+            print(f"Substitution had no effect.")
 
         if newtarget == true and self.target == None:
             print("Goal proved!")
@@ -114,8 +122,71 @@ class Subst(Tactic):
         return [newstate]
 
     def __str__(self):
-        if self.target is None:
-            return f"subst {self.hyp}"
+        if self.reversed:
+            name = "<-"+str(self.hyp)
         else:
-            return f"subst {self.hyp} at {self.target}"
+            name = str(self.hyp)
+        if self.target is None:
+            return f"subst {name}"
+        else:
+            return f"subst {name} at {self.target}"
+        
+class SubstAll(Tactic):
+    """
+    Use an existing equality hypothesis `X=Y` to substitute all instances of `X` with `Y` in the goal as well as all other hypotheses (other than variable declarations)."""
+
+    def __init__(self, hyp: str, reversed: bool = False):
+        """
+        :param hyp: The hypothesis to use for substitution.
+        :param reversed: If `True`, substitute `Y` for `X` instead of `X` for `Y`."""
+        self.hyp = hyp
+        self.reversed = reversed
+
+    def activate(self, state: ProofState) -> list[ProofState]:
+        if self.hyp not in state.hypotheses:
+            raise ValueError(f"{self.hyp} is not a hypothesis in the current proof state.")
+        hyp = state.hypotheses[self.hyp]
+        if not isinstance(hyp, Eq):
+            raise ValueError(f"{self.hyp} is not an equality hypothesis.")
+        
+        if self.reversed:
+            hyp = hyp.reversed()
+        
+        newstate = state.copy()
+
+        for other_name, other_expr in state.hypotheses.items():
+            if isinstance(other_expr, Type):
+                continue
+            if self.hyp == other_name:
+                continue  # don't substitute a hypothesis into itself
+            
+            newtarget = other_expr.subs(hyp.lhs, hyp.rhs)
+            if newtarget != other_expr:
+                if self.reversed:
+                    print(f"Substituted {self.hyp} in reverse to replace {other_expr} with {newtarget}.")
+                else:
+                    print(f"Substituted {self.hyp} to replace {other_expr} with {newtarget}.")
+            newstate.hypotheses[other_name] = newtarget
+        
+        newtarget = state.goal.subs(hyp.lhs, hyp.rhs)
+        if newtarget != state.goal:
+            if self.reversed:
+                print(f"Substituted {self.hyp} in reverse to replace {state.goal} with {newtarget}.")
+            else:
+                print(f"Substituted {self.hyp} to replace {state.goal} with {newtarget}.")
+        newstate.set_goal(newtarget)
+
+        if newstate == state:
+            print(f"Substitution had no effect.")
+        if newtarget == true:
+            print("Goal proved!")
+            return []
+        return [newstate]
+
+    def __str__(self):
+        if self.reversed:
+            name = "<-"+str(self.hyp)
+        else:
+            name = str(self.hyp)
+        return f"subst_all {name}"
         

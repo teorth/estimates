@@ -287,3 +287,20 @@ def subst_solution():
     p = subst_example()
     p.use(Subst("hx"))
     p.use(Subst("hy", reversed=True))
+
+def subst_all_example():
+    p = ProofAssistant()
+    N = p.var("pos_int", "N")
+    x, y, z = p.vars("real", "x", "y", "z")
+    p.assume(x <= N, "hx")
+    p.assume(y <= N, "hy")
+    p.assume(z <= N, "hz")
+    p.assume(Eq(N,10), "hN")
+    p.begin_proof(x+y+z <= N**2)
+    return p
+
+def subst_all_solution():
+    p = subst_all_example()
+    p.use(SubstAll("hx"))
+    p.use(Linarith())
+    

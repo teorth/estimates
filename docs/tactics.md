@@ -447,8 +447,11 @@ h1_theta: Theta(x) <= Max(Theta(1), Theta(N)**2)
 ```
 
 ### `Subst(hyp:str, target:str=None, reversed:bool=False)`
+### `SubstAll(hyp:str, reversed:bool=False)`
 
 If `hyp` is an equality, substitutes the left hand side for the right-hand side in `target` (which, by default, is the current goal).  If the `reversed` flag is set to `True`, substitute the right-hand side for the left-hand side instead.
+
+`SubstAll()` is similar to `Subst()` but the substitution is applied both to the goal and to all other hypotheses (other than variable declarations).
 
 Example:
 ```
@@ -467,6 +470,30 @@ Substituted hx to replace Eq(x - y, -w**2 + z**2) with Eq(-y + z**2, -w**2 + z**
 >>> p.use(Subst("hy",reversed=true))
 Substituted hy in reverse to replace Eq(-y + z**2, -w**2 + z**2) with True.
 Goal proved!
+Proof complete!
+```
+Example:
+```
+>>> from main import *     
+>>> p = subst_all_example()
+Starting proof.  Current proof state:
+N: pos_int
+x: real
+y: real
+z: real
+hx: x <= N
+hy: y <= N
+hz: z <= N
+hN: Eq(N, 10)
+|- x + y + z <= N**2
+>>> p.use(SubstAll("hN"))
+Substituted hN to replace x <= N with x <= 10.
+Substituted hN to replace y <= N with y <= 10.
+Substituted hN to replace z <= N with z <= 10.
+Substituted hN to replace x + y + z <= N**2 with x + y + z <= 100.
+1 goal remaining.
+>>> p.use(Linarith())
+Goal solved by linear arithmetic!
 Proof complete!
 ```
 
