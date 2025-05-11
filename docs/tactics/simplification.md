@@ -1,0 +1,49 @@
+# Simplification tactics
+
+## `SimpAll()`
+
+Applies "obvious" simplifications to each hypothesis, using each of the other hypotheses in turn.  For instance, if the other hypothesis is of the form `P` and the current hypothesis is of the form `P|Q`, it gets simplified to `Q`.  Then, simplify the goal using all the other hypotheses.  If, in the course of doing so, a hypothesis turns into `false`, or the goal turns into `true`, complete the goal.
+
+"Expensive" simplifications that require linear algebra or SAT solving are not implemented in this tactic. On the other hand, sympy's native simplifier `simplify` is invoked; as a consequence, sometimes this tactic will perform simplification even in the presence of an irrelevant hypothesis.
+
+Some examples of supported simplifications:
+
+| Statement | Hypothesis | Simplification
+| --------- | ---------- | --------------
+| `P` | `P` | `true`
+| `P` | `Not(P)` | `false`
+| `x >= y` | `x <= y` | `Eq(x,y)`
+| `x >= y` | `Ne(x,y)` | `x > y`
+| `Max(x,y)` | `x <= y` | `y`
+| `Min(x,y)` | `x <= y` | `x`
+
+The set of simplifications performed is currently far from complete.  If you discover that a situation where an "obvious" simplification should have occurred, but didn't, please inform me (e.g., via a github issue) to see if it can be added to the simplification routine.
+
+**CAVEAT**:  This tactic uses `sympy`'s native simplifier, which does not fully guard against issues such as division by zero.  For instance, `x/x` will simplify to `1` even if `x` is not proven to be non-zero.  As such, the proofs using this simplifier may possibly have some edge cases that will require additional attention if this Proof Assistant-generated proof is to be converted to a fully verified proof.  
+
+Example:
+```
+>>> from main import *
+>>> p = case_split_exercise()
+Starting proof.  Current proof state:
+P: bool
+Q: bool
+R: bool
+S: bool
+h1: P | Q
+h2: R | S
+|- (P & R) | (P & S) | (Q & R) | (Q & S)
+>>> p.use(Cases("h1"))
+Splitting h1: P | Q into cases.
+2 goals remaining.
+>>> p.use(SimpAll())
+Simplified (P & R) | (P & S) | (Q & R) | (Q & S) to R | S using Q.
+Simplified R | S to True using R | S.
+Goal solved!
+1 goal remaining.
+>>> p.use(SimpAll())
+Simplified (P & R) | (P & S) | (Q & R) | (Q & S) to R | S using P.
+Simplified R | S to True using R | S.
+Goal solved!
+Proof complete!
+```
