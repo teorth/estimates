@@ -101,7 +101,7 @@ class SplitGoal(Tactic):
     def activate(self, state: ProofState) -> list[ProofState]:
         conjuncts = get_conjuncts(state.goal)
         if conjuncts is not None:
-            print(f"Split goal into {", ".join([str(conjunct) for conjunct in conjuncts])}")
+            print(f"Split goal into {', '.join([str(conjunct) for conjunct in conjuncts])}")
             new_goals = []
             for conjunct in conjuncts:
                 newstate = state.copy()
@@ -166,7 +166,7 @@ class SplitHyp(Tactic):
             hyp = state.hypotheses[self.h]
             conjuncts = get_conjuncts(hyp)
             if conjuncts is not None:
-                print(f"Splitting {describe(self.h,hyp)} into {", ".join([str(conjunct) for conjunct in conjuncts])}.")
+                print(f"Splitting {describe(self.h,hyp)} into {', '.join([str(conjunct) for conjunct in conjuncts])}.")
                 new_state = state.copy()
                 new_state.remove_hypothesis(self.h)
                 for i, conjunct in enumerate(conjuncts):
@@ -206,7 +206,7 @@ class Cases(Tactic):
             if disjuncts == None:
                 print(f"Unable to split {hyp} into cases.")
                 return [state.copy()]
-            print(f"Splitting {describe(self.h,hyp)} into cases {", ".join([str(disjunct) for disjunct in disjuncts])}.")
+            print(f"Splitting {describe(self.h,hyp)} into cases {', '.join([str(disjunct) for disjunct in disjuncts])}.")
             new_goals = []
             for disjunct in disjuncts:
                 new_state = state.copy()
