@@ -14,7 +14,8 @@ def test(hypotheses: set[Basic], goal: Basic) -> bool:
         return True
     
     for hyp in hypotheses:
-        if Implies(hyp, goal):
+        if Implies(hyp, goal) == True:
+            print(f"Goal {goal} follows from hypothesis {hyp}!")
             return True
 
     return False
