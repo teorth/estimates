@@ -274,3 +274,16 @@ def complex_littlewood_paley_solution():
     p.use(LogLinarith())
     p.use(LogLinarith())    
     p.use(LogLinarith())
+
+def subst_example():
+    p = ProofAssistant()
+    x, y, z, w = p.vars("real", "x", "y", "z", "w")
+    p.assume(Eq(x,z**2), "hx")
+    p.assume(Eq(y,w**2), "hy")
+    p.begin_proof(Eq(x-y,z**2-w**2))
+    return p
+
+def subst_solution():
+    p = subst_example()
+    p.use(Subst("hx"))
+    p.use(Subst("hy", reversed=True))

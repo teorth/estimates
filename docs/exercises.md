@@ -456,3 +456,34 @@ hlower: Max(L_1, L_2, L_3) >= N_1*N_2*N_3
 ```
 
 **Hint**: Brute force case splitting and `LogLinarith()` will work, but requires about a minute of CPU.  More intelligent splitting will cut down the runtime.
+
+## Substitution example
+
+**Informal version** If $x,y,z,w$ are reals with $x=z^2$ and $y=w^2$, then $x-y = z^2-w^2$.
+
+**Python code**:
+```
+def subst_example():
+    p = ProofAssistant()
+    x, y, z, w = p.vars("real", "x", "y", "z", "w")
+    p.assume(Eq(x,z**2), "hx")
+    p.assume(Eq(y,w**2), "hy")
+    p.begin_proof(Eq(x-y,z**2-w**2))
+    return p
+```
+
+**In an interactive Python environment**:
+```
+>>> from main import *
+>>> p = subst_example()
+Starting proof.  Current proof state:
+x: real
+y: real
+z: real
+w: real
+hx: Eq(x, z**2)
+hy: Eq(y, w**2)
+|- Eq(x - y, -w**2 + z**2)
+```
+
+**Hint**: One can `Subst()` the hypotheses `hx`, `hy` into the goal, either in forward or in reverse.

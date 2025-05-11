@@ -61,3 +61,18 @@ class Amgm(Lemma):
     def __str__(self):
         return f"am_gm(" + ", ".join(str(x) for x in self.vars) + ")"
    
+class Rfl(Lemma):
+    """
+    The reflexive axiom: any expression is equal to itself.
+    """
+
+    def __init__(self, expr : Basic):
+        self.expr = expr
+        
+    def apply(self, state: ProofState) -> Basic:
+        assert is_defined(self.expr, state.get_all_vars()), f"{self.expr} is not defined in the current proof state."
+        return Eq(self.expr, self.expr, evaluate=False)
+            
+    def __str__(self):
+        return f"rfl({self.expr})"
+ 

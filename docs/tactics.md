@@ -446,6 +446,30 @@ h1_theta: Theta(x) <= Max(Theta(1), Theta(N)**2)
 |- Theta(x)*Theta(y) <= Theta(N)**3
 ```
 
+### `Subst(hyp:str, target:str=None, reversed:bool=False)`
+
+If `hyp` is an equality, substitutes the left hand side for the right-hand side in `target` (which, by default, is the current goal).  If the `reversed` flag is set to `True`, substitute the right-hand side for the left-hand side instead.
+
+Example:
+```
+>>> p = subst_example()
+Starting proof.  Current proof state:
+x: real
+y: real
+z: real
+w: real
+hx: Eq(x, z**2)
+hy: Eq(y, w**2)
+|- Eq(x - y, -w**2 + z**2)
+>>> p.use(Subst("hx"))
+Substituted hx to replace Eq(x - y, -w**2 + z**2) with Eq(-y + z**2, -w**2 + z**2).
+1 goal remaining.
+>>> p.use(Subst("hy",reversed=true))
+Substituted hy in reverse to replace Eq(-y + z**2, -w**2 + z**2) with True.
+Goal proved!
+Proof complete!
+```
+
 ## Simplification tactics
 
 ### `SimpAll()`
