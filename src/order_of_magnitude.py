@@ -44,6 +44,30 @@ class OrderOfMagnitude(Basic):
     
     def __rpow__(self, other):
         return Undefined() 
+    
+    def __lt__(self, other):
+        return Relational(self, Theta(other), "<")
+    
+    def __rlt__(self, other):
+        return Relational(Theta(other), self, "<")
+    
+    def __le__(self, other):
+        return Relational(self, Theta(other), "<=")
+    
+    def __rle__(self, other):
+        return Relational(Theta(other), self, "<=")
+    
+    def __gt__(self, other):
+        return Relational(self, Theta(other), ">")
+    
+    def __rgt__(self, other):
+        return Relational(Theta(other), self, ">")
+    
+    def __ge__(self, other):
+        return Relational(self, Theta(other), ">=")
+    
+    def __rge__(self, other):
+        return Relational(Theta(other), self, ">=")
 
     def __abs__(self):
         return self

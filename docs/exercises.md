@@ -415,3 +415,44 @@ h: LittlewoodPaley(N_1, N_2, N_3)
 ```
 
 **Hint**: Case split the Littlewood-Paley hypothesis then apply `LogLinarith()`.
+
+## Complex Littlewood-Paley example
+
+**Informal version** If $(N_1,N_2,N_3), (L_1,L_2,L_3)$ are triples of orders of magnitude obeying the [Littlewood-Paley property](littlewood_paley.md), with $\max(N_1,N_2,N_3) \asymp N \gtrsim 1$ and $\max(L_1,L_2,L_3) \gtrsim N_1 N_2 N_3$, then $\frac{\langle N_2 \rangle^{1/4}}{\langle N_1\rangle^{1/4}} N^{-1} (N_1 N_2 N_3)^{1/2} \lesssim 1$.
+
+**Python code**:
+```
+def complex_littlewood_paley_exercise():
+    p = ProofAssistant()
+    N_1, N_2, N_3 = p.vars("order", "N_1", "N_2", "N_3")
+    L_1, L_2, L_3 = p.vars("order", "L_1", "L_2", "L_3")
+    N = p.var("order", "N")
+    p.assume(LittlewoodPaley(N_1,N_2,N_3), "hN")
+    p.assume(LittlewoodPaley(L_1,L_2,L_3), "hL")
+    p.assume(gtrsim(N,1), "hN1")
+    p.assume(asymp(OrderMax(N_1,N_2,N_3),N), "hmax")
+    p.assume(OrderMax(L_1,L_2,L_3) >= N_1*N_2*N_3, "hlower")
+    
+    p.begin_proof(lesssim(sqrt(bracket(N_2)) / (bracket(N_1)**Fraction(1,4) * sqrt(L_1) * sqrt(L_2)) *sqrt(OrderMin(L_1,L_2,L_3)) *N**(-1) * sqrt(N_1*N_2*N_3), 1))
+    return p
+```
+
+**In an interactive Python environment**:
+```
+Starting proof.  Current proof state:
+N_1: order
+N_2: order
+N_3: order
+L_1: order
+L_2: order
+L_3: order
+N: order
+hN: LittlewoodPaley(N_1, N_2, N_3)
+hL: LittlewoodPaley(L_1, L_2, L_3)
+hN1: N >= Theta(1)
+hmax: Eq(Max(N_1, N_2, N_3), N)
+hlower: Max(L_1, L_2, L_3) >= N_1*N_2*N_3
+|- Max(Theta(1), N_2**2)**1/4*Max(Theta(1), N_1**2)**-1/8*L_1**-1/2*L_2**-1/2*Min(L_1, L_2, L_3)**1/2*N**-1*N_1**1/2*N_2**1/2*N_3**1/2 <= Theta(1)
+```
+
+**Hint**: Brute force case splitting and `LogLinarith()` will work, but requires about a minute of CPU.  More intelligent splitting will cut down the runtime.

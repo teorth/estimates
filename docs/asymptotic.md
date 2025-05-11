@@ -20,6 +20,8 @@ Various laws of asymptotic arithmetic have been encoded within the syntax of `sy
 
 **Technical note**: We technically permit `Theta` to take non-positive values, but a warning will be sent if this happens and an `Undefined()` element will be generated.  (`sympy`'s native simplifier will sometimes trigger this warning.)  Similarly for other undefined operations, such as `OrderMax` or `OrderMin` applied to an empty tuple.
 
+**A "gotcha"**: One should avoid using python's native `max` or `min` command with orders of magnitude, or even `sympy`'s alternative `Max` and `Min` commands.  Use `OrderMax` and `OrderMin` instead.
+
 An abstract order of magnitude can be created using the `OrderSymbol(name)` constructor, similar to the `Symbol()` constructor in `sympy` (but with attributes such as `is_positive` set to false, with the exception of the default flag `is_commutative`).
 
 Here is a simple example of the proof assistant establishing an asymptotic estimate. Informally, one is given a positive integer $N$ and positive reals $x,y$ such that $x \leq 2N^2$ and $y < 3N$, and the task is to conclude that $xy \lesssim N^4$.

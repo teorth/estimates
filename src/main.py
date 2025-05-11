@@ -241,3 +241,36 @@ def littlewood_paley_solution():
     p.use(LogLinarith())
     p.use(LogLinarith())
     p.use(LogLinarith())
+
+# this is adapted from the equation afer equation (51) from https://arxiv.org/abs/math/0005001
+def complex_littlewood_paley_exercise():
+    p = ProofAssistant()
+    N_1, N_2, N_3 = p.vars("order", "N_1", "N_2", "N_3")
+    L_1, L_2, L_3 = p.vars("order", "L_1", "L_2", "L_3")
+    N = p.var("order", "N")
+    p.assume(LittlewoodPaley(N_1,N_2,N_3), "hN")
+    p.assume(LittlewoodPaley(L_1,L_2,L_3), "hL")
+    p.assume(gtrsim(N,1), "hN1")
+    p.assume(asymp(OrderMax(N_1,N_2,N_3),N), "hmax")
+    p.assume(OrderMax(L_1,L_2,L_3) >= N_1*N_2*N_3, "hlower")
+    
+    p.begin_proof(lesssim(sqrt(bracket(N_2)) / (bracket(N_1)**Fraction(1,4) * sqrt(L_1) * sqrt(L_2)) *sqrt(OrderMin(L_1,L_2,L_3)) *N**(-1) * sqrt(N_1*N_2*N_3), 1))
+    return p
+
+
+def complex_littlewood_paley_solution():
+    """This solution works, but is quite slow (it maximally case splits).  A more targetd case split would work faster."""
+    p = complex_littlewood_paley_exercise()
+    p.use(Cases("hN"))
+    p.use(Cases("hL"))
+    p.use(LogLinarith())
+    p.use(LogLinarith())    
+    p.use(LogLinarith())
+    p.use(Cases("hL"))
+    p.use(LogLinarith())
+    p.use(LogLinarith())    
+    p.use(LogLinarith())
+    p.use(Cases("hL"))
+    p.use(LogLinarith())
+    p.use(LogLinarith())    
+    p.use(LogLinarith())

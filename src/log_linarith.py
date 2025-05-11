@@ -144,6 +144,10 @@ def min_objects(expr: Basic) -> list[Basic]:
         return objects
     elif isinstance(expr, OrderPow):
         return min_objects(expr.args[0])
+    elif isinstance(expr, Relational):
+        objects = min_objects(expr.args[0])
+        objects.update(min_objects(expr.args[1]))
+        return objects
     else:
         return set()
 
@@ -188,6 +192,12 @@ class LogLinarith(Tactic):
                         newhypotheses = [Rel( Theta(hypothesis.args[0]), Theta(hypothesis.args[1]), "<" ), [Rel( Theta(hypothesis.args[0]), Theta(hypothesis.args[1]), ">" )]]
                     else:
                         newhypotheses = [hypothesis]
+                elif isinstance(hypothesis.args[0], OrderOfMagnitude):
+                    print(f"Warning: somehow an order of magnitude {hypothesis.args[0]} is being compared with a non-order of magnitude {hypothesis.args[1]}.")
+                    continue
+                elif isinstance(hypothesis.args[1], OrderOfMagnitude):
+                    print(f"Warning: somehow an order of magnitude {hypothesis.args[1]} is being compared with a non-order of magnitude {hypothesis.args[0]}.")
+                    continue
                 elif hypothesis.args[0].is_positive and hypothesis.args[1].is_positive:
                     if isinstance(hypothesis, LessThan|StrictLessThan):
                         # Note that Theta turns strict inequalities into non-strict ones.

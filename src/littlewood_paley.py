@@ -5,12 +5,14 @@ from fractions import Fraction
 
 # Support for some expressions that come up in the Littlewood-Paley theory arising in PDE
 
+def sqrt(x):
+    return x**Fraction(1,2)
 
 def bracket(x):
     """
     The "Japanese bracket" notation.
     """
-    return (1 + abs(x)**2)**Fraction(1,2)
+    return sqrt(1 + abs(x)**2)
 
 
 class LittlewoodPaley(BooleanFunction):

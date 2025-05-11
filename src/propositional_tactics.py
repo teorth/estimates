@@ -4,6 +4,7 @@ from tactic import *
 from sympy import false, simplify_logic, Max, Min, LessThan, StrictLessThan, GreaterThan, StrictGreaterThan
 from order_of_magnitude import *
 from littlewood_paley import *
+from sympy.core.relational import Rel
 
 # Various tactics for handling propositional logic.
 
@@ -88,7 +89,7 @@ def get_disjuncts(expr: Expr) -> list[Expr]:
         disjuncts = []
         n = len(expr.args)
         for i in range(n):
-            disjuncts.append(Eq(expr.args[i], Max( *[expr.args[j] for j in range(n) if j != i]) ))
+            disjuncts.append(Eq(expr.args[i], OrderMax( *[expr.args[j] for j in range(n) if j != i]) ))
         return disjuncts
 
     return None
