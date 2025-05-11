@@ -98,8 +98,12 @@ Introduce a variable `name` of type `type`.  Only valid in assumption mode.  Cur
     * `"pos_rat"` - positive rationals
     * `"nonneg_rat"` - nonnegative rationals
     * `"nonzero_rat"` - nonzero rationals
-* `"bool"` - boolean variables
+* `"complex"` - complex numbers
+    * `"nonzero_complex"` - nonzero complex numbers
+* `"bool"` - boolean objects (Propositions)
 * `"order"` - an order of magnitude (necessarily positive)
+
+The `IsPositive()`, `IsNonnegative()` and `IsNonzero()` tactics can upgrade the type of a variable.
 
 ## `p.vars(type:str, *names:str) -> List[Basic]`
 

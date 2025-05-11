@@ -36,6 +36,10 @@ def typeof(obj:Basic) -> str:
             return f"nonzero_real"
         else:
             return f"real"
+    elif obj.is_complex"
+        if obj.is_nonzero:
+            return f"nonzero_complex"
+        return f"complex"
     elif obj.is_Boolean:
         return f"bool"
     elif isinstance(obj, OrderSymbol):
@@ -73,12 +77,16 @@ def new_var(type:str, name:str) -> Expr:
             return Symbol(name, rational=True, nonnegative=True)
         case "nonzero_rat":
             return Symbol(name, rational=True, nonzero=True)
+        case "complex":
+            return Symbol(name, complex=True)
+        case "nonzero_complex":
+            return Symbol(name, complex=True, nonzero=True)
         case "bool":
             return Proposition(name)
         case "order":
             return OrderSymbol(name)
         case _:
-            raise ValueError(f"Unknown type {type}.  Currently accepted types: 'int', 'pos_int', 'nonneg_int', `nonzero_int`, 'real', 'pos_real', 'nonneg_real', 'nonzero_real', 'rat', 'pos_rat`, 'nonneg_rat', 'nonzero_rat', 'bool', 'order'.")
+            raise ValueError(f"Unknown type {type}.  Currently accepted types: 'int', 'pos_int', 'nonneg_int', `nonzero_int`, 'real', 'pos_real', 'nonneg_real', 'nonzero_real', 'rat', 'pos_rat`, 'nonneg_rat', 'nonzero_rat', 'complex', 'nonzero_complex', 'bool', 'order'.")
 
 
 class Type(Basic):
