@@ -36,7 +36,7 @@ def typeof(obj:Basic) -> str:
             return f"nonzero_real"
         else:
             return f"real"
-    elif obj.is_complex"
+    elif obj.is_complex:
         if obj.is_nonzero:
             return f"nonzero_complex"
         return f"complex"
