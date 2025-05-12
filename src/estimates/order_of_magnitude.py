@@ -6,10 +6,10 @@ class Undefined(Expr):
     """A marker that says “– is not defined”, but is still technically a `Expr` for the purposes of sympy operations.
     Return this value (and optionally, print a warning), rather than an error, when performing an operation that is not defined."""
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "⊥"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "⊥"
 
 
@@ -130,10 +130,10 @@ class Theta(OrderOfMagnitude, Expr):
         obj.name = f"Theta({expr!r})"
         return obj
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Theta({self.args[0]!r})"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return str(self)
 
     def _sympystr(self, printer):
@@ -179,10 +179,10 @@ class OrderMax(OrderOfMagnitude, Expr):
 
         return OrderMax(*newargs)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return str(self)
 
     def _sympystr(self, printer):
@@ -222,10 +222,10 @@ class OrderMin(OrderOfMagnitude, Expr):
 
         return OrderMin(*newargs)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return str(self)
 
     def _sympystr(self, printer):
@@ -294,10 +294,10 @@ class OrderMul(OrderOfMagnitude, Expr):
         else:
             return OrderMul(*gathered)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return str(self)
 
     def _sympystr(self, printer):
@@ -349,10 +349,10 @@ class OrderPow(OrderOfMagnitude, Expr):
 
         return self
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return str(self)
 
     def _sympystr(self, printer):

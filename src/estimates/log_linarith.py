@@ -34,7 +34,7 @@ from estimates.tactic import Tactic
 class ApplyTheta(Tactic):
     """A tactic to apply the Theta function to an hypothesis."""
 
-    def __init__(self, hyp: str = "this", newhyp: str = None):
+    def __init__(self, hyp: str = "this", newhyp: str = None) -> None:
         """`hyp` is the hypothesis to apply the Theta function to.  `newhyp` is the name of the new hypothesis.  If None, it will be set to `hyp` with a _theta suffix."""
         self.hyp = hyp
         self.newhyp = newhyp
@@ -78,7 +78,7 @@ class ApplyTheta(Tactic):
         newstate.hypotheses[newhyp] = newhyp_statement
         return [newstate]
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self.newhyp is None:
             return f"apply_theta {self.hyp})"
         else:
@@ -196,7 +196,7 @@ def min_objects(expr: Basic) -> list[Basic]:
 class LogLinarith(Tactic):
     """A tactic to try to establish a goal via logaithmic linear arithmetic for asymptotic inequalities.  Inspired by the linarith tactic in Lean."""
 
-    def __init__(self, verbose: bool = False, split_max: bool = True):
+    def __init__(self, verbose: bool = False, split_max: bool = True) -> None:
         """
         :param verbose: If true, print the inequalities generated.
         :param split_max: If true, split the max objects into their components.  This makes the tactic more powerful, but also slower.
@@ -393,7 +393,7 @@ class LogLinarith(Tactic):
                 print("Goal solved by log-linear arithmetic!")
             return []
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self.split_max:
             return "log_linarith!"
         else:

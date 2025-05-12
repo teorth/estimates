@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 from sympy import Basic
 
 from estimates.basic import Type, describe
+from estimates.test import test
 
 ## Proof states describe the current state of a proof (a list of hypotheses and a goal).  The hypotheses are a dictionary of string-Basic pairs that match a hypothesis name to the sympy basic class they represent.  The goals are stored as sympy basic classes.
 
@@ -8,24 +11,24 @@ from estimates.basic import Type, describe
 
 
 class ProofState:
-    def __init__(self, goal: Basic, hypotheses: dict[str, Basic] = None):
+    def __init__(self, goal: Basic, hypotheses: dict[str, Basic] | None = None) -> None:
         """
         Initialize a proof state with a goal, and an optional list of hypotheses.
         """
         self.goal = goal
         self.hypotheses = hypotheses if hypotheses is not None else {}
 
-    def set_goal(self, goal: Basic):
+    def set_goal(self, goal: Basic) -> None:
         """Set the goal of the proof state."""
         self.goal = goal
 
-    def copy(self) -> "ProofState":
+    def copy(self) -> ProofState:
         """
         Create a copy of the proof state.
         """
         return ProofState(self.goal, self.hypotheses.copy())
 
-    def eq(self, other: "ProofState") -> bool:
+    def eq(self, other: ProofState) -> bool:
         """
         Check if two proof states are equal.
         """
@@ -38,7 +41,7 @@ class ProofState:
             new_name += "'"
         return new_name
 
-    def remove_hypothesis(self, name: str):
+    def remove_hypothesis(self, name: str) -> None:
         """Remove a hypothesis from the proof state."""
         assert name in self.hypotheses, f"Hypothesis {name} not found in proof state."
         if isinstance(self.hypotheses[name], Type):
@@ -113,7 +116,7 @@ class ProofState:
         self.hypotheses[name] = hypothesis
         return name
 
-    def list_hypotheses(self, variables=False) -> list[Basic]:
+    def list_hypotheses(self, variables: bool = False) -> list[Basic]:
         """Return a list of the names of the hypotheses in the proof state.  By default, variable declarations are excluded."""
         if variables:
             return list(self.hypotheses.values())
@@ -122,7 +125,13 @@ class ProofState:
                 var for var in self.hypotheses.values() if not isinstance(var, Type)
             ]
 
-    def __str__(self):
+    def test(self, goal: Basic, verbose: bool = True) -> bool:
+        """
+        Check if a goal follows immediately from the stated hypotheses, including from the implicit ones.
+        """
+        return test(self.hypotheses.values(), goal, verbose)
+
+    def __str__(self) -> str:
         output = []
         for name, hypothesis in self.hypotheses.items():
             output.append(describe(name, hypothesis))

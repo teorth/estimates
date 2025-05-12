@@ -8,11 +8,11 @@ from estimates.order_of_magnitude import Theta, asymp
 # Support for some expressions that come up in the Littlewood-Paley theory arising in PDE
 
 
-def sqrt(x):
+def sqrt(x: Expr) -> Expr:
     return x ** Fraction(1, 2)
 
 
-def bracket(x):
+def bracket(x: Expr) -> Expr:
     """
     The "Japanese bracket" notation.
     """
@@ -35,10 +35,10 @@ class LittlewoodPaley(BooleanFunction):
         obj.name = "LittlewoodPaley(" + ", ".join([str(arg) for arg in newargs]) + ")"
         return obj
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return str(self)
 
     def _sympystr(self, printer):

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from estimates.proofstate import ProofState
 from estimates.tactic import Tactic
 
@@ -10,7 +12,7 @@ class ProofTree:
     Each node has a proof state, a parent node, a tactic used to transform the proof state, and a list of child nodes.
     """
 
-    def __init__(self, proof_state: ProofState):
+    def __init__(self, proof_state: ProofState) -> None:
         """
         Initialize a proof tree node with a proof state.
         """
@@ -21,7 +23,7 @@ class ProofTree:
         )
         self.children = []  # Must be empty if self.tactic is None; can also be empty if self.tactic completes the goal
 
-    def add_sorry(self, proof_state) -> "ProofTree":
+    def add_sorry(self, proof_state: ProofState) -> ProofTree:
         """Add a child proof tree node as a 'sorry'."""
         child = ProofTree(proof_state)
         child.parent = self
@@ -42,7 +44,7 @@ class ProofTree:
         self,
         indent: str = "  ",
         next_indent: str = "  ",
-        current_node: "ProofTree" = None,
+        current_node: ProofTree | None = None,
     ) -> list[str]:
         """
         Return a string representation of the proof tree, with indentation for each level.
@@ -73,11 +75,11 @@ class ProofTree:
                     )
             return output
 
-    def rstr_join(self, current_node: "ProofTree" = None) -> str:
+    def rstr_join(self, current_node: ProofTree | None = None) -> str:
         """Return a string representation of the proof tree, with indentation for each level."""
         return "\n".join(self.rstr(current_node=current_node))
 
-    def list_sorries(self, exclude: list["ProofTree"] = []) -> list["ProofTree"]:
+    def list_sorries(self, exclude: list[ProofTree] = []) -> list[ProofTree]:
         """Return a list of sorry nodes in the proof tree, optionally excluding a given node."""
         if self in exclude:
             return []
@@ -89,7 +91,7 @@ class ProofTree:
                 sorries.extend(child.list_sorries(exclude))
             return sorries
 
-    def num_sorries(self, exclude: list["ProofTree"] = []) -> int:
+    def num_sorries(self, exclude: list[ProofTree] = []) -> int:
         """Return the number of sorries in the proof tree, optionally excluding a given node."""
         return len(self.list_sorries(exclude))
 
@@ -97,7 +99,7 @@ class ProofTree:
         """Return True if the proof tree is free of sorries."""
         return self.num_sorries() == 0
 
-    def first_sorry(self) -> "ProofTree":
+    def first_sorry(self) -> ProofTree | None:
         """Return the first sorry node in the proof tree."""
         sorries = self.list_sorries()
         if len(sorries) == 0:
@@ -105,7 +107,7 @@ class ProofTree:
         else:
             return sorries[0]
 
-    def last_sorry(self) -> "ProofTree":
+    def last_sorry(self) -> ProofTree | None:
         """Return the last sorry node in the proof tree."""
         sorries = self.list_sorries()
         if len(sorries) == 0:
@@ -113,7 +115,9 @@ class ProofTree:
         else:
             return sorries[len(sorries) - 1]
 
-    def find_sorry(self, target: "ProofTree") -> tuple[bool, "ProofTree", "ProofTree"]:
+    def find_sorry(
+        self, target: ProofTree
+    ) -> tuple[bool, ProofTree | None, ProofTree | None]:
         """
         Recursively find the last sorry before a target and the first sorry after a target.
         Also returns whether the target was found in the tree.
@@ -144,7 +148,7 @@ class ProofTree:
                     before = last_before
         return (found_target, before, after)
 
-    def count_sorries(self, target: "ProofTree") -> tuple[bool, int, int]:
+    def count_sorries(self, target: ProofTree) -> tuple[bool, int, int]:
         """
         Recursively count the number of sorries before and after a target in the proof tree.
         Also returns whether the target was found in the tree.
@@ -177,5 +181,5 @@ class ProofTree:
                     before += before_count
         return (found_target, before, after)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.rstr_join()

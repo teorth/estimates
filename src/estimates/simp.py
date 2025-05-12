@@ -140,7 +140,7 @@ class SimpAll(Tactic):
         else:
             return [newstate]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "simp_all"
 
 
@@ -149,7 +149,7 @@ class IsPositive(Tactic):
     Makes a variable positive by searching for hypotheses that imply positivity.
     """
 
-    def __init__(self, name: str | Basic = "this"):
+    def __init__(self, name: str | Basic = "this") -> None:
         self.name = name
 
     def activate(self, state: ProofState) -> list[ProofState]:
@@ -193,7 +193,7 @@ class IsPositive(Tactic):
         else:
             return [newstate]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"is_positive {self.name}"
 
 
@@ -202,7 +202,7 @@ class IsNonnegative(Tactic):
     Makes a variable nonnegative by searching for hypotheses that imply nonnegativity.
     """
 
-    def __init__(self, name: str | Basic = "this"):
+    def __init__(self, name: str | Basic = "this") -> None:
         self.name = name
 
     def activate(self, state: ProofState) -> list[ProofState]:
@@ -246,7 +246,7 @@ class IsNonnegative(Tactic):
         else:
             return [newstate]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"is_nonnegative {self.name}"
 
 
@@ -255,7 +255,7 @@ class IsNonzero(Tactic):
     Makes a variable nonzero by searching for hypotheses that imply nonvanishing.
     """
 
-    def __init__(self, name: str | Basic = "this"):
+    def __init__(self, name: str | Basic = "this") -> None:
         self.name = name
 
     def activate(self, state: ProofState) -> list[ProofState]:
@@ -299,5 +299,5 @@ class IsNonzero(Tactic):
         else:
             return [newstate]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"is_nonzero {self.name}"

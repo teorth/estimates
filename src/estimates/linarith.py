@@ -22,7 +22,7 @@ from estimates.tactic import Tactic
 class Linarith(Tactic):
     """A tactic to try to establish a goal via linear arithmetic.  Inspired by the linarith tactic in Lean."""
 
-    def __init__(self, verbose: bool = False):
+    def __init__(self, verbose: bool = False) -> None:
         """
         :param verbose: If true, print the inequalities generated.
         """
@@ -143,5 +143,5 @@ class Linarith(Tactic):
                 print("Goal solved by linear arithmetic!")
             return []
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "linarith"

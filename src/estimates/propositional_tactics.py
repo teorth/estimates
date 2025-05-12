@@ -1,5 +1,8 @@
+from typing import Sequence
+
 from sympy import (
     And,
+    Basic,
     Eq,
     Expr,
     GreaterThan,
@@ -25,7 +28,7 @@ from estimates.tactic import Tactic
 # Various tactics for handling propositional logic.
 
 
-def get_conjuncts(expr: Expr) -> list[Expr]:
+def get_conjuncts(expr: Basic) -> Sequence[Basic] | None:
     """
     Get the conjuncts of an expression (after unpacking), or None if no conjuncts found.
     """
@@ -74,7 +77,7 @@ def get_conjuncts(expr: Expr) -> list[Expr]:
     return None
 
 
-def get_disjuncts(expr: Expr) -> list[Expr]:
+def get_disjuncts(expr: Basic) -> Sequence[Basic] | None:
     """
     Get the disjuncts of an expression (after unpacking), or None if no disjuncts found
     """
@@ -131,10 +134,10 @@ class SplitGoal(Tactic):
                 new_goals.append(newstate)
             return new_goals
         else:
-            print(f"{str(state.goal)} cannot be split.")
+            print(f"{state.goal!s} cannot be split.")
             return [state.copy()]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "split_goal"
 
 
@@ -142,7 +145,7 @@ class Contrapose(Tactic):
     """
     Contrapose the goal and a hypothesis.  If the hypothesis is a proposition, replace the goal with the negation of the hypothesis, and the hypothesis with the negation of the goal.  If the hypothesis is not a proposition, this becomes a proof by contradiction, adding the negation of the goal as a hypothesis, and "false" as the goal."""
 
-    def __init__(self, h: str = "this"):
+    def __init__(self, h: str = "this") -> None:
         """
         :param h: The name of the hypothesis to use for contraposition.
         """
@@ -165,7 +168,7 @@ class Contrapose(Tactic):
             newstate.hypotheses[self.h] = false
             return [newstate]
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self.h == "this":
             return "contrapose"
         else:
@@ -176,7 +179,7 @@ class SplitHyp(Tactic):
     """
     Split a hypothesis into its conjuncts.  If the hypothesis is a conjunction, split the hypothesis into one hypothesis for each conjunct.  The new hypotheses will be named according to the names supplied in the constructor."""
 
-    def __init__(self, h: str = "this", *names: str):
+    def __init__(self, h: str = "this", *names: str) -> None:
         """
         :param h: The name of the hypothesis to use for obtaining.
         :param names: A list of names to use for the new hypotheses.  If None, the default names will be used.
@@ -208,7 +211,7 @@ class SplitHyp(Tactic):
             print(f"Cannot find hypothesis {self.h}.")
             return [state.copy()]
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self.h == "this":
             return "split_hyp"
         else:
@@ -222,7 +225,7 @@ class Cases(Tactic):
     """
     Split a hypothesis into its disjuncts.  If the hypothesis is a disjunction, split the hypothesis into one goal for each disjunct."""
 
-    def __init__(self, hyp: str = "this"):
+    def __init__(self, hyp: str = "this") -> None:
         self.h = hyp
 
     def activate(self, state: ProofState) -> list[ProofState]:
@@ -245,7 +248,7 @@ class Cases(Tactic):
             print(f"Cannot find hypothesis {self.h}.")
             return [state.copy()]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "cases " + self.h
 
 
@@ -253,13 +256,13 @@ class ByCases(Tactic):
     """
     Split into two cases, depending on whether an assertin is true or false."""
 
-    def __init__(self, statement: Boolean, name: str = "this"):
+    def __init__(self, statement: Boolean, name: str = "this") -> None:
         self.statement = statement
         self.name = name
 
     def activate(self, state: ProofState) -> list[ProofState]:
         if not isinstance(self.statement, Boolean):
-            raise ValueError(f"{str(self.statement)} is not a proposition.")
+            raise ValueError(f"{self.statement!s} is not a proposition.")
         name = state.new(self.name)
         new_states = []
         new_state = state.copy()
@@ -273,7 +276,7 @@ class ByCases(Tactic):
         )
         return new_states
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self.name == "this":
             return "by_cases " + str(self.statement)
         else:
@@ -284,7 +287,7 @@ class Option(Tactic):
     """
     If the goal is a disjunction, replace it with one of its disjuncts."""
 
-    def __init__(self, n: int = 1):
+    def __init__(self, n: int = 1) -> None:
         assert n > 0, f"Argument {n} of Option() must be positive."
         self.n = n
 
@@ -301,7 +304,7 @@ class Option(Tactic):
         new_state.set_goal(disjuncts[self.n - 1])
         return [new_state]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "option " + str(self.n)
 
 
@@ -309,17 +312,17 @@ class Claim(Tactic):
     """
     Similar to the `have` tactic in Lean.  Add a subgoal to prove, and then prove the original goal assuming the subgoal."""
 
-    def __init__(self, expr: Boolean, name: str = "this"):
+    def __init__(self, expr: Boolean, name: str = "this") -> None:
         self.name = name
         self.expr = expr
 
     def activate(self, state: ProofState) -> list[ProofState]:
         if not is_defined(self.expr, state.get_all_vars()):
             raise ValueError(
-                f"{str(self.expr)} is not defined in the current proof state."
+                f"{self.expr!s} is not defined in the current proof state."
             )
         if not isinstance(self.expr, Boolean):
-            raise ValueError(f"{str(self.expr)} is not a proposition.")
+            raise ValueError(f"{self.expr!s} is not a proposition.")
         first_state = state.copy()
         first_state.set_goal(self.expr)
         second_state = state.copy()
@@ -341,7 +344,7 @@ class Claim(Tactic):
                 print(f"We claim that {self.expr}.")
                 return [first_state, second_state]
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self.name == "this":
             return "claim " + str(self.expr)
         else:

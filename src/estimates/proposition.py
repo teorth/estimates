@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from sympy import Symbol
 from sympy.logic.boolalg import And, Boolean, Not, Or, false, true
 
@@ -11,12 +13,12 @@ class Proposition(Symbol, Boolean):
 
     is_Boolean = True  # mark it as Boolean so that Or/And treat it properly
 
-    def __new__(cls, name):
+    def __new__(cls, name: str) -> Proposition:
         # delegate all the real work to Symbol.__new__
         return Symbol.__new__(cls, name)
 
 
-def proposition_examples():
+def proposition_examples() -> None:
     # usage
     p = Proposition("p")
     q = Proposition("q")

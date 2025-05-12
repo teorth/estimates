@@ -12,7 +12,7 @@ class Let(Tactic):
     A tactic to introduce a new variable, defined to equal a given expression.
     """
 
-    def __init__(self, name: str, expr: Basic):
+    def __init__(self, name: str, expr: Basic) -> None:
         """
         :param name: The name of the new variable.
         :param expr: The expression to set the new variable equal to.
@@ -34,7 +34,7 @@ class Let(Tactic):
         newstate.hypotheses[def_name] = Eq(var, self.expr)
         return [newstate]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"let {self.name} := {self.expr}"
 
 
@@ -43,7 +43,7 @@ class Set(Tactic):
     A tactic to introduce a new variable, defined to equal a given expression, then substitute all instances of that expression with the variable.
     """
 
-    def __init__(self, name: str, expr: Basic):
+    def __init__(self, name: str, expr: Basic) -> None:
         """
         :param name: The name of the new variable.
         :param expr: The expression to set the new variable equal to.
@@ -72,7 +72,7 @@ class Set(Tactic):
         newstate.hypotheses[def_name] = Eq(var, self.expr)
         return [newstate]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"set {self.name} := {self.expr}"
 
 
@@ -80,7 +80,9 @@ class Subst(Tactic):
     """
     A tactic to use an existing equality hypothesis `X=Y` to substitute all instances of `X` with `Y` in the goal, or in a specified hypothesis."""
 
-    def __init__(self, hyp: str, target: str = None, reversed: bool = False):
+    def __init__(
+        self, hyp: str, target: str | None = None, reversed: bool = False
+    ) -> None:
         """
         :param hyp: The hypothesis to use for substitution.
         :param target: The statement to apply substitution (`None` means to apply it to the goal.
@@ -140,7 +142,7 @@ class Subst(Tactic):
             newstate.hypotheses[self.target] = newtarget
         return [newstate]
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self.reversed:
             name = "<-" + str(self.hyp)
         else:
@@ -155,7 +157,7 @@ class SubstAll(Tactic):
     """
     Use an existing equality hypothesis `X=Y` to substitute all instances of `X` with `Y` in the goal as well as all other hypotheses (other than variable declarations)."""
 
-    def __init__(self, hyp: str, reversed: bool = False):
+    def __init__(self, hyp: str, reversed: bool = False) -> None:
         """
         :param hyp: The hypothesis to use for substitution.
         :param reversed: If `True`, substitute `Y` for `X` instead of `X` for `Y`."""
@@ -167,7 +169,7 @@ class SubstAll(Tactic):
             raise ValueError(
                 f"{self.hyp} is not a hypothesis in the current proof state."
             )
-        hyp = state.hypotheses[self.hyp]
+        hyp: Basic = state.hypotheses[self.hyp]
         if not isinstance(hyp, Eq):
             raise ValueError(f"{self.hyp} is not an equality hypothesis.")
 
@@ -213,7 +215,7 @@ class SubstAll(Tactic):
             return []
         return [newstate]
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self.reversed:
             name = "<-" + str(self.hyp)
         else:

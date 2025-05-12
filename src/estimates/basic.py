@@ -1,3 +1,5 @@
+from typing import Any
+
 from sympy import Basic, Expr, S, Symbol, false, true
 
 from estimates.order_of_magnitude import OrderSymbol
@@ -108,10 +110,10 @@ class Type(Basic):
         """Return the variable that this type wraps around."""
         return self.args[0]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(typeof(self.var()))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Type({self.args})"
 
 
@@ -120,7 +122,7 @@ def describe(name: str, object: Basic) -> str:
     return f"{name}: {object}"
 
 
-def is_defined(expr: Expr, vars: set[Expr]) -> bool:
+def is_defined(expr: Any, vars: set[Basic]) -> bool:
     """Check if expr is defined in terms of the set `vars` of other expressions"""
     expr = S(expr)
     if expr in vars:

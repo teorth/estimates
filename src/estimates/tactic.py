@@ -1,18 +1,21 @@
-from estimates.proofstate import ProofState
+from __future__ import annotations
+
+from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from estimates.proofstate import ProofState
 
 ## Tactics are operations that can transform a proof state into one or more proof states.
 
 
-class Tactic:
+class Tactic(ABC):
+    @abstractmethod
     def activate(self, state: ProofState) -> list[ProofState]:
         """
         Activate the tactic on the given proof state.  Will return any proof states that remain after applying the tactic.
         """
-        raise NotImplementedError(
-            "This tactic has not implemented an activate() method yet."
-        )
+        ...
 
-    def __str__(self):
-        raise NotImplementedError(
-            "This tactic has not implemented a __str__() method yet."
-        )
+    @abstractmethod
+    def __str__(self) -> str: ...

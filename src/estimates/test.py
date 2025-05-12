@@ -1,11 +1,17 @@
+from __future__ import annotations
+
+from collections.abc import Iterable
+from typing import TYPE_CHECKING
+
 from sympy import Basic, true
 from sympy.logic.boolalg import Implies
 
-from estimates.proofstate import ProofState
+if TYPE_CHECKING:
+    from estimates.proofstate import ProofState
 from estimates.tactic import Tactic
 
 
-def test(hypotheses: set[Basic], goal: Basic, verbose: bool = True) -> bool:
+def test(hypotheses: Iterable[Basic], goal: Basic, verbose: bool = True) -> bool:
     """
     Check if a goal follows immediately from the stated hypotheses, including from the implicit ones.
     """
@@ -23,16 +29,6 @@ def test(hypotheses: set[Basic], goal: Basic, verbose: bool = True) -> bool:
     return False
 
 
-def state_test(state: ProofState, goal: Basic, verbose: bool = True) -> bool:
-    """
-    Check if a goal follows immediately from the stated hypotheses, including from the implicit ones.
-    """
-    return test(state.hypotheses.values(), goal, verbose)
-
-
-ProofState.test = state_test
-
-
 class Trivial(Tactic):
     """
     Closes a goal if it follows trivially from the hypotheses.
@@ -46,5 +42,5 @@ class Trivial(Tactic):
             print(f"Goal {state.goal} does not follow trivially from the hypotheses.")
             return [state.copy()]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "trivial"

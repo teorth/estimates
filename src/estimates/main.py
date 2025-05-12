@@ -1,11 +1,12 @@
-from fraction import Fraction
+from fractions import Fraction
+
 from sympy import Eq, Max, Min
 
 from estimates.lemma import Amgm
 from estimates.linarith import Linarith
 from estimates.littlewood_paley import LittlewoodPaley, bracket, sqrt
-from estimates.log_linarith import ApplyTheta, LogLinarith, asymp
-from estimates.order_of_magnitude import OrderMax, OrderMin
+from estimates.log_linarith import ApplyTheta, LogLinarith
+from estimates.order_of_magnitude import OrderMax, OrderMin, asymp, gtrsim, lesssim
 from estimates.proofassistant import ProofAssistant
 from estimates.propositional_tactics import ByCases, Cases, Claim, SplitGoal, SplitHyp
 from estimates.simp import (
@@ -13,14 +14,12 @@ from estimates.simp import (
     IsNonzero,
     IsPositive,
     SimpAll,
-    gtrsim,
-    lesssim,
 )
 from estimates.subst import Set, Subst, SubstAll
 from estimates.test import Trivial
 
 
-def linarith_exercise():
+def linarith_exercise() -> ProofAssistant:
     p = ProofAssistant()
     x, y, z = p.vars("pos_real", "x", "y", "z")
     p.assume(x < 2 * y, "h1")
@@ -29,12 +28,12 @@ def linarith_exercise():
     return p
 
 
-def linarith_solution():
+def linarith_solution() -> None:
     p = linarith_exercise()
     p.use(Linarith(verbose=True))
 
 
-def linarith_impossible_example():
+def linarith_impossible_example() -> ProofAssistant:
     p = ProofAssistant()
     x, y, z = p.vars("pos_real", "x", "y", "z")
     p.assume(x < 2 * y, "h1")
@@ -43,12 +42,12 @@ def linarith_impossible_example():
     return p
 
 
-def linarith_failure_example():
+def linarith_failure_example() -> None:
     p = linarith_impossible_example()
     p.use(Linarith(verbose=True))
 
 
-def case_split_exercise():
+def case_split_exercise() -> ProofAssistant:
     p = ProofAssistant()
     P, Q, R, S = p.vars("bool", "P", "Q", "R", "S")
     p.assume(P | Q, "h1")
@@ -57,13 +56,13 @@ def case_split_exercise():
     return p
 
 
-def case_split_solution():
+def case_split_solution() -> None:
     p = case_split_exercise()
     p.use(Cases("h1"))
     p.use(SimpAll())
 
 
-def split_exercise():
+def split_exercise() -> ProofAssistant:
     p = ProofAssistant()
     x, y = p.vars("real", "x", "y")
     p.assume((x > -1) & (x < 1), "h1")
@@ -72,7 +71,7 @@ def split_exercise():
     return p
 
 
-def split_solution():
+def split_solution() -> None:
     p = split_exercise()
     p.use(SplitHyp("h1"))
     p.use(SplitHyp("h2"))
@@ -81,7 +80,7 @@ def split_solution():
     p.use(Linarith())
 
 
-def pigeonhole_exercise():
+def pigeonhole_exercise() -> ProofAssistant:
     p = ProofAssistant()
     x, y = p.vars("real", "x", "y")
     p.assume(x + y > 5, "h")
@@ -89,7 +88,7 @@ def pigeonhole_exercise():
     return p
 
 
-def ineq_exercise():
+def ineq_exercise() -> ProofAssistant:
     p = ProofAssistant()
     x, y = p.vars("real", "x", "y")
     p.assume(x <= y, "h1")
@@ -98,7 +97,7 @@ def ineq_exercise():
     return p
 
 
-def ineq_solution():
+def ineq_solution() -> None:
     p = ineq_exercise()
     p.use(SimpAll())  # can also use p.use(Linarith())
 
@@ -113,20 +112,20 @@ def ineq_exercise2():
     return p
 
 
-def ineq_solution2():
+def ineq_solution2() -> None:
     p = ineq_exercise2()
     p.use(SplitHyp("h2"))
     p.use(Linarith())
 
 
-def min_max_exercise():
+def min_max_exercise() -> ProofAssistant:
     p = ProofAssistant()
     x, y = p.vars("real", "x", "y")
     p.begin_proof(Min(x, y) <= Max(x, y))
     return p
 
 
-def min_max_solution():
+def min_max_solution() -> None:
     p = min_max_exercise()
     x, y = p.get_vars("x", "y")
     p.use(Set("a", Min(x, y)))
@@ -136,7 +135,7 @@ def min_max_solution():
     p.use(Linarith())
 
 
-def positive_exercise():
+def positive_exercise() -> ProofAssistant:
     p = ProofAssistant()
     x = p.var("real", "x")
     p.assume(x > 0, "h")
@@ -144,12 +143,12 @@ def positive_exercise():
     return p
 
 
-def positive_solution():
+def positive_solution() -> None:
     p = positive_exercise()
     p.use(IsPositive("x"))
 
 
-def nonnegative_exercise():
+def nonnegative_exercise() -> ProofAssistant:
     p = ProofAssistant()
     x = p.var("real", "x")
     p.assume(x >= 0, "h")
@@ -157,12 +156,12 @@ def nonnegative_exercise():
     return p
 
 
-def nonnegative_solution():
+def nonnegative_solution() -> None:
     p = nonnegative_exercise()
     p.use(IsNonnegative("x"))
 
 
-def trivial_exercise():
+def trivial_exercise() -> ProofAssistant:
     p = ProofAssistant()
     x = p.var("real", "x")
     p.assume(x > 0, "h")
@@ -170,12 +169,12 @@ def trivial_exercise():
     return p
 
 
-def trivial_solution():
+def trivial_solution() -> None:
     p = trivial_exercise()
     p.use(Trivial())
 
 
-def loglinarith_exercise():
+def loglinarith_exercise() -> ProofAssistant:
     p = ProofAssistant()
     N = p.var("pos_int", "N")
     x, y = p.vars("pos_real", "x", "y")
@@ -185,12 +184,12 @@ def loglinarith_exercise():
     return p
 
 
-def loglinarith_solution():
+def loglinarith_solution() -> None:
     p = loglinarith_exercise()
     p.use(LogLinarith())
 
 
-def loglinarith_hard_exercise():
+def loglinarith_hard_exercise() -> ProofAssistant:
     p = ProofAssistant()
     N = p.var("pos_int", "N")
     x, y = p.vars("pos_real", "x", "y")
@@ -200,7 +199,7 @@ def loglinarith_hard_exercise():
     return p
 
 
-def loglinarith_hard_solution():
+def loglinarith_hard_solution() -> None:
     p = loglinarith_hard_exercise()
     p.use(ApplyTheta("h1"))
     p.use(ApplyTheta("h2"))
@@ -213,12 +212,12 @@ def loglinarith_hard_solution():
     p.use(LogLinarith())
 
 
-def loglinarith_hard_solution2():
+def loglinarith_hard_solution2() -> None:
     p = loglinarith_hard_exercise()
     p.use(LogLinarith())
 
 
-def loglinarith_imposssible_example():
+def loglinarith_imposssible_example() -> ProofAssistant:
     p = ProofAssistant()
     N = p.var("pos_int", "N")
     x, y = p.vars("pos_real", "x", "y")
@@ -228,33 +227,33 @@ def loglinarith_imposssible_example():
     return p
 
 
-def loglinarith_failure_example():
+def loglinarith_failure_example() -> None:
     p = loglinarith_imposssible_example()
     p.use(LogLinarith(verbose=True))
 
 
-def amgm_exercise():
+def amgm_exercise() -> ProofAssistant:
     p = ProofAssistant()
     x, y = p.vars("nonneg_real", "x", "y")
     p.begin_proof(2 * x * y <= x**2 + y**2)
     return p
 
 
-def amgm_solution():
+def amgm_solution() -> None:
     p = amgm_exercise()
     x, y = p.get_vars("x", "y")
     p.use_lemma(Amgm(x**2, y**2))
     p.use(SimpAll())
 
 
-def bracket_submult_exercise():
+def bracket_submult_exercise() -> ProofAssistant:
     p = ProofAssistant()
     x, y = p.vars("real", "x", "y")
     p.begin_proof(lesssim(bracket(x * y), bracket(x) * bracket(y)))
     return p
 
 
-def bracket_submult_solution():
+def bracket_submult_solution() -> None:
     p = bracket_submult_exercise()
     x, y = p.get_vars("x", "y")
     p.use(ByCases(Eq(x, 0)))
@@ -266,7 +265,7 @@ def bracket_submult_solution():
     p.use(LogLinarith())
 
 
-def littlewood_paley_exercise():
+def littlewood_paley_exercise() -> ProofAssistant:
     p = ProofAssistant()
     N_1, N_2, N_3 = p.vars("order", "N_1", "N_2", "N_3")
     p.assume(LittlewoodPaley(N_1, N_2, N_3), "h")
@@ -274,7 +273,7 @@ def littlewood_paley_exercise():
     return p
 
 
-def littlewood_paley_solution():
+def littlewood_paley_solution() -> None:
     p = littlewood_paley_exercise()
     p.use(Cases("h"))
     p.use(LogLinarith())
@@ -283,7 +282,7 @@ def littlewood_paley_solution():
 
 
 # this is adapted from the equation afer equation (51) from https://arxiv.org/abs/math/0005001
-def complex_littlewood_paley_exercise():
+def complex_littlewood_paley_exercise() -> ProofAssistant:
     p = ProofAssistant()
     N_1, N_2, N_3 = p.vars("order", "N_1", "N_2", "N_3")
     L_1, L_2, L_3 = p.vars("order", "L_1", "L_2", "L_3")
@@ -307,7 +306,7 @@ def complex_littlewood_paley_exercise():
     return p
 
 
-def complex_littlewood_paley_solution():
+def complex_littlewood_paley_solution() -> None:
     """This solution works, but is quite slow (it maximally case splits).  A more targetd case split would work faster."""
     p = complex_littlewood_paley_exercise()
     p.use(Cases("hN"))
@@ -325,7 +324,7 @@ def complex_littlewood_paley_solution():
     p.use(LogLinarith())
 
 
-def subst_example():
+def subst_example() -> ProofAssistant:
     p = ProofAssistant()
     x, y, z, w = p.vars("real", "x", "y", "z", "w")
     p.assume(Eq(x, z**2), "hx")
@@ -334,13 +333,13 @@ def subst_example():
     return p
 
 
-def subst_solution():
+def subst_solution() -> None:
     p = subst_example()
     p.use(Subst("hx"))
     p.use(Subst("hy", reversed=True))
 
 
-def subst_all_example():
+def subst_all_example() -> ProofAssistant:
     p = ProofAssistant()
     N = p.var("pos_int", "N")
     x, y, z = p.vars("real", "x", "y", "z")
@@ -352,7 +351,7 @@ def subst_all_example():
     return p
 
 
-def subst_all_solution():
+def subst_all_solution() -> None:
     p = subst_all_example()
     p.use(SubstAll("hx"))
     p.use(Linarith())
