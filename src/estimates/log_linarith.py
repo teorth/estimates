@@ -212,7 +212,7 @@ class LogLinarith(Tactic):
 
         hypotheses = set()
 
-        for hypothesis in state.list_hypotheses(variables=true):
+        for hypothesis in state.list_hypotheses(variables=True):
             if isinstance(
                 hypothesis,
                 Eq

@@ -31,7 +31,7 @@ def linarith_exercise():
 
 def linarith_solution():
     p = linarith_exercise()
-    p.use(Linarith(verbose=true))
+    p.use(Linarith(verbose=True))
 
 
 def linarith_impossible_example():
@@ -45,7 +45,7 @@ def linarith_impossible_example():
 
 def linarith_failure_example():
     p = linarith_impossible_example()
-    p.use(Linarith(verbose=true))
+    p.use(Linarith(verbose=True))
 
 
 def case_split_exercise():

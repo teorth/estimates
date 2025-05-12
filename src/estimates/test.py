@@ -1,11 +1,11 @@
-from sympy import Basic
+from sympy import Basic, true
 from sympy.logic.boolalg import Implies
 
 from estimates.proofstate import ProofState
 from estimates.tactic import Tactic
 
 
-def test(hypotheses: set[Basic], goal: Basic, verbose: bool = true) -> bool:
+def test(hypotheses: set[Basic], goal: Basic, verbose: bool = True) -> bool:
     """
     Check if a goal follows immediately from the stated hypotheses, including from the implicit ones.
     """
@@ -23,7 +23,7 @@ def test(hypotheses: set[Basic], goal: Basic, verbose: bool = true) -> bool:
     return False
 
 
-def state_test(state: ProofState, goal: Basic, verbose: bool = true) -> bool:
+def state_test(state: ProofState, goal: Basic, verbose: bool = True) -> bool:
     """
     Check if a goal follows immediately from the stated hypotheses, including from the implicit ones.
     """

@@ -10,7 +10,6 @@ from sympy import (
     StrictGreaterThan,
     StrictLessThan,
     false,
-    true,
 )
 from sympy.core.relational import Relational
 
@@ -32,7 +31,7 @@ class Linarith(Tactic):
     def activate(self, state: ProofState) -> list[ProofState]:
         # First, gather all the hypotheses that can generate inequalities.
         hypotheses = set()
-        for hypothesis in state.list_hypotheses(variables=true):
+        for hypothesis in state.list_hypotheses(variables=True):
             if isinstance(
                 hypothesis,
                 Eq | LessThan | StrictLessThan | GreaterThan | StrictGreaterThan | Type,

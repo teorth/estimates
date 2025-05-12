@@ -326,15 +326,15 @@ class Claim(Tactic):
         name = state.new(self.name)
         second_state.hypotheses[name] = self.expr
 
-        if first_state.test(first_state.goal, verbose=false):
-            if second_state.test(second_state.goal, verbose=false):
+        if first_state.test(first_state.goal, verbose=False):
+            if second_state.test(second_state.goal, verbose=False):
                 print(f"Goal follows trivially after observing {self.expr}.")
                 return []
             else:
                 print(f"Observe that {self.expr} holds.")
                 return [second_state]
         else:
-            if second_state.test(second_state.goal, verbose=false):
+            if second_state.test(second_state.goal, verbose=False):
                 print(f"Clearly, it suffices to show {self.expr}.")
                 return [first_state]
             else:
