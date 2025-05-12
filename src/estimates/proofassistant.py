@@ -165,7 +165,7 @@ class ProofAssistant:
             )
             self.theorem_str += f": {goal}"
             self.hypotheses = {}
-            print(f"Starting proof.  Current proof state:")
+            print("Starting proof.  Current proof state:")
             print(self.current_proof_state())
         else:
             raise ValueError(
@@ -393,7 +393,7 @@ class ProofAssistant:
                 return "Proof Assistant is in assumption mode.  No hypotheses."
             else:
                 output = (
-                    f"Proof Assistant is in assumption mode.  Current hypotheses:\n"
+                    "Proof Assistant is in assumption mode.  Current hypotheses:\n"
                 )
                 output += "\n".join(
                     [
@@ -403,7 +403,7 @@ class ProofAssistant:
                 )
                 return output
         else:
-            output = f"Proof Assistant is in tactic mode.  Current proof state:\n"
+            output = "Proof Assistant is in tactic mode.  Current proof state:\n"
             output += str(self.current_proof_state())
             if self.current_node.tactic is None:
                 count = self.proof_tree.num_sorries()

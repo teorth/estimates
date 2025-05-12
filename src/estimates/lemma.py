@@ -66,7 +66,7 @@ class Amgm(Lemma):
         return prod ** (1 / len(self.vars)) <= sum / len(self.vars)
 
     def __str__(self):
-        return f"am_gm(" + ", ".join(str(x) for x in self.vars) + ")"
+        return "am_gm(" + ", ".join(str(x) for x in self.vars) + ")"
 
 
 class Rfl(Lemma):

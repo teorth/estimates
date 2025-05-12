@@ -126,7 +126,7 @@ class SimpAll(Tactic):
             newstate.remove_hypothesis(name)
 
         if hyp == false:
-            print(f"Goal solved by _ex falso quodlibet_.")
+            print("Goal solved by _ex falso quodlibet_.")
             return []
 
         goal = newstate.goal
@@ -135,7 +135,7 @@ class SimpAll(Tactic):
         newstate.set_goal(goal)
 
         if goal == true:
-            print(f"Goal solved!")
+            print("Goal solved!")
             return []
         else:
             return [newstate]
@@ -188,7 +188,7 @@ class IsPositive(Tactic):
         newstate.set_goal(state.goal.subs(var, newvar))
 
         if newstate.goal == true:
-            print(f"Goal solved!")
+            print("Goal solved!")
             return []
         else:
             return [newstate]
@@ -241,7 +241,7 @@ class IsNonnegative(Tactic):
         newstate.set_goal(newstate.goal.subs(var, newvar))
 
         if newstate.goal == true:
-            print(f"Goal solved!")
+            print("Goal solved!")
             return []
         else:
             return [newstate]
@@ -294,7 +294,7 @@ class IsNonzero(Tactic):
         newstate.set_goal(newstate.goal.subs(var, newvar))
 
         if newstate.goal == true:
-            print(f"Goal solved!")
+            print("Goal solved!")
             return []
         else:
             return [newstate]

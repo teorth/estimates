@@ -13,41 +13,41 @@ def typeof(obj: Basic) -> str:
     """
     if obj.is_integer:
         if obj.is_positive:
-            return f"pos_int"
+            return "pos_int"
         elif obj.is_nonnegative:
-            return f"nonneg_int"
+            return "nonneg_int"
         elif obj.is_nonzero:
-            return f"nonzero_int"
+            return "nonzero_int"
         else:
-            return f"int"
+            return "int"
     elif obj.is_rational:
         if obj.is_positive:
-            return f"pos_rat"
+            return "pos_rat"
         elif obj.is_nonnegative:
-            return f"nonneg_rat"
+            return "nonneg_rat"
         elif obj.is_nonzero:
-            return f"nonzero_rat"
+            return "nonzero_rat"
         else:
-            return f"rat"
+            return "rat"
     elif obj.is_real:
         if obj.is_positive:
-            return f"pos_real"
+            return "pos_real"
         elif obj.is_nonnegative:
-            return f"nonneg_real"
+            return "nonneg_real"
         elif obj.is_nonzero:
-            return f"nonzero_real"
+            return "nonzero_real"
         else:
-            return f"real"
+            return "real"
     elif obj.is_complex:
         if obj.is_nonzero:
-            return f"nonzero_complex"
-        return f"complex"
+            return "nonzero_complex"
+        return "complex"
     elif obj.is_Boolean:
-        return f"bool"
+        return "bool"
     elif isinstance(obj, OrderSymbol):
-        return f"order"
+        return "order"
     else:
-        return f"unknown"
+        return "unknown"
 
 
 def new_var(type: str, name: str) -> Expr:

@@ -47,4 +47,4 @@ class Trivial(Tactic):
             return [state.copy()]
 
     def __str__(self):
-        return f"trivial"
+        return "trivial"

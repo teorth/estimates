@@ -50,7 +50,7 @@ class ApplyTheta(Tactic):
             raise ValueError(f"{self.hyp} is not a relational hypothesis.")
 
         if isinstance(hyp_statement, Ne):
-            raise ValueError(f"Unequalities do not have useful asymptotic forms.")
+            raise ValueError("Unequalities do not have useful asymptotic forms.")
         elif isinstance(hyp_statement, Eq):
             new_rel_op = "="
         elif isinstance(hyp_statement, LessThan | StrictLessThan):

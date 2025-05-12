@@ -112,7 +112,7 @@ class Subst(Tactic):
             target = state.hypotheses[self.target]
             if isinstance(target, Type):
                 raise ValueError(
-                    f"Cannot target a variable declaration for substitution."
+                    "Cannot target a variable declaration for substitution."
                 )
 
         if self.reversed:
@@ -127,7 +127,7 @@ class Subst(Tactic):
                 print(f"Substituted {self.hyp} to replace {target} with {newtarget}.")
 
         if newtarget == target:
-            print(f"Substitution had no effect.")
+            print("Substitution had no effect.")
 
         if newtarget == true and self.target == None:
             print("Goal proved!")
@@ -207,7 +207,7 @@ class SubstAll(Tactic):
         newstate.set_goal(newtarget)
 
         if newstate == state:
-            print(f"Substitution had no effect.")
+            print("Substitution had no effect.")
         if newtarget == true:
             print("Goal proved!")
             return []

@@ -103,7 +103,7 @@ class Theta(OrderOfMagnitude, Expr):
         if expr.is_number:
             # all positive constants collapse to Theta(1)
             obj = Expr.__new__(cls, S.One)
-            obj.name = f"Theta(1)"
+            obj.name = "Theta(1)"
             return obj
 
         if isinstance(expr, Add | Max):
