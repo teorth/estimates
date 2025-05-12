@@ -129,11 +129,8 @@ def is_defined(expr: Any, vars: set[Basic]) -> bool:
         return True
     if expr.is_number:
         return True
-    if expr == true or expr == false:
+    if expr in (true, false):
         return True
     if len(expr.args) == 0:
         return False
-    for arg in expr.args:
-        if not is_defined(arg, vars):
-            return False
-    return True
+    return all(is_defined(arg, vars) for arg in expr.args)

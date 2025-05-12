@@ -82,7 +82,7 @@ class Linarith(Tactic):
 
                     # Linarith ignores any relations that involve anything other than a real number.  (One could make a companion tactic, say Linalg, to handle linear equalities over vector spaces other than the reals.)
                     all_real = True
-                    for var in coeffs.keys():
+                    for var in coeffs:
                         if not var.is_real:
                             all_real = False
                             break
@@ -134,7 +134,7 @@ class Linarith(Tactic):
                     print("Infeasible by summing the following:")
                     dict = proofs[n]
                     for ineq, coeff in dict.items():
-                        if not coeff == Fraction(0, 1):
+                        if coeff != Fraction(0, 1):
                             print(f"{ineq} multiplied by {coeff}")
                     n += 1
                 if n == 0:

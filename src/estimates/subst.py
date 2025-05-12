@@ -23,7 +23,7 @@ class Let(Tactic):
     def activate(self, state: ProofState) -> list[ProofState]:
         if not is_defined(self.expr, state.get_all_vars()):
             raise ValueError(
-                f"{str(self.expr)} is not defined in the current proof state."
+                f"{self.expr!s} is not defined in the current proof state."
             )
         name = state.new(self.name)
         newstate = state.copy()
@@ -54,7 +54,7 @@ class Set(Tactic):
     def activate(self, state: ProofState) -> list[ProofState]:
         if not is_defined(self.expr, state.get_all_vars()):
             raise ValueError(
-                f"{str(self.expr)} is not defined in the current proof state."
+                f"{self.expr!s} is not defined in the current proof state."
             )
         name = state.new(self.name)
         newstate = state.copy()
@@ -143,10 +143,7 @@ class Subst(Tactic):
         return [newstate]
 
     def __str__(self) -> str:
-        if self.reversed:
-            name = "<-" + str(self.hyp)
-        else:
-            name = str(self.hyp)
+        name = "<-" + str(self.hyp) if self.reversed else str(self.hyp)
         if self.target is None:
             return f"subst {name}"
         else:
@@ -216,8 +213,5 @@ class SubstAll(Tactic):
         return [newstate]
 
     def __str__(self) -> str:
-        if self.reversed:
-            name = "<-" + str(self.hyp)
-        else:
-            name = str(self.hyp)
+        name = "<-" + str(self.hyp) if self.reversed else str(self.hyp)
         return f"subst_all {name}"

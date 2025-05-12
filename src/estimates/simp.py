@@ -36,7 +36,7 @@ def rsimp(goal: Basic, hyp: Basic) -> Basic:
             s = -1
         else:
             s = 0
-        if not s == 0:
+        if s != 0:
             sign = {
                 "<=": {0, 1},
                 "<": {1},
@@ -58,18 +58,17 @@ def rsimp(goal: Basic, hyp: Basic) -> Basic:
                         return Rel(goal.args[0], goal.args[1], rel)
 
     if isinstance(hyp, LessThan | StrictLessThan | GreaterThan | StrictGreaterThan):
-        if hyp.lts != hyp.gts:
-            if hyp.lts in goal.args and hyp.gts in goal.args:
-                if isinstance(goal, Max | OrderMax):
-                    # can remove a copy of hyp.lts
-                    l = list(goal.args)
-                    l.remove(hyp.lts)
-                    return goal.func(*l)
-                if isinstance(goal, Min | OrderMin):
-                    # can remove a copy of hyp.gts
-                    l = list(goal.args)
-                    l.remove(hyp.gts)
-                    return goal.func(*l)
+        if hyp.lts != hyp.gts and hyp.lts in goal.args and hyp.gts in goal.args:
+            if isinstance(goal, Max | OrderMax):
+                # can remove a copy of hyp.lts
+                l = list(goal.args)
+                l.remove(hyp.lts)
+                return goal.func(*l)
+            if isinstance(goal, Min | OrderMin):
+                # can remove a copy of hyp.gts
+                l = list(goal.args)
+                l.remove(hyp.gts)
+                return goal.func(*l)
 
     if goal.args == ():
         return goal
@@ -130,7 +129,7 @@ class SimpAll(Tactic):
             return []
 
         goal = newstate.goal
-        for name, hyp in newstate.hypotheses.items():
+        for hyp in newstate.hypotheses.values():
             goal = simp(goal, hyp)
         newstate.set_goal(goal)
 

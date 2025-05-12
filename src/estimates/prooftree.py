@@ -79,8 +79,10 @@ class ProofTree:
         """Return a string representation of the proof tree, with indentation for each level."""
         return "\n".join(self.rstr(current_node=current_node))
 
-    def list_sorries(self, exclude: list[ProofTree] = []) -> list[ProofTree]:
+    def list_sorries(self, exclude: list[ProofTree] | None = None) -> list[ProofTree]:
         """Return a list of sorry nodes in the proof tree, optionally excluding a given node."""
+        if exclude is None:
+            exclude = []
         if self in exclude:
             return []
         elif self.tactic is None:
@@ -91,8 +93,10 @@ class ProofTree:
                 sorries.extend(child.list_sorries(exclude))
             return sorries
 
-    def num_sorries(self, exclude: list[ProofTree] = []) -> int:
+    def num_sorries(self, exclude: list[ProofTree] | None = None) -> int:
         """Return the number of sorries in the proof tree, optionally excluding a given node."""
+        if exclude is None:
+            exclude = []
         return len(self.list_sorries(exclude))
 
     def is_sorry_free(self) -> bool:

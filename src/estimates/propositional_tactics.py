@@ -1,10 +1,9 @@
-from typing import Sequence
+from collections.abc import Sequence
 
 from sympy import (
     And,
     Basic,
     Eq,
-    Expr,
     GreaterThan,
     LessThan,
     Max,
@@ -198,10 +197,7 @@ class SplitHyp(Tactic):
                 new_state = state.copy()
                 new_state.remove_hypothesis(self.h)
                 for i, conjunct in enumerate(conjuncts):
-                    if len(self.names) > i:
-                        name = self.names[i]
-                    else:
-                        name = self.h
+                    name = self.names[i] if len(self.names) > i else self.h
                     new_state.new_hypothesis(name, conjunct)
                 return [new_state]
             else:

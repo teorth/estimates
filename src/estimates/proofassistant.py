@@ -137,9 +137,9 @@ class ProofAssistant:
     def get_all_vars(self) -> set[Basic]:
         """Get all variables from the list of assumptions (in Assumption mode) or proof state (in Tactic mode)."""
         if self.mode == "assumption":
-            return set(
-                [obj.var() for obj in self.hypotheses.values() if isinstance(obj, Type)]
-            )
+            return {
+                obj.var() for obj in self.hypotheses.values() if isinstance(obj, Type)
+            }
         else:
             return self.get_state().get_all_vars()
 

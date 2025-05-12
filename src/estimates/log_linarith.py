@@ -34,7 +34,7 @@ from estimates.tactic import Tactic
 class ApplyTheta(Tactic):
     """A tactic to apply the Theta function to an hypothesis."""
 
-    def __init__(self, hyp: str = "this", newhyp: str = None) -> None:
+    def __init__(self, hyp: str = "this", newhyp: str | None = None) -> None:
         """`hyp` is the hypothesis to apply the Theta function to.  `newhyp` is the name of the new hypothesis.  If None, it will be set to `hyp` with a _theta suffix."""
         self.hyp = hyp
         self.newhyp = newhyp
@@ -384,7 +384,7 @@ class LogLinarith(Tactic):
                     print("Infeasible by multiplying the following:")
                     dict = proofs[n]
                     for ineq, coeff in dict.items():
-                        if not coeff == Fraction(0, 1):
+                        if coeff != Fraction(0, 1):
                             print(f"{order_str(ineq)} raised to power {coeff}")
                     n += 1
                 if n == 0:

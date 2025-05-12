@@ -97,7 +97,7 @@ class Theta(OrderOfMagnitude, Expr):
             return expr
 
         if not expr.is_positive:
-            print(f"Warning: a non-positive argument {str(expr)} was passed to Theta.")
+            print(f"Warning: a non-positive argument {expr!s} was passed to Theta.")
             return Undefined()
 
         if expr.is_number:
@@ -107,23 +107,21 @@ class Theta(OrderOfMagnitude, Expr):
             return obj
 
         if isinstance(expr, Add | Max):
-            if all([arg.is_positive for arg in expr.args]):
+            if all(arg.is_positive for arg in expr.args):
                 # Distribute the Theta operator over the sum or max
                 return OrderMax(*[Theta(arg) for arg in expr.args]).doit()
 
-        if isinstance(expr, Mul):
-            if all([arg.is_positive for arg in expr.args]):
-                # Distribute the Theta operator over the product
-                return OrderMul(*[Theta(arg) for arg in expr.args]).doit()
+        if isinstance(expr, Mul) and all(arg.is_positive for arg in expr.args):
+            # Distribute the Theta operator over the product
+            return OrderMul(*[Theta(arg) for arg in expr.args]).doit()
 
-        if isinstance(expr, Pow):
-            if (
-                expr.args[0].is_positive
-                and expr.args[1].is_number
-                and expr.args[1].is_rational
-            ):
-                # Distribute the Theta operator over the power
-                return OrderPow(Theta(expr.args[0]), expr.args[1]).doit()
+        if isinstance(expr, Pow) and (
+            expr.args[0].is_positive
+            and expr.args[1].is_number
+            and expr.args[1].is_rational
+        ):
+            # Distribute the Theta operator over the power
+            return OrderPow(Theta(expr.args[0]), expr.args[1]).doit()
 
         # otherwise wrap the general symbolic expr
         obj = Expr.__new__(cls, expr)
