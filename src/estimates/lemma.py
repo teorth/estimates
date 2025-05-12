@@ -1,4 +1,8 @@
-from estimates.tactic import *
+from sympy import Basic, Eq, S
+
+from estimates.basic import describe, is_defined
+from estimates.proofstate import ProofState
+from estimates.tactic import Tactic
 
 
 class Lemma:

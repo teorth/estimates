@@ -1,7 +1,7 @@
-from sympy import Basic, Symbol, false, true
+from sympy import Basic, Expr, S, Symbol, false, true
 
-from estimates.order_of_magnitude import *
-from estimates.proposition import *
+from estimates.order_of_magnitude import OrderSymbol
+from estimates.proposition import Proposition
 
 # Some code to handle sympy classes
 

@@ -1,4 +1,6 @@
-from basic import *
+from sympy import Basic
+
+from estimates.basic import Type, describe
 
 ## Proof states describe the current state of a proof (a list of hypotheses and a goal).  The hypotheses are a dictionary of string-Basic pairs that match a hypothesis name to the sympy basic class they represent.  The goals are stored as sympy basic classes.
 

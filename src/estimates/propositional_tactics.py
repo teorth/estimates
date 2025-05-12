@@ -1,21 +1,26 @@
 from sympy import (
+    And,
+    Eq,
+    Expr,
     GreaterThan,
     LessThan,
     Max,
     Min,
+    Not,
+    Or,
     StrictGreaterThan,
     StrictLessThan,
     false,
     simplify_logic,
 )
 from sympy.core.relational import Rel
+from sympy.logic.boolalg import Boolean
 
-from estimates.basic import *
-from estimates.littlewood_paley import *
-from estimates.order_of_magnitude import *
-from estimates.proposition import *
-from estimates.tactic import *
-from estimates.test import *
+from estimates.basic import describe, is_defined
+from estimates.littlewood_paley import LittlewoodPaley
+from estimates.order_of_magnitude import OrderMax, OrderMin
+from estimates.proofstate import ProofState
+from estimates.tactic import Tactic
 
 # Various tactics for handling propositional logic.
 

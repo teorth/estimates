@@ -1,4 +1,4 @@
-from sympy import Abs, Add, Basic, Eq, Expr, Max, Mul, Pow, S, Symbol, sympify
+from sympy import Add, Basic, Eq, Expr, Max, Mul, Pow, S, Symbol, sympify
 from sympy.core.relational import Relational
 
 

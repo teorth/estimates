@@ -1,9 +1,9 @@
 from fractions import Fraction
 
 from sympy.core.expr import Expr
+from sympy.logic.boolalg import BooleanFunction
 
-from estimates.order_of_magnitude import *
-from estimates.sympy.logic.boolalg import BooleanFunction
+from estimates.order_of_magnitude import Theta, asymp
 
 # Support for some expressions that come up in the Littlewood-Paley theory arising in PDE
 

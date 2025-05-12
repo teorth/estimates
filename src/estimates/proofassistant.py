@@ -1,7 +1,11 @@
-from estimates.basic import *
-from estimates.lemma import *
-from estimates.order_of_magnitude import *
-from estimates.prooftree import *
+from sympy import Basic, S
+from sympy.logic.boolalg import Boolean
+
+from estimates.basic import Type, describe, is_defined, new_var
+from estimates.lemma import Lemma, UseLemma
+from estimates.proofstate import ProofState
+from estimates.prooftree import ProofTree
+from estimates.tactic import Tactic
 
 # A pseudo-Lean stype proof assistant.  The proof assistant will, at any time, be one of two modes:
 

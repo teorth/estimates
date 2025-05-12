@@ -2,19 +2,33 @@ from fractions import Fraction
 from itertools import product
 
 from sympy import (
+    Basic,
     Eq,
+    Expr,
     GreaterThan,
     LessThan,
     Ne,
+    Not,
     S,
     StrictGreaterThan,
     StrictLessThan,
+    false,
+    true,
 )
 from sympy.core.relational import Rel, Relational
 
+from estimates.basic import Type, describe
 from estimates.linprog import Inequality, feasibility
-from estimates.order_of_magnitude import *
-from estimates.tactic import *
+from estimates.order_of_magnitude import (
+    OrderMax,
+    OrderMin,
+    OrderMul,
+    OrderOfMagnitude,
+    OrderPow,
+    Theta,
+)
+from estimates.proofstate import ProofState
+from estimates.tactic import Tactic
 
 
 class ApplyTheta(Tactic):

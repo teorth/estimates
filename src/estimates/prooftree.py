@@ -1,5 +1,5 @@
-from estimates.proofstate import *
-from estimates.tactic import *
+from estimates.proofstate import ProofState
+from estimates.tactic import Tactic
 
 # Support for proof trees and tactics, mimicking a Lean-type tactic proof environment.
 

@@ -1,4 +1,4 @@
-from estimates.proofstate import *
+from estimates.proofstate import ProofState
 
 ## Tactics are operations that can transform a proof state into one or more proof states.
 

@@ -1,10 +1,23 @@
 from fractions import Fraction
 
-from sympy import Eq, GreaterThan, LessThan, Ne, S, StrictGreaterThan, StrictLessThan
+from sympy import (
+    Eq,
+    GreaterThan,
+    LessThan,
+    Ne,
+    Not,
+    S,
+    StrictGreaterThan,
+    StrictLessThan,
+    false,
+    true,
+)
 from sympy.core.relational import Relational
 
+from estimates.basic import Type
 from estimates.linprog import Inequality, feasibility
-from estimates.tactic import *
+from estimates.proofstate import ProofState
+from estimates.tactic import Tactic
 
 
 class Linarith(Tactic):

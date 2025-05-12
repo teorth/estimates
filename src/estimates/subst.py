@@ -1,4 +1,8 @@
-from estimates.tactic import *
+from sympy import Basic, Eq, true
+
+from estimates.basic import Type, is_defined, new_var, typeof
+from estimates.proofstate import ProofState
+from estimates.tactic import Tactic
 
 # Substitution tactics
 

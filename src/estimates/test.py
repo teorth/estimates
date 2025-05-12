@@ -1,10 +1,8 @@
-from sympy import Basic, GreaterThan, LessThan, Ne, StrictGreaterThan, StrictLessThan
-from sympy.core.relational import Relational
+from sympy import Basic
 from sympy.logic.boolalg import Implies
 
-from estimates.basic import *
-from estimates.proofstate import *
-from estimates.tactic import *
+from estimates.proofstate import ProofState
+from estimates.tactic import Tactic
 
 
 def test(hypotheses: set[Basic], goal: Basic, verbose: bool = true) -> bool:

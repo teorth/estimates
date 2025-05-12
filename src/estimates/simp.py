@@ -1,4 +1,4 @@
-from sympy import Basic, Eq, Max, Min, Not, simplify
+from sympy import Basic, Eq, Max, Min, Not, false, simplify, true
 from sympy.core.relational import (
     GreaterThan,
     LessThan,
@@ -8,8 +8,11 @@ from sympy.core.relational import (
     StrictLessThan,
 )
 
-from estimates.tactic import *
-from estimates.test import *
+from estimates.basic import Type, new_var, typeof
+from estimates.order_of_magnitude import OrderMax, OrderMin
+from estimates.proofstate import ProofState
+from estimates.tactic import Tactic
+from estimates.test import test
 
 #  The simplifier
 
