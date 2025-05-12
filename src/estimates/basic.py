@@ -1,10 +1,12 @@
-from sympy import Basic, Symbol, true, false
-from proposition import *
-from order_of_magnitude import *
+from sympy import Basic, Symbol, false, true
+
+from estimates.order_of_magnitude import *
+from estimates.proposition import *
 
 # Some code to handle sympy classes
 
-def typeof(obj:Basic) -> str:
+
+def typeof(obj: Basic) -> str:
     """
     Return a string describing the type of the object.  This is used to determine the type of a variable in a declaration.
     TODO: implement a more sophisticated type system that can also infer properties from ambient hypotheses.
@@ -47,7 +49,8 @@ def typeof(obj:Basic) -> str:
     else:
         return f"unknown"
 
-def new_var(type:str, name:str) -> Expr:    
+
+def new_var(type: str, name: str) -> Expr:
     """
     Create a new symbolic variable of the given type and name.
     """
@@ -58,7 +61,7 @@ def new_var(type:str, name:str) -> Expr:
         case "pos_int":
             return Symbol(name, integer=True, positive=True)
         case "nonneg_int":
-            return Symbol(name, integer=True, nonnegative=True)  
+            return Symbol(name, integer=True, nonnegative=True)
         case "nonzero_int":
             return Symbol(name, integer=True, nonzero=True)
         case "real":
@@ -86,13 +89,16 @@ def new_var(type:str, name:str) -> Expr:
         case "order":
             return OrderSymbol(name)
         case _:
-            raise ValueError(f"Unknown type {type}.  Currently accepted types: 'int', 'pos_int', 'nonneg_int', `nonzero_int`, 'real', 'pos_real', 'nonneg_real', 'nonzero_real', 'rat', 'pos_rat`, 'nonneg_rat', 'nonzero_rat', 'complex', 'nonzero_complex', 'bool', 'order'.")
+            raise ValueError(
+                f"Unknown type {type}.  Currently accepted types: 'int', 'pos_int', 'nonneg_int', `nonzero_int`, 'real', 'pos_real', 'nonneg_real', 'nonzero_real', 'rat', 'pos_rat`, 'nonneg_rat', 'nonzero_rat', 'complex', 'nonzero_complex', 'bool', 'order'."
+            )
 
 
 class Type(Basic):
     """
     A bare‐bones SymPy object to capture the "type" of of other SymPy expressions.  Used here to encode variable declarations: "x : int", for instance, is encoded as "x : Type(Symbol("x", integer=True))".
     """
+
     def __new__(cls, *args):
         assert len(args) == 1, "Type requires exactly one argument."
         # force args into a tuple and pass to Basic
@@ -104,15 +110,17 @@ class Type(Basic):
 
     def __str__(self):
         return str(typeof(self.var()))
-        
+
     def __repr__(self):
         return f"Type({self.args})"
 
-def describe( name:str, object:Basic ) -> str:
+
+def describe(name: str, object: Basic) -> str:
     """Return a string description of a named sympy object."""
     return f"{name}: {object}"
 
-def is_defined(expr:Expr, vars:set[Expr]) -> bool:
+
+def is_defined(expr: Expr, vars: set[Expr]) -> bool:
     """Check if expr is defined in terms of the set `vars` of other expressions"""
     expr = S(expr)
     if expr in vars:

@@ -1,9 +1,18 @@
-from tactic import *
-from sympy import Basic, simplify, Not, Eq, Min, Max
-from sympy.core.relational import Relational, Rel, LessThan, StrictLessThan, GreaterThan, StrictGreaterThan
-from test import *
+from sympy import Basic, Eq, Max, Min, Not, simplify
+from sympy.core.relational import (
+    GreaterThan,
+    LessThan,
+    Rel,
+    Relational,
+    StrictGreaterThan,
+    StrictLessThan,
+)
+
+from estimates.tactic import *
+from estimates.test import *
 
 #  The simplifier
+
 
 def rsimp(goal: Basic, hyp: Basic) -> Basic:
     """
@@ -13,10 +22,10 @@ def rsimp(goal: Basic, hyp: Basic) -> Basic:
 
     if goal == hyp:
         return true
-    
+
     if Not(goal) == hyp:
         return false
-    
+
     if isinstance(goal, Relational) and isinstance(hyp, Relational):
         if goal.args[0] == hyp.args[0] and goal.args[1] == hyp.args[1]:
             s = 1
@@ -25,28 +34,35 @@ def rsimp(goal: Basic, hyp: Basic) -> Basic:
         else:
             s = 0
         if not s == 0:
-            sign = { "<=":{0,1}, "<":{1}, "==":{0}, ">=":{-1,0}, ">":{-1}, "!=":{-1,1}}
+            sign = {
+                "<=": {0, 1},
+                "<": {1},
+                "==": {0},
+                ">=": {-1, 0},
+                ">": {-1},
+                "!=": {-1, 1},
+            }
             goalset = sign[goal.rel_op]
-            hypset = { s * i for i in sign[hyp.rel_op] }
-            if hypset.issubset(goalset): # hypothesis implies goal
+            hypset = {s * i for i in sign[hyp.rel_op]}
+            if hypset.issubset(goalset):  # hypothesis implies goal
                 return true
-            elif hypset.isdisjoint(goalset): # hypothesis contradicts goal
+            elif hypset.isdisjoint(goalset):  # hypothesis contradicts goal
                 return false
             else:
                 goalset = goalset.intersection(hypset)
-                for rel, signset in sign.items(): # hypothesis refines goal
+                for rel, signset in sign.items():  # hypothesis refines goal
                     if goalset == signset:
                         return Rel(goal.args[0], goal.args[1], rel)
 
-    if isinstance(hyp, LessThan|StrictLessThan|GreaterThan|StrictGreaterThan):
+    if isinstance(hyp, LessThan | StrictLessThan | GreaterThan | StrictGreaterThan):
         if hyp.lts != hyp.gts:
             if hyp.lts in goal.args and hyp.gts in goal.args:
-                if isinstance(goal, Max|OrderMax):
+                if isinstance(goal, Max | OrderMax):
                     # can remove a copy of hyp.lts
                     l = list(goal.args)
                     l.remove(hyp.lts)
                     return goal.func(*l)
-                if isinstance(goal, Min|OrderMin):
+                if isinstance(goal, Min | OrderMin):
                     # can remove a copy of hyp.gts
                     l = list(goal.args)
                     l.remove(hyp.gts)
@@ -55,7 +71,7 @@ def rsimp(goal: Basic, hyp: Basic) -> Basic:
     if goal.args == ():
         return goal
     else:
-        return goal.func(*new_args) 
+        return goal.func(*new_args)
 
 
 def simp(goal: Basic, hyp: Basic) -> Basic:
@@ -68,24 +84,24 @@ def simp(goal: Basic, hyp: Basic) -> Basic:
     if isinstance(goal, Type):
         # do not attempt to simplify variable declarations.  This is done by a separate tactic.
         return goal
-    
-    new_goal =  simplify(goal)
+
+    new_goal = simplify(goal)
 
     if test({hyp}, new_goal):
         return true
     if test({hyp}, Not(new_goal)):
         return false
-    
+
     if hyp.is_Boolean:
         # If the hypothesis is a boolean, we can use it to simplify the goal further.
         new_goal = simplify(new_goal.subs(hyp, True))
 
         if isinstance(hyp, Not):
             new_goal = simplify(new_goal.subs(hyp.args[0], False))
-    
+
     new_goal = rsimp(new_goal, hyp)
 
-    if Eq(new_goal,goal) is not true:
+    if Eq(new_goal, goal) is not true:
         print(f"Simplified {goal} to {new_goal} using {hyp}.")
     return new_goal
 
@@ -100,7 +116,7 @@ class SimpAll(Tactic):
         for name, hyp in state.hypotheses.items():
             for other_name, other_hyp in newstate.hypotheses.items():
                 if other_name != name:  # Cannot use a hypothesis to simplify itself!
-                    hyp = simp(hyp, other_hyp)    
+                    hyp = simp(hyp, other_hyp)
             newstate.hypotheses[name] = hyp
 
         if hyp == true:
@@ -109,7 +125,7 @@ class SimpAll(Tactic):
         if hyp == false:
             print(f"Goal solved by _ex falso quodlibet_.")
             return []
-        
+
         goal = newstate.goal
         for name, hyp in newstate.hypotheses.items():
             goal = simp(goal, hyp)
@@ -123,13 +139,14 @@ class SimpAll(Tactic):
 
     def __str__(self):
         return "simp_all"
-    
+
+
 class IsPositive(Tactic):
     """
     Makes a variable positive by searching for hypotheses that imply positivity.
     """
 
-    def __init__(self, name: str|Basic="this"):
+    def __init__(self, name: str | Basic = "this"):
         self.name = name
 
     def activate(self, state: ProofState) -> list[ProofState]:
@@ -154,8 +171,10 @@ class IsPositive(Tactic):
         elif var.is_real:
             newvar = new_var("pos_real", name)
         else:
-            raise ValueError(f"INCONSISTENCY: {name}:{typeof} was somehow proven positive, which is impossible.")
-        
+            raise ValueError(
+                f"INCONSISTENCY: {name}:{typeof} was somehow proven positive, which is impossible."
+            )
+
         print(f"{name} is now of type {typeof(newvar)}.")
         newstate = state.copy()
         for other_name, other_var in state.hypotheses.items():
@@ -170,16 +189,17 @@ class IsPositive(Tactic):
             return []
         else:
             return [newstate]
-    
+
     def __str__(self):
         return f"is_positive {self.name}"
-    
+
+
 class IsNonnegative(Tactic):
     """
     Makes a variable nonnegative by searching for hypotheses that imply nonnegativity.
     """
 
-    def __init__(self, name: str|Basic="this"):
+    def __init__(self, name: str | Basic = "this"):
         self.name = name
 
     def activate(self, state: ProofState) -> list[ProofState]:
@@ -204,8 +224,10 @@ class IsNonnegative(Tactic):
         elif var.is_real:
             newvar = new_var("nonneg_real", name)
         else:
-            raise ValueError(f"INCONSISTENCY: {name}:{typeof} was somehow proven nonnegative, which is impossible.")
-        
+            raise ValueError(
+                f"INCONSISTENCY: {name}:{typeof} was somehow proven nonnegative, which is impossible."
+            )
+
         print(f"{name} is now of type {typeof(newvar)}.")
         newstate = state.copy()
         for other_name, other_var in state.hypotheses.items():
@@ -220,17 +242,17 @@ class IsNonnegative(Tactic):
             return []
         else:
             return [newstate]
-    
+
     def __str__(self):
         return f"is_nonnegative {self.name}"
-    
+
 
 class IsNonzero(Tactic):
     """
     Makes a variable nonzero by searching for hypotheses that imply nonvanishing.
     """
 
-    def __init__(self, name: str|Basic="this"):
+    def __init__(self, name: str | Basic = "this"):
         self.name = name
 
     def activate(self, state: ProofState) -> list[ProofState]:
@@ -255,8 +277,10 @@ class IsNonzero(Tactic):
         elif var.is_real:
             newvar = new_var("nonzero_real", name)
         else:
-            raise ValueError(f"INCONSISTENCY: {name}:{typeof} was somehow proven positive, which is impossible.")
-        
+            raise ValueError(
+                f"INCONSISTENCY: {name}:{typeof} was somehow proven positive, which is impossible."
+            )
+
         print(f"{name} is now of type {typeof(newvar)}.")
         newstate = state.copy()
         for other_name, other_var in state.hypotheses.items():
@@ -271,6 +295,6 @@ class IsNonzero(Tactic):
             return []
         else:
             return [newstate]
-    
+
     def __str__(self):
         return f"is_nonzero {self.name}"

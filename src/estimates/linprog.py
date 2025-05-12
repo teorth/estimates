@@ -1,5 +1,6 @@
-from z3 import Solver, Real, sat, Sum
 from fractions import Fraction
+
+from z3 import Real, Solver, Sum, sat
 
 # exact linear programming tools.
 
@@ -8,41 +9,41 @@ from fractions import Fraction
 class Inequality:
     def __init__(self, coeffs, sense, rhs):
         # convert coeffs to Fraction for exact arithmetic
-        self.coeffs = {v: Fraction(c) for v, c in coeffs.items()} 
+        self.coeffs = {v: Fraction(c) for v, c in coeffs.items()}
         self.rhs = Fraction(rhs)
-        assert sense in ['leq', 'lt', 'geq', 'gt', 'eq'], f"Invalid sense: {sense}"
+        assert sense in ["leq", "lt", "geq", "gt", "eq"], f"Invalid sense: {sense}"
         self.sense = sense
 
     # return the set of variables in the coeff dictionary
     def variables(self):
         return set(self.coeffs.keys())
-        
+
     def dual_name(self):
         """
         Return an internal name for the dual variable of this inequality, suitable for LP solvers.
         """
-        return "dual_"+str(id(self))
-            
+        return "dual_" + str(id(self))
+
     def __str__(self):
         """
         Return a string representation of the inequality.
         """
-        coeffs_str = ' + '.join(f"{c}*{v}" for v, c in self.coeffs.items())
+        coeffs_str = " + ".join(f"{c}*{v}" for v, c in self.coeffs.items())
         match self.sense:
-            case 'leq':
+            case "leq":
                 return f"{coeffs_str} <= {self.rhs}"
-            case 'lt':
+            case "lt":
                 return f"{coeffs_str} < {self.rhs}"
-            case 'geq':
+            case "geq":
                 return f"{coeffs_str} >= {self.rhs}"
-            case 'gt':
+            case "gt":
                 return f"{coeffs_str} > {self.rhs}"
-            case 'eq':
+            case "eq":
                 return f"{coeffs_str} = {self.rhs}"
             case _:
                 raise ValueError(f"Invalid sense: {self.sense}")
 
-        
+
 def ineq_variables(inequalities):
     """
     Return the set of variables in a list of inequalities.
@@ -52,75 +53,122 @@ def ineq_variables(inequalities):
         vars.update(inequality.variables())
     return vars
 
-def feasibility(inequalities):
-    """ Test via dual linear programming if a list of inequalities is feasible, outputting a certificate in both cases. """
 
-# collect the primal variables
+def feasibility(inequalities):
+    """Test via dual linear programming if a list of inequalities is feasible, outputting a certificate in both cases."""
+
+    # collect the primal variables
     variables = ineq_variables(inequalities)
 
-#   First we test for feasibility.
+    #   First we test for feasibility.
 
     s = Solver()
 
-# create a dictionary of real z3 variables for each inequality variable
+    # create a dictionary of real z3 variables for each inequality variable
     z3_variables = {var: Real(str(var)) for var in variables}
 
-# add the constraint for each inequality
+    # add the constraint for each inequality
     for ineq in inequalities:
         match ineq.sense:
-            case 'leq':
-                s.add(Sum(*[z3_variables[var] * coeff for var, coeff in ineq.coeffs.items()]) <= ineq.rhs)
-            case 'lt':
-                s.add(Sum(*[z3_variables[var]* coeff for var, coeff in ineq.coeffs.items()]) < ineq.rhs)
-            case 'geq':
-                s.add(Sum(*[z3_variables[var] * coeff for var, coeff in ineq.coeffs.items()]) >= ineq.rhs)
-            case 'gt':
-                s.add(Sum(*[z3_variables[var] * coeff for var, coeff in ineq.coeffs.items()]) > ineq.rhs)
-            case 'eq':
-                s.add(Sum(*[z3_variables[var] * coeff for var, coeff in ineq.coeffs.items()]) == ineq.rhs)
+            case "leq":
+                s.add(
+                    Sum(
+                        *[
+                            z3_variables[var] * coeff
+                            for var, coeff in ineq.coeffs.items()
+                        ]
+                    )
+                    <= ineq.rhs
+                )
+            case "lt":
+                s.add(
+                    Sum(
+                        *[
+                            z3_variables[var] * coeff
+                            for var, coeff in ineq.coeffs.items()
+                        ]
+                    )
+                    < ineq.rhs
+                )
+            case "geq":
+                s.add(
+                    Sum(
+                        *[
+                            z3_variables[var] * coeff
+                            for var, coeff in ineq.coeffs.items()
+                        ]
+                    )
+                    >= ineq.rhs
+                )
+            case "gt":
+                s.add(
+                    Sum(
+                        *[
+                            z3_variables[var] * coeff
+                            for var, coeff in ineq.coeffs.items()
+                        ]
+                    )
+                    > ineq.rhs
+                )
+            case "eq":
+                s.add(
+                    Sum(
+                        *[
+                            z3_variables[var] * coeff
+                            for var, coeff in ineq.coeffs.items()
+                        ]
+                    )
+                    == ineq.rhs
+                )
 
-# solve
+    # solve
     if s.check() == sat:
         m = s.model()
         return True, {var: m[z3_variables[var]] for var in variables}
 
-#   Now we test for infeasibility.
+    #   Now we test for infeasibility.
 
     # create a z3 variable for each inequality
     dual_vars = {ineq: Real(ineq.dual_name()) for ineq in inequalities}
 
     dual_s = Solver()
 
-    # add a non-negativity constraint for each dual variable 
+    # add a non-negativity constraint for each dual variable
     for ineq in inequalities:
         match ineq.sense:
-            case 'leq' | 'lt':
+            case "leq" | "lt":
                 dual_s.add(dual_vars[ineq] <= 0)
-            case 'geq' | 'gt':
+            case "geq" | "gt":
                 dual_s.add(dual_vars[ineq] >= 0)
 
     # each primal variable generates a constraint on the dual variables
     for var in variables:
-        dual_s.add(Sum(*[dual_vars[ineq] * ineq.coeffs.get(var, 0) for ineq in inequalities]) == 0)
+        dual_s.add(
+            Sum(*[dual_vars[ineq] * ineq.coeffs.get(var, 0) for ineq in inequalities])
+            == 0
+        )
 
     # sum of the final coefficients must be non-positive
-    final_sum = Sum(*[dual_vars[ineq] * ineq.rhs for ineq in inequalities]) 
-    
+    final_sum = Sum(*[dual_vars[ineq] * ineq.rhs for ineq in inequalities])
+
     dual_s.add(final_sum >= 0)
 
     # also normalize the sum of the final coefficients, plus the gt dual variables, minus the lt dual variables, to 1
-    sum_lt_vars = Sum(*[dual_vars[ineq] for ineq in inequalities if ineq.sense == 'lt'])
-    sum_gt_vars = Sum(*[dual_vars[ineq] for ineq in inequalities if ineq.sense == 'gt'])
+    sum_lt_vars = Sum(*[dual_vars[ineq] for ineq in inequalities if ineq.sense == "lt"])
+    sum_gt_vars = Sum(*[dual_vars[ineq] for ineq in inequalities if ineq.sense == "gt"])
     dual_s.add(final_sum + sum_gt_vars - sum_lt_vars == 1)
 
     if dual_s.check() == sat:
         m = dual_s.model()
-        return False, {ineq:m[v] for ineq, v in dual_vars.items()}
+        return False, {ineq: m[v] for ineq, v in dual_vars.items()}
     else:
-        raise ValueError(f"Farkas lemma violation!  Problem is neither feasible nor infeasible. Inequalities: {inequalities}")
+        raise ValueError(
+            f"Farkas lemma violation!  Problem is neither feasible nor infeasible. Inequalities: {inequalities}"
+        )
+
 
 def verbose_feasibility(inequalities) -> bool:
-    """ Test via dual linear programming if a list of inequalities is feasible, outputting a certificate in both cases. """
+    """Test via dual linear programming if a list of inequalities is feasible, outputting a certificate in both cases."""
     print("Checking feasibility of the following inequalities:")
     for ineq in inequalities:
         print(ineq)
@@ -134,7 +182,6 @@ def verbose_feasibility(inequalities) -> bool:
     else:
         print("Infeasible by summing the following:")
         for ineq, coeff in dict.items():
-            if not coeff == Fraction(0,1):
+            if not coeff == Fraction(0, 1):
                 print(f"{ineq} multiplied by {coeff}")
         return False
-

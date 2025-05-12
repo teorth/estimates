@@ -1,8 +1,8 @@
-from tactic import *
+from estimates.tactic import *
 
 
 class Lemma:
-    """ A base class for a lemma object, to be used by the use_lemma() method."""
+    """A base class for a lemma object, to be used by the use_lemma() method."""
 
     def __init__(self, *args):
         self.name = "Unimplemented"
@@ -31,48 +31,53 @@ class UseLemma(Tactic):
         statement = self.lemma.apply(state)
         newstate = state.copy()
         newstate.hypotheses[hyp] = statement
-        print(f"Applying lemma {self.lemma} to conclude {describe(hyp,statement)}.")
+        print(f"Applying lemma {self.lemma} to conclude {describe(hyp, statement)}.")
         return [newstate]
-    
+
     def __str__(self):
         return f"{self.hyp} := {self.lemma}"
-    
+
+
 class Amgm(Lemma):
     """
     The arithmetic mean-geometric mean inequality.  This is a sample lemma to test the code.
     """
 
-    def __init__(self, *vars : Basic):
+    def __init__(self, *vars: Basic):
         assert len(vars) > 0, "At least one variable is required."
         self.vars = [S(x) for x in vars]
         for x in vars:
             assert x.is_nonnegative, f"{x} must be a nonnegative expression."
-        
+
     def apply(self, state: ProofState) -> Basic:
         for x in self.vars:
-            assert is_defined(x, state.get_all_vars()), f"{x} is not defined in the current proof state."
+            assert is_defined(x, state.get_all_vars()), (
+                f"{x} is not defined in the current proof state."
+            )
         prod = 1
         sum = 0
         for x in self.vars:
             prod *= x
             sum += x
-        return prod**(1/len(self.vars)) <= sum/len(self.vars)
-            
+        return prod ** (1 / len(self.vars)) <= sum / len(self.vars)
+
     def __str__(self):
         return f"am_gm(" + ", ".join(str(x) for x in self.vars) + ")"
-   
+
+
 class Rfl(Lemma):
     """
     The reflexive axiom: any expression is equal to itself.
     """
 
-    def __init__(self, expr : Basic):
+    def __init__(self, expr: Basic):
         self.expr = expr
-        
+
     def apply(self, state: ProofState) -> Basic:
-        assert is_defined(self.expr, state.get_all_vars()), f"{self.expr} is not defined in the current proof state."
+        assert is_defined(self.expr, state.get_all_vars()), (
+            f"{self.expr} is not defined in the current proof state."
+        )
         return Eq(self.expr, self.expr, evaluate=False)
-            
+
     def __str__(self):
         return f"rfl({self.expr})"
- 
