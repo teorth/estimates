@@ -12,6 +12,20 @@ class Undefined(Expr):
     def __repr__(self) -> str:
         return "⊥"
 
+class FormalSub(Expr):
+    """A marker that says “– is a formal substitution”, but is still technically a `Expr` for the purposes of sympy operations.
+    Need to use this instead of `Undefined` when computing the difference of two expressions, due to sympy's simplifier."""
+
+    def __new__(cls, lhs, rhs):
+        obj = Expr.__new__(cls, lhs, rhs)
+        obj.name = f"FormalSub({lhs!r}, {rhs!r})"
+        return obj
+    
+    def __str__(self) -> str:
+        return self.name
+
+    def __repr__(self) -> str:
+        return self.name
 
 class OrderOfMagnitude(Basic):
     """
@@ -25,10 +39,10 @@ class OrderOfMagnitude(Basic):
         return OrderMax(other, self).doit()
 
     def __sub__(self, other):
-        return Undefined()
+        return FormalSub(self,other)
 
     def __rsub__(self, other):
-        return Undefined()
+        return FormalSub(other, self)
 
     def __mul__(self, other):
         return OrderMul(self, other).doit()

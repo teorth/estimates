@@ -8,7 +8,7 @@ from estimates.littlewood_paley import LittlewoodPaley, bracket, sqrt
 from estimates.log_linarith import ApplyTheta, LogLinarith
 from estimates.order_of_magnitude import OrderMax, OrderMin, asymp, gtrsim, lesssim
 from estimates.proofassistant import ProofAssistant
-from estimates.propositional_tactics import ByCases, Cases, Claim, SplitGoal, SplitHyp
+from estimates.propositional_tactics import ByCases, Cases, Claim, SplitGoal, SplitHyp, Contrapose
 from estimates.simp import (
     IsNonnegative,
     IsNonzero,
@@ -60,6 +60,7 @@ def case_split_solution() -> None:
     p = case_split_exercise()
     p.use(Cases("h1"))
     p.use(SimpAll())
+    p.use(SimpAll())
 
 
 def split_exercise() -> ProofAssistant:
@@ -87,6 +88,11 @@ def pigeonhole_exercise() -> ProofAssistant:
     p.begin_proof((x > 2) | (y > 3))
     return p
 
+def pigeonhole_solution() -> None:
+    p = pigeonhole_exercise()
+    p.use(Contrapose("h"))
+    p.use(SplitHyp("h"))
+    p.use(Linarith())
 
 def ineq_exercise() -> ProofAssistant:
     p = ProofAssistant()
@@ -165,7 +171,7 @@ def trivial_exercise() -> ProofAssistant:
     p = ProofAssistant()
     x = p.var("real", "x")
     p.assume(x > 0, "h")
-    p.begin_proof(x >= 0)
+    p.begin_proof(0 < x)
     return p
 
 

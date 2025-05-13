@@ -209,7 +209,7 @@ def trivial_exercise():
     p = ProofAssistant()
     x = p.var("real", "x")
     p.assume(x>0, "h")
-    p.begin_proof(x >= 0)
+    p.begin_proof(0 < x)
     return p
 ```
 
@@ -220,7 +220,7 @@ def trivial_exercise():
 Starting proof.  Current proof state:
 x: real
 h: x > 0
-|- x >= 0
+|- x > 0
 ```
 
 **Hint**: This is `Trivial()`.

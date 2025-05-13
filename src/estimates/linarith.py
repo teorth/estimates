@@ -134,7 +134,7 @@ class Linarith(Tactic):
                     print("Infeasible by summing the following:")
                     dict = proofs[n]
                     for ineq, coeff in dict.items():
-                        if coeff != Fraction(0, 1):
+                        if coeff.as_fraction() != Fraction(0, 1):
                             print(f"{ineq} multiplied by {coeff}")
                     n += 1
                 if n == 0:
