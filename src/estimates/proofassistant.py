@@ -351,13 +351,13 @@ class ProofAssistant:
                 if len(self.current_node.children) == 1:
                     print("Moved forward a step in the proof.")
                 elif case == 1:
-                    print("Moved forward to the first case in the proof.")
+                    print("Moved forward to the first case of this step in the proof.")
                 elif case == 2:
-                    print("Moved forward to the second case in the proof.")
+                    print("Moved forward to the second case of this step in the proof.")
                 elif case == 3:
-                    print("Moved forward to the third case in the proof.")
+                    print("Moved forward to the third case of this step in the proof.")
                 else:
-                    print("Moved forward to case {case} in the proof.")
+                    print("Moved forward to case {case} of this step in the proof.")
         else:
             raise ValueError("Cannot move forward in assumption mode.")
 
