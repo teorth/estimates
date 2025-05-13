@@ -1,4 +1,5 @@
 from sympy import Basic, Eq, Max, Min, Not, false, simplify, true
+from sympy.logic.boolalg import Boolean
 from sympy.core.relational import (
     GreaterThan,
     LessThan,
@@ -17,7 +18,7 @@ from estimates.test import test
 #  The simplifier
 
 
-def rsimp(goal: Basic, hyp: Basic) -> Basic:
+def rsimp(goal: Basic, hyp: Basic|None = None) -> Basic:
     """
     Recursively simplifies the goal using the hypothesis."""
 
@@ -73,15 +74,15 @@ def rsimp(goal: Basic, hyp: Basic) -> Basic:
     if goal.args == ():
         return goal
     else:
-        return goal.func(*new_args)
+        return goal.func(*new_args).doit()
 
 
-def simp(goal: Basic, hyp: Basic) -> Basic:
+def simp(goal: Basic, hyp: Basic|None = None) -> Basic:
     """
     Simplifies the goal using the hypothesis.
     """
 
-    # Note: use of sympy's native simplifier introduced too much unwanted behavior, e.g., simplifying inequalities using subtraction, and we are now removing it from the code.
+    # Note: use of sympy's native simplifier introduced too much unwanted behavior, e.g., simplifying inequalities using subtraction, and we are currently disabling it from the code.  Perhaps we will reintroduce it later as an option.
 
     
     if isinstance(goal, Type):
@@ -93,7 +94,7 @@ def simp(goal: Basic, hyp: Basic) -> Basic:
     if test({hyp}, Not(goal)):
         return false
 
-    if hyp.is_Boolean:
+    if isinstance(hyp,Boolean):
         # If the hypothesis is a boolean, we can use it to simplify the goal further.
         new_goal = goal.subs(hyp, True)
 

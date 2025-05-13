@@ -3,6 +3,7 @@ from sympy import Basic, Eq, true
 from estimates.basic import Type, is_defined, new_var, typeof
 from estimates.proofstate import ProofState
 from estimates.tactic import Tactic
+from estimates.simp import simp
 
 # Substitution tactics
 
@@ -118,13 +119,13 @@ class Subst(Tactic):
                 )
 
         if self.reversed:
-            newtarget = target.subs(hyp.rhs, hyp.lhs)
+            newtarget = simp(target.subs(hyp.rhs, hyp.lhs))
             if newtarget != target:
                 print(
                     f"Substituted {self.hyp} in reverse to replace {target} with {newtarget}."
                 )
         else:
-            newtarget = target.subs(hyp.lhs, hyp.rhs)
+            newtarget = simp(target.subs(hyp.lhs, hyp.rhs))
             if newtarget != target:
                 print(f"Substituted {self.hyp} to replace {target} with {newtarget}.")
 

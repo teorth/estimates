@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 from estimates.tactic import Tactic
 
 
-def test(hypotheses: Iterable[Basic], goal: Basic, verbose: bool = True) -> bool:
+def test(hypotheses: Iterable[Basic|None], goal: Basic, verbose: bool = True) -> bool:
     """
     Check if a goal follows immediately from the stated hypotheses, including from the implicit ones.
     """
@@ -22,11 +22,11 @@ def test(hypotheses: Iterable[Basic], goal: Basic, verbose: bool = True) -> bool
         return True
 
     for hyp in hypotheses:
-        if Implies(hyp.simplify(), goal) == True:
-            if verbose:
-                print(f"Goal {goal} follows from hypothesis {hyp}!")
-            return True
-
+        if hyp != None:
+            if Implies(hyp, goal) == True:
+                if verbose:
+                    print(f"Goal {goal} follows from hypothesis {hyp}!")
+                return True
     return False
 
 

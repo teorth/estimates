@@ -91,6 +91,9 @@ def extract_monomials(expr: Basic) -> dict[Basic, Fraction]:
     The keys are the monomials and the values are their coefficients.
     """
     monomials = {}
+    if expr == Theta(1):
+        return monomials
+
     if isinstance(expr, OrderMul):
         for arg in expr.args:
             for term, coeff in extract_monomials(arg).items():

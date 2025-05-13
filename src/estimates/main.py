@@ -263,11 +263,17 @@ def bracket_submult_exercise() -> ProofAssistant:
 def bracket_submult_solution() -> None:
     p = bracket_submult_exercise()
     x, y = p.get_vars("x", "y")
-    p.use(ByCases(Eq(x, 0)))
-    p.use(SimpAll())  # generates some warnings from the simplifier
-    p.use(ByCases(Eq(y, 0)))
-    p.use(SimpAll())
+    p.use(ByCases(Eq(x, 0),"hx"))
+    p.use(Subst("hx"))
+    p.use(ByCases(Eq(y, 0),"hy"))
+    p.use(Subst("hy"))
+    p.use(LogLinarith())
+    p.use(IsNonzero("y"))
+    p.use(LogLinarith())
     p.use(IsNonzero("x"))
+    p.use(ByCases(Eq(y, 0),"hy"))
+    p.use(Subst("hy"))
+    p.use(LogLinarith())
     p.use(IsNonzero("y"))
     p.use(LogLinarith())
 
