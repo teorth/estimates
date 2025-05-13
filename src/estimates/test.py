@@ -16,12 +16,13 @@ def test(hypotheses: Iterable[Basic], goal: Basic, verbose: bool = True) -> bool
     Check if a goal follows immediately from the stated hypotheses, including from the implicit ones.
     """
 
-    simp_goal = goal.simplify()
-    if simp_goal == true:
+    # use of sympy's simplifier has been discontinued as it caused multiple unwanted operations and simplifications
+
+    if goal == true:
         return True
 
     for hyp in hypotheses:
-        if Implies(hyp.simplify(), simp_goal) == True:
+        if Implies(hyp.simplify(), goal) == True:
             if verbose:
                 print(f"Goal {goal} follows from hypothesis {hyp}!")
             return True

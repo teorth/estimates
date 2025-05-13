@@ -249,7 +249,7 @@ def amgm_solution() -> None:
     p = amgm_exercise()
     x, y = p.get_vars("x", "y")
     p.use_lemma(Amgm(x**2, y**2))
-    p.use(SimpAll())
+    p.use(Linarith())
 
 
 def bracket_submult_exercise() -> ProofAssistant:
@@ -259,6 +259,7 @@ def bracket_submult_exercise() -> ProofAssistant:
     return p
 
 
+# New solution needed here.
 def bracket_submult_solution() -> None:
     p = bracket_submult_exercise()
     x, y = p.get_vars("x", "y")
@@ -275,7 +276,7 @@ def littlewood_paley_exercise() -> ProofAssistant:
     p = ProofAssistant()
     N_1, N_2, N_3 = p.vars("order", "N_1", "N_2", "N_3")
     p.assume(LittlewoodPaley(N_1, N_2, N_3), "h")
-    p.begin_proof(Min(N_1, N_2, N_3) * Max(N_1, N_2, N_3) ** 2 <= N_1 * N_2 * N_3)
+    p.begin_proof(OrderMin(N_1, N_2, N_3) * OrderMax(N_1, N_2, N_3) ** 2 <= N_1 * N_2 * N_3)
     return p
 
 
@@ -359,5 +360,5 @@ def subst_all_example() -> ProofAssistant:
 
 def subst_all_solution() -> None:
     p = subst_all_example()
-    p.use(SubstAll("hx"))
+    p.use(SubstAll("hN"))
     p.use(Linarith())

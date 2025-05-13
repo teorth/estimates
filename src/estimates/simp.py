@@ -83,6 +83,7 @@ def simp(goal: Basic, hyp: Basic) -> Basic:
 
     # Note: use of sympy's native simplifier introduced too much unwanted behavior, e.g., simplifying inequalities using subtraction, and we are now removing it from the code.
 
+    
     if isinstance(goal, Type):
         # do not attempt to simplify variable declarations.  This is done by a separate tactic.
         return goal

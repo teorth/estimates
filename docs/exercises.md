@@ -398,7 +398,7 @@ def littlewood_paley_exercise():
     p = ProofAssistant()
     N_1, N_2, N_3 = p.vars("order", "N_1", "N_2", "N_3")
     p.assume(LittlewoodPaley(N_1,N_2,N_3), "h")
-    p.begin_proof(Min(N_1,N_2,N_3) * Max(N_1,N_2,N_3)**2 <= N_1*N_2*N_3)
+    p.begin_proof(OrderMin(N_1,N_2,N_3) * OrderMax(N_1,N_2,N_3)**2 <= N_1*N_2*N_3)
     return p
 ```
 

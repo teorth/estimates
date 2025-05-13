@@ -1,4 +1,5 @@
 from sympy import Basic, Eq, S
+from fractions import Fraction
 
 from estimates.basic import describe, is_defined
 from estimates.proofstate import ProofState
@@ -63,7 +64,7 @@ class Amgm(Lemma):
         for x in self.vars:
             prod *= x
             sum += x
-        return prod ** (1 / len(self.vars)) <= sum / len(self.vars)
+        return prod ** Fraction(1, len(self.vars)) <= sum / len(self.vars)
 
     def __str__(self) -> str:
         return "am_gm(" + ", ".join(str(x) for x in self.vars) + ")"

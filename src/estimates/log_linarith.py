@@ -237,7 +237,6 @@ class LogLinarith(Tactic):
         for hypothesis in hypotheses:
             # convert the hypothesis to an asymptotic form, which in the case of unequalities generates two hypotheses.
             newhypotheses = []
-            print(f"Processing hypothesis {hypothesis}.")
             if isinstance(
                 hypothesis, Type
             ):  # check for positivity conditions to add to the inequalities
@@ -311,8 +310,6 @@ class LogLinarith(Tactic):
                     continue
             else:
                 continue
-
-            print(f"Adding {len(newhypotheses)} new hypotheses: {[str(hyp) for hyp in newhypotheses]}.")
 
             newhypotheses = [
                 hyp for hyp in newhypotheses if hyp != false
