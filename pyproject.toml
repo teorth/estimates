@@ -1,0 +1,53 @@
+[project]
+name = "estimates"
+version = "0.1.0"
+description = "A lightweight proof assistant."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "sympy>=1.14.0",
+    "z3-solver>=4.15.0.0",
+]
+
+[project.scripts]
+estimates = "estimates:main"
+
+[tool.pyright]
+venv = ".venv"
+venvPath = "."
+
+[tool.ruff.lint]
+select = [
+    "ANN",
+    "BLE",
+    "B",
+    "C4",
+    "EXE",
+    "ISC",
+    "SIM",
+    "ARG",
+    "PTH",
+    "I",
+    "N",
+    "F",
+    "PLE",
+    "PLW",
+    "UP",
+    "FURB",
+    "RUF",
+    "TRY",
+]
+
+unfixable = ["ISC001"]
+
+[tool.ruff.lint.flake8-implicit-str-concat]
+allow-multiline = false
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.11.9",
+]
