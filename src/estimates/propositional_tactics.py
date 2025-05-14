@@ -276,7 +276,7 @@ class ByCases(Tactic):
         if self.name == "this":
             return "by_cases " + str(self.statement)
         else:
-            return "by_cases " + describe(str.name, self.statement)
+            return "by_cases " + describe(self.name, self.statement)
 
 
 class Option(Tactic):
