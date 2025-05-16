@@ -250,7 +250,7 @@ class Cases(Tactic):
 
 class ByCases(Tactic):
     """
-    Split into two cases, depending on whether an assertin is true or false."""
+    Split into two cases, depending on whether an assertion is true or false."""
 
     def __init__(self, statement: Boolean, name: str = "this") -> None:
         self.statement = statement
@@ -276,7 +276,7 @@ class ByCases(Tactic):
         if self.name == "this":
             return "by_cases " + str(self.statement)
         else:
-            return "by_cases " + describe(str.name, self.statement)
+            return "by_cases " + describe(self.name, self.statement)
 
 
 class Option(Tactic):
@@ -292,7 +292,7 @@ class Option(Tactic):
         if disjuncts is None:
             raise ValueError(f"Goal {state.goal} did not split into a disjunction.")
         if self.n > len(disjuncts):
-            raise ValueError(f"Goal {state.goal} only hhad {len(disjuncts)} disjuncts.")
+            raise ValueError(f"Goal {state.goal} only had {len(disjuncts)} disjuncts.")
         print(
             f"Replacing goal {state.goal} with option {self.n}: {disjuncts[self.n - 1]}."
         )
