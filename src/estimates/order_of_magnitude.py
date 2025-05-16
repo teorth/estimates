@@ -44,6 +44,9 @@ class OrderOfMagnitude(Basic):
     def __rsub__(self, other):
         return FormalSub(other, self)
 
+    def __neg__(self):
+        return FormalSub(0, self)
+
     def __mul__(self, other):
         return OrderMul(self, other).doit()
 
