@@ -76,7 +76,6 @@ def rsimp(goal: Basic, hypotheses: set[Basic] = set(), use_sympy = False) -> Bas
                     l.remove(hyp.gts)
                     return goal.func(*l)
 
-
     if goal.args == ():
         return goal
     else:

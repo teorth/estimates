@@ -234,7 +234,7 @@ class LogLinarith(Tactic):
             hypotheses.add(Not(state.goal))
 
         # Now gather a list of inequalities for each hypothesis.  In most cases, only one inequality is generated.
-        inequality_lists = []
+        inequality_lists : list[list[Inequality]] = []
         max_objects_set = set()
         min_objects_set = set()
         for hypothesis in hypotheses:
@@ -335,7 +335,7 @@ class LogLinarith(Tactic):
 
         # For each max object and min object, add further inequalities
         for max_object in max_objects_set:
-            extra_inequality = []
+            extra_inequality : list[Inequality] = []
             for arg in max_object.args:
                 inequality_lists.append([inequality_of(Rel(arg, max_object, "<="))])
                 extra_inequality.append(inequality_of(Rel(arg, max_object, "==")))
@@ -346,6 +346,8 @@ class LogLinarith(Tactic):
                 inequality_lists.append([inequality_of(Rel(arg, min_object, ">="))])
                 extra_inequality.append(inequality_of(Rel(arg, min_object, "==")))
             inequality_lists.append(extra_inequality)
+
+# TODO: for quantity that is bounded, add an inequality bounding it by 1
 
         if self.verbose:
             print(
