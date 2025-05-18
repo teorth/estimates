@@ -133,36 +133,44 @@ class SimpAll(Tactic):
     Simplifies each hypothesis using other hypotheses, then the goal using the hypothesis.
     """
 
-    def __init__(self, use_sympy:bool = False) -> None:
+    def __init__(self, use_sympy:bool = False, repeat:bool = False) -> None:
         self.use_sympy = use_sympy
-
+        self.repeat = repeat
 
     def activate(self, state: ProofState) -> list[ProofState]:
         newstate = state.copy()
-        for name, hyp in state.hypotheses.items():
-            other_hypotheses = set()
-            for other_name, other_hyp in newstate.hypotheses.items():
-                if other_name != name:  # Cannot use a hypothesis to simplify itself!
-                    other_hypotheses.add(other_hyp)
-            hyp = simp(hyp, other_hypotheses, self.use_sympy)
-            newstate.hypotheses[name] = hyp
 
-            if hyp == true:
-                newstate.remove_hypothesis(name)
+        while True:
+            for name, hyp in state.hypotheses.items():
+                other_hypotheses = set()
+                for other_name, other_hyp in newstate.hypotheses.items():
+                    if other_name != name:  # Cannot use a hypothesis to simplify itself!
+                        other_hypotheses.add(other_hyp)
+                hyp = simp(hyp, other_hypotheses, self.use_sympy)
+                newstate.hypotheses[name] = hyp
 
-            if hyp == false:
-                print("Goal solved by _ex falso quodlibet_.")
+                if hyp == true:
+                    newstate.remove_hypothesis(name)
+
+                if hyp == false:
+                    print("Goal solved by _ex falso quodlibet_.")
+                    return []
+
+            goal = newstate.goal
+            goal = simp(goal, set(newstate.hypotheses.values()), self.use_sympy)
+            newstate.set_goal(goal)
+
+            if goal == true:
+                print("Goal solved!")
                 return []
+            
+            if not self.repeat:
+                break
 
-        goal = newstate.goal
-        goal = simp(goal, set(newstate.hypotheses.values()), self.use_sympy)
-        newstate.set_goal(goal)
-
-        if goal == true:
-            print("Goal solved!")
-            return []
-        else:
-            return [newstate]
+            if newstate.eq(state):
+                break  # if repeat is True, we keep simplifying until the goal stabilizes
+    
+        return [newstate]
 
     def __str__(self) -> str:
         return "simp_all"

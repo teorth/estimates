@@ -60,8 +60,8 @@ def case_split_exercise() -> ProofAssistant:
 def case_split_solution() -> None:
     p = case_split_exercise()
     p.use(Cases("h1"))
-    while p.mode == "tactic":  # sometimes, due to the ordering of hypotheses, SimpAll will not completely resolve the proof in two steps; it can take three.
-        p.use(SimpAll())
+    p.use(SimpAll())
+    p.use(SimpAll(repeat=True)) # The second case is non-deterministic, and can require one or more iterations to close
 
 
 def split_exercise() -> ProofAssistant:
