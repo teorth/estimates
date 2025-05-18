@@ -61,8 +61,8 @@ def case_split_solution() -> None:
     p = case_split_exercise()
     p.use(Cases("h1"))
     p.use(SimpAll())
-    p.use(SimpAll())
-    p.use(SimpAll())
+    while p.mode == "tactic":  # sometimes, due to the ordering of hypotheses, SimpAll will not completely resolve the proof here.
+        p.use(SimpAll())
 
 
 def split_exercise() -> ProofAssistant:
