@@ -132,3 +132,25 @@ Substituted hN to replace x + y + z <= N**2 with x + y + z <= 100.
 Goal solved by linear arithmetic!
 Proof complete!
 ```
+Example:
+```
+>>> from estimates.main import *     
+>>> p = subst_all_example_reversed()
+Starting proof.  Current proof state:
+N: pos_int
+x: real
+y: real
+z: real
+hx: x <= N
+hy: y <= N
+hz: z <= N
+hN: Eq(10, N)
+|- x + y + z <= N**2
+>>> p.use(SubstAll("hN",reversed=True))
+Substituted hN in reverse to replace x <= N with x <= 10.
+Substituted hN in reverse to replace y <= N with y <= 10.
+Substituted hN in reverse to replace z <= N with z <= 10.
+Substituted hN in reverse to replace x + y + z <= N**2 with x + y + z <= 100.
+1 goal remaining.
+```
+

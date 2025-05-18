@@ -524,6 +524,42 @@ hN: Eq(N, 10)
 
 **Hint**: A single `SubstAll()` will make this problem fall to `Linarith()`.
 
+## Substitution example III
+
+**Informal version** If $x,y,z \leq N$ and $10=N$, then $x+y+z \leq N^2$.
+
+**Python code**:
+```
+def subst_all_example_reversed():
+    p = ProofAssistant()
+    N = p.var("pos_int", "N")
+    x, y, z = p.vars("real", "x", "y", "z")
+    p.assume(x <= N, "hx")
+    p.assume(y <= N, "hy")
+    p.assume(z <= N, "hz")
+    p.assume(Eq(10,N), "hN")
+    p.begin_proof(x+y+z <= N**2)
+    return p
+```
+
+**In an interactive Python environment**:
+```
+>>> from estimates.main import *     
+>>> p = subst_all_example_reversed()
+Starting proof.  Current proof state:
+N: pos_int
+x: real
+y: real
+z: real
+hx: x <= N
+hy: y <= N
+hz: z <= N
+hN: Eq(10, N)
+|- x + y + z <= N**2
+```
+
+**Hint**: One needs to set `reversed` to true.
+
 ## Sympy simplification example
 
 **Informal version** If $x,y \in \R$, then $(x-y)(x+y) = x^2-y^2$.

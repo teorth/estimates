@@ -368,6 +368,22 @@ def subst_all_solution() -> None:
     p.use(SubstAll("hN"))
     p.use(Linarith())
 
+def subst_all_example_reversed() -> ProofAssistant:
+    p = ProofAssistant()
+    N = p.var("pos_int", "N")
+    x, y, z = p.vars("real", "x", "y", "z")
+    p.assume(x <= N, "hx")
+    p.assume(y <= N, "hy")
+    p.assume(z <= N, "hz")
+    p.assume(Eq(10, N), "hN")
+    p.begin_proof(x + y + z <= N**2)
+    return p
+
+def subst_all_solution_reversed() -> None:
+    p = subst_all_example_reversed()
+    p.use(SubstAll("hN", reversed=True))
+    p.use(Linarith())
+
 def sympy_simplify_example() -> ProofAssistant:
     p = ProofAssistant()
     x, y = p.vars("real", "x", "y")
