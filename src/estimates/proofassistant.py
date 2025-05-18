@@ -1,4 +1,4 @@
-from sympy import Basic, S
+from sympy import Basic, S, Expr
 from sympy.logic.boolalg import Boolean
 
 from estimates.basic import Type, describe, is_defined, new_var
@@ -58,7 +58,7 @@ class ProofAssistant:
         print("Proof assistant will stay in Tactic mode even when proof is complete.")
         self.auto_finish = False
 
-    def var(self, type: str, name: str = "this") -> Basic:
+    def var(self, type: str, name: str = "this") -> Expr:
         """Introduce a variable of a given type, stored as a Tuple wrapper around a sympy variable of the same type."""
         if self.mode == "assumption":
             while name in self.hypotheses:  # avoid namespace collisions
@@ -71,7 +71,7 @@ class ProofAssistant:
                 "Cannot introduce variables in tactic mode.  Please switch to assumption mode."
             )
 
-    def vars(self, type: str, *names: str) -> list[Basic]:
+    def vars(self, type: str, *names: str) -> list[Expr]:
         """Introduce a list of variables of a given type."""
         if self.mode == "assumption":
             varlist = []

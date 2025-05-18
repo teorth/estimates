@@ -11,6 +11,9 @@ from estimates.test import test
 
 
 class ProofState:
+    goal: Basic                    # The goal of the proof state
+    hypotheses: dict[str, Basic]   # A dictionary of hypotheses, where the key is the name of the hypothesis and the value is the sympy basic class it represents
+
     def __init__(self, goal: Basic, hypotheses: dict[str, Basic] | None = None) -> None:
         """
         Initialize a proof state with a goal, and an optional list of hypotheses.

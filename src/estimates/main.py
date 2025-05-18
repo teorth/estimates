@@ -259,7 +259,6 @@ def bracket_submult_exercise() -> ProofAssistant:
     return p
 
 
-# New solution needed here.
 def bracket_submult_solution() -> None:
     p = bracket_submult_exercise()
     x, y = p.get_vars("x", "y")

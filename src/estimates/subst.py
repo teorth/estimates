@@ -172,7 +172,7 @@ class SubstAll(Tactic):
             raise ValueError(f"{self.hyp} is not an equality hypothesis.")
 
         if self.reversed:
-            hyp = hyp.reversed()
+            hyp = hyp.reversed
 
         newstate = state.copy()
 
