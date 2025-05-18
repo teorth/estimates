@@ -16,6 +16,8 @@ There is then an operation `Theta` that maps positive real `sympy` expressions t
 
 Various laws of asymptotic arithmetic have been encoded within the syntax of `sympy`, for instance `Theta(C)` simplifies to `Theta(1)` for any numerical constant `C`, `Theta(X+Y)` simplifies to `Max(Theta(X),Theta(Y))`, and so forth.
 
+Expressions can be marked as "fixed" (resp. "bounded"), in which case they will be marked has having order of magnitude equal to (resp. at most) `Theta(1)` for the purposes of logarithmic linear programming.
+
 **Technical note**: to avoid some unwanted applications of `sympy`'s native simplifier (in particular, those applications that involve subtraction, which we leave purely formal for orders of magnitude), and to force certain type inferences to work, `OrderOfMagnitude` overrides the usual `Add`, `Mul`, `Pow`, `Max`, and `Min` operations with custom alternatives `OrderAdd`, `OrderMul`, `OrderPow`, `OrderMax`, `OrderMin`.
 
 **Technical note**: We technically permit `Theta` to take non-positive values, but a warning will be sent if this happens and an `Undefined()` element will be generated.  (`sympy`'s native simplifier will sometimes trigger this warning.)  Similarly for other undefined operations, such as `OrderMax` or `OrderMin` applied to an empty tuple.
@@ -24,7 +26,7 @@ Various laws of asymptotic arithmetic have been encoded within the syntax of `sy
 
 An abstract order of magnitude can be created using the `OrderSymbol(name)` constructor, similar to the `Symbol()` constructor in `sympy` (but with attributes such as `is_positive` set to false, with the exception of the default flag `is_commutative`).
 
-Here is a simple example of the proof assistant establishing an asymptotic estimate. Informally, one is given a positive integer $N$ and positive reals $x,y$ such that $x \leq 2N^2$ and $y < 3N$, and the task is to conclude that $xy \lesssim N^4$.
+Here is a simple example of the proof assistant establishing an asymptotic estimate. Informally, one is given a positive integer $N$ and positive reals $x,y$ such that $x \leq 2N^2$ and $y < 3kN$ with $k$ bounded, and the task is to conclude that $xy \lesssim N^4$.
 
 ```
 >>> from estimates.main import *
@@ -33,19 +35,51 @@ Starting proof.  Current proof state:
 N: pos_int
 x: pos_real
 y: pos_real
+hk: Bounded(k)
 h1: x <= 2*N**2
-h2: y < 3*N
+h2: y < 3*N*k
 |- Theta(x)*Theta(y) <= Theta(N)**4
 >>> p.use(LogLinarith(verbose=True))
+Identified the following disjunctions of asymptotic inequalities that we need to obtain a contradiction from:
+['Theta(N)**1 >= Theta(1)']
+['Theta(x)**1 * Theta(N)**-2 <= Theta(1)']
+['Theta(k)**1 >= Theta(1)']
+['Theta(x)**1 * Theta(y)**1 * Theta(N)**-4 > Theta(1)']
+['Theta(y)**1 * Theta(N)**-1 * Theta(k)**-1 <= Theta(1)']
+['Theta(k)**1 <= Theta(1)']
 Checking feasibility of the following inequalities:
 Theta(N)**1 >= Theta(1)
 Theta(x)**1 * Theta(N)**-2 <= Theta(1)
-Theta(y)**1 * Theta(N)**-1 <= Theta(1)
+Theta(k)**1 >= Theta(1)
 Theta(x)**1 * Theta(y)**1 * Theta(N)**-4 > Theta(1)
+Theta(y)**1 * Theta(N)**-1 * Theta(k)**-1 <= Theta(1)
+Theta(k)**1 <= Theta(1)
 Infeasible by multiplying the following:
 Theta(N)**1 >= Theta(1) raised to power 1
 Theta(x)**1 * Theta(N)**-2 <= Theta(1) raised to power -1
-Theta(y)**1 * Theta(N)**-1 <= Theta(1) raised to power -1
 Theta(x)**1 * Theta(y)**1 * Theta(N)**-4 > Theta(1) raised to power 1
+Theta(y)**1 * Theta(N)**-1 * Theta(k)**-1 <= Theta(1) raised to power -1
+Theta(k)**1 <= Theta(1) raised to power -1
 Proof complete!
 ```
+
+
+## `Theta(expr) -> OrderOfMagnitude`
+
+Returns the order of magnitude associated to a non-negative quantity `expr`.
+
+## `Fixed(expr:Expr)`
+
+Marks an expression as fixed (independent of parameters).
+
+## `Bounded(expr:Expr)`
+
+Marks an expression as bounded (ranging in a compact set for all choices of parameters).
+
+## `is_fixed(expr:Expr, hypotheses:set[Basic]) -> Bool`
+
+Tests if an expression is fixed, given the known hypotheses.
+
+## `is_bounded(expr:Expr, hypotheses:set[Basic]) -> Bool`
+
+Tests if an expression is bounded, given the known hypotheses.

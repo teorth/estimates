@@ -2,6 +2,7 @@
 from sympy import Basic, Mul, Add, Pow, Expr, Max, Min, Abs
 from sympy.logic.boolalg import Boolean, true, false
 from sympy.core.relational import Relational
+from estimates.order_of_magnitude import OrderMax, OrderMin, OrderMul, OrderPow, Theta
 
 # Code to implement the concept of 
 ## fixed expressions (expressions independent of parameters); and
@@ -59,7 +60,7 @@ def is_fixed(expr: Expr, hypotheses:set[Basic] = set()) -> bool:
             if hypothesis.args[0] == expr:
                 return True    # expressions explicitly marked as fixed are always fixed
 
-    if isinstance(expr, (Mul, Add, Pow, Max, Min, Abs, Relational)):  # here we use a "whitelist" approach of approved operations that preserve fixedness.  This list can be extended as needed.
+    if isinstance(expr, (Mul, Add, Pow, Max, Min, OrderMax, OrderMin, OrderMul, OrderPow, Theta, Abs, Relational)):  # here we use a "whitelist" approach of approved operations that preserve fixedness.  This list can be extended as needed.
         return all(is_fixed(arg, hypotheses) for arg in expr.args)  # sums, products, etc. of fixed expressions are fixed
 
     return False
@@ -77,11 +78,11 @@ def is_bounded(expr: Expr, hypotheses:set[Basic] = set()) -> bool:
             if hypothesis.args[0] == expr:
                 return True    # expressions explicitly marked as fixed or bounded are always bounded
 
-    if isinstance(expr, Boolean):
+    if expr.is_Boolean:
         return True   # boolean expressions (e.g., relations) are always bounded
-    elif isinstance(expr, (Mul, Add, Abs, Max, Min)):  # here we use a "whitelist" approach of approved operations that preserve boundedness.  This list can be extended as needed.
-        return all(is_bounded(arg, hypotheses) for arg in expr.args)  # sums or products of bounded expressions are bounded
-    elif isinstance(expr, Pow):
+    elif isinstance(expr, (Mul, Add, Abs, Max, Min, Theta, OrderMul, OrderMax, OrderMin)):  # here we use a "whitelist" approach of approved operations that preserve boundedness.  This list can be extended as needed.
+        return all(is_bounded(arg, hypotheses) for arg in expr.args)  # sums, products, etc. of bounded expressions are bounded
+    elif isinstance(expr, (Pow, OrderPow)):
         return all(is_bounded(arg, hypotheses) for arg in expr.args) and (expr.args[1].is_nonnegative is True)  # powers of bounded expressions are bounded if the exponent is bounded and nonnegative
     
 

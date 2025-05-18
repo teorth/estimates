@@ -17,6 +17,7 @@ from estimates.simp import (
 )
 from estimates.subst import Set, Subst, SubstAll
 from estimates.test import Trivial
+from estimates.bounded import Bounded
 
 
 def linarith_exercise() -> ProofAssistant:
@@ -183,10 +184,11 @@ def trivial_solution() -> None:
 
 def loglinarith_exercise() -> ProofAssistant:
     p = ProofAssistant()
-    N = p.var("pos_int", "N")
+    k, N = p.vars("pos_int", "k", "N")
     x, y = p.vars("pos_real", "x", "y")
+    p.assume(Bounded(k), "hk")
     p.assume(x <= 2 * N**2, "h1")
-    p.assume(y < 3 * N, "h2")
+    p.assume(y < 3 * k * N, "h2")
     p.begin_proof(lesssim(x * y, N**4))
     return p
 

@@ -285,11 +285,12 @@ h: x >= 0
 ```
 def loglinarith_exercise():
     p = ProofAssistant()
-    N = p.var("pos_int", "N")
+    k, N = p.vars("pos_int", "k", "N")
     x, y = p.vars("pos_real", "x", "y")
-    p.assume(x <= 2*N**2, "h1")
-    p.assume(y < 3*N, "h2")
-    p.begin_proof(lesssim(x*y, N**4))
+    p.assume(Bounded(k), "hk")
+    p.assume(x <= 2 * N**2, "h1")
+    p.assume(y < 3 * k * N, "h2")
+    p.begin_proof(lesssim(x * y, N**4))
     return p
 ```
 
@@ -301,11 +302,12 @@ Starting proof.  Current proof state:
 N: pos_int
 x: pos_real
 y: pos_real
+hk: Bounded(k)
 h1: x <= 2*N**2
-h2: y < 3*N
+h2: y < 3*N*k
 |- Theta(x)*Theta(y) <= Theta(N)**4
 ```
-**Hint**: Can be directly handled by `LogLinarith()`.
+**Hint**: Can be directly handled by `LogLinarith()`.  The bounded nature of `k` allows its contribution to be ignored in the logarithmic linear programming.
 
 ## Log linear arithmetic example (hard)
 

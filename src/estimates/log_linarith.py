@@ -29,7 +29,7 @@ from estimates.order_of_magnitude import (
 )
 from estimates.proofstate import ProofState
 from estimates.tactic import Tactic
-
+from estimates.bounded import is_bounded, is_fixed
 
 class ApplyTheta(Tactic):
     """A tactic to apply the Theta function to an hypothesis."""
@@ -341,13 +341,26 @@ class LogLinarith(Tactic):
                 extra_inequality.append(inequality_of(Rel(arg, max_object, "==")))
             inequality_lists.append(extra_inequality)
         for min_object in min_objects_set:
-            extra_inequality = []
+            extra_inequality : list[Inequality] = []
             for arg in min_object.args:
                 inequality_lists.append([inequality_of(Rel(arg, min_object, ">="))])
                 extra_inequality.append(inequality_of(Rel(arg, min_object, "==")))
             inequality_lists.append(extra_inequality)
 
-# TODO: for quantity that is bounded, add an inequality bounding it by 1
+# TODO: for quantity that is fixed / bounded, add an inequality bounding it (asymptotic to) by 1
+        variables = set()
+        for inequalities in inequality_lists:
+            for ineq in inequalities:
+                variables.update(ineq.variables())
+        for var in variables:
+            if is_fixed(var, set(state.hypotheses.values())):
+                inequality_lists.append(
+                    [inequality_of(Rel(var, 1, "=="))]
+                )
+            elif is_bounded(var, set(state.hypotheses.values())):
+                inequality_lists.append(
+                    [inequality_of(Rel(var, 1, "<="))]
+                )
 
         if self.verbose:
             print(
