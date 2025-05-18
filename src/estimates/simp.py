@@ -10,10 +10,11 @@ from sympy.core.relational import (
 )
 
 from estimates.basic import Type, new_var, typeof
-from estimates.order_of_magnitude import OrderMax, OrderMin
+from estimates.order_of_magnitude import OrderMax, OrderMin, Theta
 from estimates.proofstate import ProofState
 from estimates.tactic import Tactic
 from estimates.test import test
+from estimates.bounded import is_fixed, is_bounded
 
 #  The simplifier
 
@@ -75,6 +76,12 @@ def rsimp(goal: Basic, hypotheses: set[Basic] = set(), use_sympy = False) -> Bas
                     l = list(goal.args)
                     l.remove(hyp.gts)
                     return goal.func(*l)
+
+    if isinstance(goal, Theta):
+        if is_fixed(goal.args[0], hypotheses):
+            return Theta(1) # Theta of a fixed quantity is Theta(1)
+        elif is_bounded(goal.args[0], hypotheses) and goal.args[0].is_integer:
+            return Theta(1) # Theta of a bounded integer is Theta(1)
 
     if goal.args == ():
         return goal
