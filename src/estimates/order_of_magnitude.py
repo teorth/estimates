@@ -181,7 +181,7 @@ class OrderMax(OrderOfMagnitude, Expr):
         obj.name = "Max(" + ", ".join([str(arg) for arg in newargs]) + ")"
         return obj
 
-    def doit(self):
+    def doit(self, **hints):
         # flatten nested OrderMaxs
         newargs = []
         for arg in self.args:
@@ -224,7 +224,7 @@ class OrderMin(OrderOfMagnitude, Expr):
         obj.name = "Min(" + ", ".join([str(arg) for arg in newargs]) + ")"
         return obj
 
-    def doit(self):
+    def doit(self, **hints):
         # flatten nested OrderMaxs
         newargs = []
         for arg in self.args:
@@ -266,7 +266,7 @@ class OrderMul(OrderOfMagnitude, Expr):
         obj.name = "*".join([str(arg) for arg in newargs])
         return obj
 
-    def doit(self):
+    def doit(self,**hints):
         # flatten nested OrderMuls
         newargs = []
         for arg in self.args:
@@ -348,7 +348,7 @@ class OrderPow(OrderOfMagnitude, Expr):
         obj.name = f"{args[0]}**{exp}"
         return obj
 
-    def doit(self):
+    def doit(self, **hints):
         if self.args[1] == S(0):
             return Theta(1)
         if self.args[1] == S(1):
