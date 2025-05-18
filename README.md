@@ -12,6 +12,7 @@ This project aims to develop (in Python) a lightweight proof assistant that is s
 - [Implementation details for asymptotic orders of magnitude](docs/asymptotic.md)
 - [Some support for Littlewood-Paley type frequency estimation](docs/littlewood_paley.md)
 - [List of lemmas](docs/lemmas.md)
+- [Instructions for contributors](CONTRIBUTING.md)
 
 ## Older versions and posts
 
@@ -363,14 +364,3 @@ Applying lemma am_gm(x**2, y**2) to conclude this: x**1.0*y**1.0 <= x**2/2 + y**
 Goal solved!
 Proof complete!
 ```
-
-## Contributions and feedback
-
-I would be happy to receive contributions and feedback on this tool, either as Github issues and pull requests, or the [associated blog post](https://terrytao.wordpress.com/2025/05/09/a-tool-to-verify-estimates-ii-a-flexible-proof-assistant/).  Examples of such contributions can include
-
-- Bug reports and corrections
-- Suggestions or submissions of exercises (or problems which are currently difficult to solve with the existing tactics and lemmas, but which can suggest new tactics and lemmas to implement)
-- Suggestions or submissions for new tactics
-- Suggestions or submissions for new lemmas
-- Suggestions or submissions for new data types
-- Suggestions or submissions of new user interfaces
