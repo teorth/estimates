@@ -17,7 +17,7 @@ def linarith_exercise():
 
 **In an interactive Python environment**:
 ```
->>> from main import *
+>>> from estimates.main import *
 >>> p = linarith_exercise()
 Starting proof.  Current proof state:
 x: pos_real
@@ -47,7 +47,7 @@ def linarith_failure_example():
 
 **In an interactive Python environment**:
 ```
->>> from main import *
+>>> from estimates.main import *
 >>> p = linarith_failure_example()
 Starting proof.  Current proof state:
 x: pos_real
@@ -75,7 +75,7 @@ def case_split_exercise():
 
 **In an interactive Python environment**:
 ```
->>> from main import *
+>>> from estimates.main import *
 >>> p = case_split_exercise()
 Starting proof.  Current proof state:
 P: bool
@@ -105,7 +105,7 @@ def pigeonhole_exercise():
 
 **In an interactive Python environment**:
 ```
->>> from main import *              
+>>> from estimates.main import *              
 >>> p = pigeonhole_exercise()
 Starting proof.  Current proof state:
 x: real
@@ -133,7 +133,7 @@ def ineq_exercise():
 
 **In an interactive Python environment**:
 ```
->>> from main import *              
+>>> from estimates.main import *              
 >>> p = ineq_exercise()
 Starting proof.  Current proof state:
 x: real
@@ -163,7 +163,7 @@ def ineq_exercise2():
 
 **In an interactive Python environment**:
 ```
->>> from main import *
+>>> from estimates.main import *
 >>> p = ineq_exercise2()
 Starting proof.  Current proof state:
 x: real
@@ -189,7 +189,7 @@ def min_max_exercise():
 
 **In an interactive Python environment**:
 ```
->>> from main import *       
+>>> from estimates.main import *       
 >>> p = min_max_exercise()
 Starting proof.  Current proof state:
 x: real
@@ -215,7 +215,7 @@ def trivial_exercise():
 
 **In an interactive Python environment**:
 ```
->>> from main import *  
+>>> from estimates.main import *  
 >>> p = trivial_exercise()
 Starting proof.  Current proof state:
 x: real
@@ -241,7 +241,7 @@ def positive_exercise():
 
 **In an interactive Python environment**:
 ```
->>> from main import *  
+>>> from estimates.main import *  
 >>> p = positive_exercise()
 Starting proof.  Current proof state:
 x: real
@@ -267,7 +267,7 @@ def nonnegative_exercise():
 
 **In an interactive Python environment**:
 ```
->>> from main import *  
+>>> from estimates.main import *  
 >>> p = nonnegative_exercise()
 Starting proof.  Current proof state:
 x: real
@@ -295,7 +295,7 @@ def loglinarith_exercise():
 
 **In an interactive Python environment**:
 ```
->>> from main import *  
+>>> from estimates.main import *  
 >>> p = loglinarith_exercise()
 Starting proof.  Current proof state:
 N: pos_int
@@ -325,7 +325,7 @@ def loglinarith_hard_exercise():
 
 **In an interactive Python environment**:
 ```
->>> from main import *  
+>>> from estimates.main import *  
 >>> p = loglinarith_hard_exercise()
 Starting proof.  Current proof state:
 N: pos_int
@@ -353,7 +353,7 @@ def amgm_exercise():
 
 **In an interactive Python environment**:
 ```
->>> from main import *  
+>>> from estimates.main import *  
 >>> p = amgm_exercise()
 Starting proof.  Current proof state:
 x: nonneg_real
@@ -378,7 +378,7 @@ def bracket_submult_exercise():
 
 **In an interactive Python environment**:
 ```
->>> from main import *
+>>> from estimates.main import *
 >>> p = bracket_submult_exercise()
 Starting proof.  Current proof state:
 x: real
@@ -404,7 +404,7 @@ def littlewood_paley_exercise():
 
 **In an interactive Python environment**:
 ```
->>> from main import *
+>>> from estimates.main import *
 >>> p = littlewood_paley_exercise()
 Starting proof.  Current proof state:
 N_1: order
@@ -474,7 +474,7 @@ def subst_example():
 
 **In an interactive Python environment**:
 ```
->>> from main import *
+>>> from estimates.main import *
 >>> p = subst_example()
 Starting proof.  Current proof state:
 x: real
@@ -508,7 +508,7 @@ def subst_all_example():
 
 **In an interactive Python environment**:
 ```
->>> from main import *     
+>>> from estimates.main import *     
 >>> p = subst_all_example()
 Starting proof.  Current proof state:
 N: pos_int

@@ -10,7 +10,7 @@ Same as `Let(var, expr)`, except that all other appearances of `expr` in the hyp
 
 Example:
 ```
->>> from main import *
+>>> from estimates.main import *
 >>> p = min_max_exercise()
 Starting proof.  Current proof state:
 x: real
@@ -59,7 +59,7 @@ Applies `Theta` to a hypothesis `hyp` to obtain its asymptotic version, which is
 
 Example:
 ```
->>> from main import *
+>>> from estimates.main import *
 >>> p = loglinarith_hard_exercise()
 Starting proof.  Current proof state:
 N: pos_int
@@ -110,7 +110,7 @@ Proof complete!
 ```
 Example:
 ```
->>> from main import *     
+>>> from estimates.main import *     
 >>> p = subst_all_example()
 Starting proof.  Current proof state:
 N: pos_int

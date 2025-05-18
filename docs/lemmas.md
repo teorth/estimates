@@ -14,7 +14,7 @@ The arithmetic mean-geometric mean inequality $(x_1 \dots X_n)^{1/n} \leq \frac{
 
 Example:
 ```
->>> from main import *
+>>> from estimates.main import *
 >>> p = amgm_exercise()
 Starting proof.  Current proof state:
 x: nonneg_real

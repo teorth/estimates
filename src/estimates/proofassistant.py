@@ -14,15 +14,20 @@ from estimates.tactic import Tactic
 
 
 class ProofAssistant:
+    mode : str                      # either "assumption" or "tactic"   
+    hypotheses : dict[str, Basic]   # a dictionary of (str, Basic) pairs
+    theorem_str : str               # a description of the theorem
+    proof_tree : ProofTree | None   # the root of the proof tree
+    current_node : ProofTree | None # the current node in the proof tree
+    auto_finish : bool              # whether one automatically finishes the proof when all sorries are cleared
+
     def __init__(self) -> None:
         self.mode = "assumption"
-        self.hypotheses = {}  # a dictionary of (str, Basic) pairs
-        self.theorem_str = ""  # a description of the theorem
-        self.proof_tree = None  # a ProofTree object: the root of the proof
-        self.current_node = None  # a ProofTree object, a node of self.proof_tree
-        self.auto_finish = (
-            True  # automatically finish the proof when all sorries are cleared
-        )
+        self.hypotheses = {}  
+        self.theorem_str = "" 
+        self.proof_tree = None 
+        self.current_node = None 
+        self.auto_finish = True
 
     def assume(self, assumption: Basic, name: str = "this") -> None:
         """Add a hypothesis to the list of assumptions."""
@@ -191,7 +196,7 @@ class ProofAssistant:
             self.proof_tree = None
             self.current_node = None
             self.theorem_str = ""
-            self.hypotheses = []
+            self.hypotheses = {}
         else:
             raise ValueError(
                 "Cannot abandon a proof in assumption mode.  Please start a proof first."

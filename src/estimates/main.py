@@ -368,3 +368,13 @@ def subst_all_solution() -> None:
     p = subst_all_example()
     p.use(SubstAll("hN"))
     p.use(Linarith())
+
+def sympy_simplify_example() -> ProofAssistant:
+    p = ProofAssistant()
+    x, y = p.vars("real", "x", "y")
+    p.begin_proof(Eq((x-y)*(x+y), x**2 - y**2))
+    return p
+
+def sympy_simplify_solution() -> None:
+    p = sympy_simplify_example()
+    p.use(SimpAll(use_sympy=True))

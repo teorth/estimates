@@ -18,7 +18,7 @@ Some examples of statements that can be split into disjuncts:
 
 Example:
 ```
->>> from main import *
+>>> from estimates.main import *
 >>> p = case_split_exercise()
 Starting proof.  Current proof state:
 P: bool
@@ -39,7 +39,7 @@ Similar to `Cases()`, but splits into cases based on whether `statement` is true
 
 Example:
 ```
->>> from main import *
+>>> from estimates.main import *
 >>> p = bracket_submult_exercise()
 Starting proof.  Current proof state:
 x: real
@@ -72,7 +72,7 @@ If the goal is a disjunction (using the same table as in the `Cases()` tactic), 
 
 Example:
 ```
->>> from main import *     
+>>> from estimates.main import *     
 >>> p = min_max_exercise()
 Starting proof.  Current proof state:
 x: real
@@ -108,7 +108,7 @@ Some examples of statements that can be split into conjuncts:
 
 Example:
 ```
->>> from main import *
+>>> from estimates.main import *
 >>> p = split_exercise()
 Starting proof.  Current proof state:
 x: real
@@ -146,7 +146,7 @@ Create a subgoal to prove `expr`, and then a further subgoal to establish the or
 
 Example:
 ```
->>> from main import *        
+>>> from estimates.main import *        
 >>> p = ineq_exercise2()
 Starting proof.  Current proof state:
 x: real
@@ -183,7 +183,7 @@ Contrapose the goal with hypothesis `hyp`, by replacing `hyp` with the negation 
 
 Example:
 ```
->>> from main import *              
+>>> from estimates.main import *              
 >>> p = pigeonhole_exercise()
 Starting proof.  Current proof state:
 x: real

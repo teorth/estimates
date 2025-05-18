@@ -61,7 +61,7 @@ Let's start for instance with `linarith_exercise()`.  Informally, this exercise 
 
 If one follows the above quick start instructions, one should now see the following:
 ```
->>> from main import *
+>>> from estimates.main import *
 >>> p = linarith_exercise()
 Starting proof.  Current proof state:
 x: pos_real
@@ -89,7 +89,7 @@ Proof complete!
 
 This may seem suspiciously easy, but one can ask `Linarith` to give a more detailed explanation:
 ```
->>> from main import *
+>>> from estimates.main import *
 >>> p = linarith_exercise()
 Starting proof.  Current proof state:
 x: pos_real
@@ -130,7 +130,7 @@ Here, the original hypotheses and goal are listed in a pseudo-Lean style, follow
 
 One could ask what happens if `Linarith` fails to resolve the goal.  With the verbose flag, it will give a specific counterexample consistent with all the inequalities it could find:
 ```
->>> from main import *
+>>> from estimates.main import *
 >>> p = linarith_impossible_example()
 Starting proof.  Current proof state:
 x: pos_real
@@ -159,7 +159,7 @@ Here, the task given was an impossible one: to deduce $x < 7z$ from the hypothes
 
 Now let us consider a slightly more complicated proof, in which some branching of cases is required.  
 ```
->>> from main import *
+>>> from estimates.main import *
 >>> p = case_split_exercise()
 Starting proof.  Current proof state:
 P: bool
@@ -247,7 +247,7 @@ example (P: bool) (Q: bool) (R: bool) (S: bool) (h1: P | Q) (h2: R | S): (P & R)
 ```
 One can combine propositional tactics with linear arithmetic tactics.  Here is one example (using some propositional tactics we have not yet discussed, but whose purpose should be clear, and which one can look up [in this page](docs/tactics.md)):
 ```
->>> from main import *
+>>> from estimates.main import *
 >>> p = split_exercise()
 Starting proof.  Current proof state:
 x: real
@@ -350,7 +350,7 @@ For a full list of navigation commands that one can perform in either **Assumpti
 
 In addition to general proof tactics, I plan to build a [library of lemmas](docs/lemmas.md) that can be used for more specialized applications.  Here is one example, using an arithmetic mean geometric mean lemma $(x_1+\dots+x_n)^{1/n} \leq \frac{x_1+\dots+x_n}{n}$ to prove a slight variant of that lemma:
 ```
->>> from main import *
+>>> from estimates.main import *
 >>> p = amgm_exercise()
 Starting proof.  Current proof state:
 x: nonneg_real

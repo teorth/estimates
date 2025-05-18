@@ -16,7 +16,7 @@ Limitations:
 
 Example:
 ```
->>> from main import *
+>>> from estimates.main import *
 >>> p = linarith_exercise()
 Starting proof.  Current proof state:
 x: pos_real
@@ -31,7 +31,7 @@ Proof complete!
 ```
 Verbose version of example:
 ```
->>> from main import *
+>>> from estimates.main import *
 >>> p = linarith_exercise()
 Starting proof.  Current proof state:
 x: pos_real
@@ -58,7 +58,7 @@ Proof complete!
 ```
 If linarith fails to find a contradiction, then (with the verbose flag) it will report a specific counterexample consistent with all the inequalities it could find:
 ```
->>> from main import *
+>>> from estimates.main import *
 >>> p = linarith_impossible_example()
 Starting proof.  Current proof state:
 x: pos_real
@@ -90,7 +90,7 @@ Similar to `Linarith()`, but now applies to order of magnitude inequalities rath
 
 Example:
 ```
->>> from main import *
+>>> from estimates.main import *
 >>> p = loglinarith_imposssible_example()
 Starting proof.  Current proof state:
 N: pos_int

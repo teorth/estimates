@@ -27,7 +27,7 @@ An abstract order of magnitude can be created using the `OrderSymbol(name)` cons
 Here is a simple example of the proof assistant establishing an asymptotic estimate. Informally, one is given a positive integer $N$ and positive reals $x,y$ such that $x \leq 2N^2$ and $y < 3N$, and the task is to conclude that $xy \lesssim N^4$.
 
 ```
->>> from main import *
+>>> from estimates.main import *
 >>> p = loglinarith_exercise()
 Starting proof.  Current proof state:
 N: pos_int

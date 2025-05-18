@@ -18,11 +18,16 @@ from estimates.test import test
 #  The simplifier
 
 
-def rsimp(goal: Basic, hyp: Basic|None = None) -> Basic:
+def rsimp(goal: Basic, hyp: Basic|None = None, use_sympy = False) -> Basic:
     """
-    Recursively simplifies the goal using the hypothesis."""
+    Recursively simplifies the goal using the hypothesis.  If `use_sympy` is True, it uses sympy's simplifier."""
 
     new_args = [rsimp(arg, hyp) for arg in goal.args]
+
+    if use_sympy:  # Use sympy's simplifier.  Note that this may have unwanted behavior.
+        goal = simplify(goal)
+        if hyp is not None:  
+            hyp = simplify(hyp)
 
     if goal == hyp:
         return true
@@ -77,31 +82,40 @@ def rsimp(goal: Basic, hyp: Basic|None = None) -> Basic:
         return goal.func(*new_args).doit()
 
 
-def simp(goal: Basic, hyp: Basic|None = None) -> Basic:
+def simp(goal: Basic, hyp: Basic|None = None, use_sympy = False) -> Basic:
     """
-    Simplifies the goal using the hypothesis.
+    Simplifies the goal using the hypothesis.  If `use_sympy` is True, it uses sympy's simplifier.
     """
 
-    # Note: use of sympy's native simplifier introduced too much unwanted behavior, e.g., simplifying inequalities using subtraction, and we are currently disabling it from the code.  Perhaps we will reintroduce it later as an option.
-
-    
     if isinstance(goal, Type):
         # do not attempt to simplify variable declarations.  This is done by a separate tactic.
         return goal
+    
+    if goal == true or goal == false:
+        return goal  # no need to simplify
 
-    if test({hyp}, goal):
+    if use_sympy:
+        new_goal = simplify(goal)
+        if hyp is not None:
+            hyp = simplify(hyp)
+    else:
+        new_goal = goal
+
+    if test({hyp}, new_goal):
+        print(f"Simplified {goal} to True using {hyp}.")
         return true
-    if test({hyp}, Not(goal)):
+    if test({hyp}, Not(new_goal)):
+        print(f"Simplified {goal} to False using {hyp}.")
         return false
 
     if isinstance(hyp,Boolean):
         # If the hypothesis is a boolean, we can use it to simplify the goal further.
-        new_goal = goal.subs(hyp, True)
+        new_goal = new_goal.subs(hyp, True)
 
         if isinstance(hyp, Not):
             new_goal = new_goal.subs(hyp.args[0], False)
 
-    new_goal = rsimp(goal, hyp)
+    new_goal = rsimp(new_goal, hyp, use_sympy)
 
     if Eq(new_goal, goal) is not true:
         print(f"Simplified {goal} to {new_goal} using {hyp}.")
@@ -113,12 +127,16 @@ class SimpAll(Tactic):
     Simplifies each hypothesis using other hypotheses, then the goal using the hypothesis.
     """
 
+    def __init__(self, use_sympy:bool = False) -> None:
+        self.use_sympy = use_sympy
+
+
     def activate(self, state: ProofState) -> list[ProofState]:
         newstate = state.copy()
         for name, hyp in state.hypotheses.items():
             for other_name, other_hyp in newstate.hypotheses.items():
                 if other_name != name:  # Cannot use a hypothesis to simplify itself!
-                    hyp = simp(hyp, other_hyp)
+                    hyp = simp(hyp, other_hyp, self.use_sympy)
             newstate.hypotheses[name] = hyp
 
             if hyp == true:
@@ -129,8 +147,9 @@ class SimpAll(Tactic):
                 return []
 
         goal = newstate.goal
+        goal = simp(goal, None, self.use_sympy)  # in case there are no usable hypotheses 
         for hyp in newstate.hypotheses.values():
-            goal = simp(goal, hyp)
+            goal = simp(goal, hyp, self.use_sympy)
         newstate.set_goal(goal)
 
         if goal == true:
