@@ -523,3 +523,28 @@ hN: Eq(N, 10)
 ```
 
 **Hint**: A single `SubstAll()` will make this problem fall to `Linarith()`.
+
+## Sympy simplification example
+
+**Informal version** If $x,y \in \R$, then $(x-y)(x+y) = x^2-y^2$.
+
+**Python code**:
+```
+def sympy_simplify_example() -> ProofAssistant:
+    p = ProofAssistant()
+    x, y = p.vars("real", "x", "y")
+    p.begin_proof(Eq((x-y)*(x+y), x**2 - y**2))
+    return p
+```
+
+**In an interactive Python environment**:
+```
+>>> from estimates.main import *
+>>> p = sympy_simplify_exercise()
+Starting proof.  Current proof state:
+x: real
+y: real
+|- Eq((x - y)*(x + y), x**2 - y**2)
+```
+
+**Hint**: Use `SimpAll()` with the `use_sympy` flag set to `True`.
