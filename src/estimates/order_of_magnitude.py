@@ -1,7 +1,6 @@
 from sympy import Add, Basic, Eq, Expr, Max, Mul, Pow, S, Symbol, sympify
 from sympy.core.relational import Relational
 
-
 class Undefined(Expr):
     """A marker that says “– is not defined”, but is still technically a `Expr` for the purposes of sympy operations.
     Return this value (and optionally, print a warning), rather than an error, when performing an operation that is not defined."""
@@ -15,6 +14,8 @@ class Undefined(Expr):
 class FormalSub(Expr):
     """A marker that says “– is a formal substitution”, but is still technically a `Expr` for the purposes of sympy operations.
     Need to use this instead of `Undefined` when computing the difference of two expressions, due to sympy's simplifier."""
+
+    name:str
 
     def __new__(cls, lhs, rhs):
         obj = Expr.__new__(cls, lhs, rhs)
@@ -103,6 +104,8 @@ class Theta(OrderOfMagnitude, Expr):
     We force any *positive numeric* expr ≠ 1 to collapse to Theta(1).
     """
 
+    name:str
+    
     def __new__(cls, expr):
         # TODO: respect sympy's evaluate flag
 
@@ -165,6 +168,8 @@ class OrderSymbol(OrderOfMagnitude, Symbol):
 class OrderMax(OrderOfMagnitude, Expr):
     """A class to handle maxima (and hence also sums) of orders of magnitude."""
 
+    name:str
+    
     def __new__(cls, *args):
         # TODO: respect sympy's evaluate flag
         newargs = list(dict.fromkeys([Theta(arg) for arg in args]))
@@ -207,6 +212,8 @@ class OrderMax(OrderOfMagnitude, Expr):
 class OrderMin(OrderOfMagnitude, Expr):
     """A class to handle minima of orders of magnitude."""
 
+    name:str
+    
     def __new__(cls, *args):
         # TODO: respect sympy's evaluate flag
 
@@ -250,6 +257,8 @@ class OrderMin(OrderOfMagnitude, Expr):
 class OrderMul(OrderOfMagnitude, Expr):
     """A class to handle multiplication of orders of magnitude."""
 
+    name:str
+    
     def __new__(cls, *args):
         # TODO: respect sympy's evaluate flag
 
@@ -322,6 +331,8 @@ class OrderMul(OrderOfMagnitude, Expr):
 class OrderPow(OrderOfMagnitude, Expr):
     """A class to handle exponentiation of orders of magnitude."""
 
+    name:str
+    
     def __new__(cls, *args):
         # TODO: respect sympy's evaluate flag
 

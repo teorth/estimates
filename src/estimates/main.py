@@ -61,6 +61,7 @@ def case_split_solution() -> None:
     p.use(Cases("h1"))
     p.use(SimpAll())
     p.use(SimpAll())
+    p.use(SimpAll())
 
 
 def split_exercise() -> ProofAssistant:

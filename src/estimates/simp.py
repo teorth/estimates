@@ -18,63 +18,64 @@ from estimates.test import test
 #  The simplifier
 
 
-def rsimp(goal: Basic, hyp: Basic|None = None, use_sympy = False) -> Basic:
+def rsimp(goal: Basic, hypotheses: set[Basic] = set(), use_sympy = False) -> Basic:
     """
-    Recursively simplifies the goal using the hypothesis.  If `use_sympy` is True, it uses sympy's simplifier."""
+    Recursively simplifies the goal using a set of hypotheses.  If `use_sympy` is True, it uses sympy's simplifier."""
 
-    new_args = [rsimp(arg, hyp) for arg in goal.args]
+    new_args = [rsimp(arg, hypotheses) for arg in goal.args]
 
     if use_sympy:  # Use sympy's simplifier.  Note that this may have unwanted behavior.
         goal = simplify(goal)
-        if hyp is not None:  
-            hyp = simplify(hyp)
+        hypotheses = {simplify(hyp) for hyp in hypotheses}
 
-    if goal == hyp:
+    if goal in hypotheses:
         return true
 
-    if Not(goal) == hyp:
+    if Not(goal) in hypotheses:
         return false
 
-    if isinstance(goal, Relational) and isinstance(hyp, Relational):
-        if goal.args[0] == hyp.args[0] and goal.args[1] == hyp.args[1]:
-            s = 1
-        elif goal.args[0] == hyp.args[1] and goal.args[1] == hyp.args[0]:
-            s = -1
-        else:
-            s = 0
-        if s != 0:
-            sign = {
-                "<=": {0, 1},
-                "<": {1},
-                "==": {0},
-                ">=": {-1, 0},
-                ">": {-1},
-                "!=": {-1, 1},
-            }
-            goalset = sign[goal.rel_op]
-            hypset = {s * i for i in sign[hyp.rel_op]}
-            if hypset.issubset(goalset):  # hypothesis implies goal
-                return true
-            elif hypset.isdisjoint(goalset):  # hypothesis contradicts goal
-                return false
+    for hyp in hypotheses:
+        if isinstance(goal, Relational) and isinstance(hyp, Relational):
+            if goal.args[0] == hyp.args[0] and goal.args[1] == hyp.args[1]:
+                s = 1
+            elif goal.args[0] == hyp.args[1] and goal.args[1] == hyp.args[0]:
+                s = -1
             else:
-                goalset = goalset.intersection(hypset)
-                for rel, signset in sign.items():  # hypothesis refines goal
-                    if goalset == signset:
-                        return Rel(goal.args[0], goal.args[1], rel)
+                s = 0
+            if s != 0:
+                sign = {
+                    "<=": {0, 1},
+                    "<": {1},
+                    "==": {0},
+                    ">=": {-1, 0},
+                    ">": {-1},
+                    "!=": {-1, 1},
+                }
+                goalset = sign[goal.rel_op]
+                hypset = {s * i for i in sign[hyp.rel_op]}
+                if hypset.issubset(goalset):  # hypothesis implies goal
+                    return true
+                elif hypset.isdisjoint(goalset):  # hypothesis contradicts goal
+                    return false
+                else:
+                    goalset = goalset.intersection(hypset)
+                    for rel, signset in sign.items():  # hypothesis refines goal
+                        if goalset == signset:
+                            return Rel(goal.args[0], goal.args[1], rel)
 
-    if isinstance(hyp, LessThan | StrictLessThan | GreaterThan | StrictGreaterThan):
-        if hyp.lts != hyp.gts and hyp.lts in goal.args and hyp.gts in goal.args:
-            if isinstance(goal, Max | OrderMax):
-                # can remove a copy of hyp.lts
-                l = list(goal.args)
-                l.remove(hyp.lts)
-                return goal.func(*l)
-            if isinstance(goal, Min | OrderMin):
-                # can remove a copy of hyp.gts
-                l = list(goal.args)
-                l.remove(hyp.gts)
-                return goal.func(*l)
+        if isinstance(hyp, LessThan | StrictLessThan | GreaterThan | StrictGreaterThan):
+            if hyp.lts != hyp.gts and hyp.lts in goal.args and hyp.gts in goal.args:
+                if isinstance(goal, Max | OrderMax):
+                    # can remove a copy of hyp.lts
+                    l = list(goal.args)
+                    l.remove(hyp.lts)
+                    return goal.func(*l)
+                if isinstance(goal, Min | OrderMin):
+                    # can remove a copy of hyp.gts
+                    l = list(goal.args)
+                    l.remove(hyp.gts)
+                    return goal.func(*l)
+
 
     if goal.args == ():
         return goal
@@ -82,7 +83,7 @@ def rsimp(goal: Basic, hyp: Basic|None = None, use_sympy = False) -> Basic:
         return goal.func(*new_args).doit()
 
 
-def simp(goal: Basic, hyp: Basic|None = None, use_sympy = False) -> Basic:
+def simp(goal: Basic, hypotheses:set[Basic] = set(), use_sympy = False) -> Basic:
     """
     Simplifies the goal using the hypothesis.  If `use_sympy` is True, it uses sympy's simplifier.
     """
@@ -96,29 +97,28 @@ def simp(goal: Basic, hyp: Basic|None = None, use_sympy = False) -> Basic:
 
     if use_sympy:
         new_goal = simplify(goal)
-        if hyp is not None:
-            hyp = simplify(hyp)
+        hypotheses = {simplify(hyp) for hyp in hypotheses}
     else:
         new_goal = goal
 
-    if test({hyp}, new_goal):
-        print(f"Simplified {goal} to True using {hyp}.")
+    if test(hypotheses, new_goal):
+        print(f"Simplified {goal} to True using {hypotheses}.")
         return true
-    if test({hyp}, Not(new_goal)):
-        print(f"Simplified {goal} to False using {hyp}.")
+    if test(hypotheses, Not(new_goal)):
+        print(f"Simplified {goal} to False using {hypotheses}.")
         return false
 
-    if isinstance(hyp,Boolean):
-        # If the hypothesis is a boolean, we can use it to simplify the goal further.
-        new_goal = new_goal.subs(hyp, True)
+    for hyp in hypotheses:
+        if isinstance(hyp,Boolean):
+            # If a hypothesis is a boolean, we can use it to simplify the goal further.
+            new_goal = new_goal.subs(hyp, True)
+            if isinstance(hyp, Not):
+                new_goal = new_goal.subs(hyp.args[0], False)
 
-        if isinstance(hyp, Not):
-            new_goal = new_goal.subs(hyp.args[0], False)
-
-    new_goal = rsimp(new_goal, hyp, use_sympy)
+    new_goal = rsimp(new_goal, hypotheses, use_sympy)
 
     if Eq(new_goal, goal) is not true:
-        print(f"Simplified {goal} to {new_goal} using {hyp}.")
+        print(f"Simplified {goal} to {new_goal} using {hypotheses}.")
     return new_goal
 
 
@@ -134,9 +134,11 @@ class SimpAll(Tactic):
     def activate(self, state: ProofState) -> list[ProofState]:
         newstate = state.copy()
         for name, hyp in state.hypotheses.items():
+            other_hypotheses = set()
             for other_name, other_hyp in newstate.hypotheses.items():
                 if other_name != name:  # Cannot use a hypothesis to simplify itself!
-                    hyp = simp(hyp, other_hyp, self.use_sympy)
+                    other_hypotheses.add(other_hyp)
+            hyp = simp(hyp, other_hypotheses, self.use_sympy)
             newstate.hypotheses[name] = hyp
 
             if hyp == true:
@@ -147,9 +149,7 @@ class SimpAll(Tactic):
                 return []
 
         goal = newstate.goal
-        goal = simp(goal, None, self.use_sympy)  # in case there are no usable hypotheses 
-        for hyp in newstate.hypotheses.values():
-            goal = simp(goal, hyp, self.use_sympy)
+        goal = simp(goal, set(newstate.hypotheses.values()), self.use_sympy)
         newstate.set_goal(goal)
 
         if goal == true:
