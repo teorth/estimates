@@ -375,10 +375,6 @@ class ProofAssistant:
                 self.current_node.tactic = None  # clear the tactic
                 self.current_node.children = []  # clear the children
             else:
-                if self.current_node.parent is not None:
-                    print(f"Undid current tactic ({self.current_node.tactic}).")
-                    self.current_node.tactic = None  # clear the tactic
-                    self.current_node.children = []  # clear the children
                 print("No tactics to undo.")
         else:
             raise ValueError("Cannot undo in assumption mode.")
