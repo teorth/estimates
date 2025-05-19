@@ -14,6 +14,7 @@ from estimates.simp import (
     IsNonzero,
     IsPositive,
     SimpAll,
+    Calc
 )
 from estimates.subst import Set, Subst, SubstAll
 from estimates.test import Trivial
@@ -395,3 +396,18 @@ def sympy_simplify_example() -> ProofAssistant:
 def sympy_simplify_solution() -> None:
     p = sympy_simplify_example()
     p.use(SimpAll(use_sympy=True))
+
+
+def calc_example() -> ProofAssistant:
+    p = ProofAssistant()
+    x, y = p.vars("real", "x", "y")
+    p.assume(x < 4, "hx")
+    p.assume(y >= 4, "hy")
+    p.begin_proof(x < y)
+    return p
+
+def calc_solution() -> None:
+    p = calc_example()
+    p.use(Calc("<", 4, "<="))    # Can also solve using LinArith()
+    p.use(SimpAll())
+    p.use(SimpAll())

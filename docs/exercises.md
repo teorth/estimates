@@ -6,7 +6,7 @@
 
 **Python code**:
 ```
-def linarith_exercise():
+def linarith_exercise() -> ProofAssistant:
     p = ProofAssistant()
     x, y, z = p.vars("pos_real", "x", "y", "z")
     p.assume(x < 2*y, "h1")
@@ -36,7 +36,7 @@ h2: y < 3*z+1
 
 **Python code**:
 ```
-def linarith_failure_example():
+def linarith_failure_example() -> ProofAssistant:
     p = ProofAssistant()
     x, y, z = p.vars("pos_real", "x", "y", "z")
     p.assume(x < 2*y, "h1")
@@ -64,7 +64,7 @@ h2: y < 3*z+1
 
 **Python code**:
 ```
-def case_split_exercise():
+def case_split_exercise() -> ProofAssistant:
     p = ProofAssistant()
     P, Q, R, S = p.vars("bool", "P", "Q", "R", "S")
     p.assume(P|Q, "h1")
@@ -95,7 +95,7 @@ h2: R | S
 
 **Python code**:
 ```
-def pigeonhole_exercise():
+def pigeonhole_exercise() -> ProofAssistant:
     p = ProofAssistant()
     x, y = p.vars("real", "x", "y")
     p.assume(x + y > 5, "h")
@@ -122,7 +122,7 @@ h: x + y > 5
 
 **Python code**:
 ```
-def ineq_exercise():
+def ineq_exercise() -> ProofAssistant:
     p = ProofAssistant()
     x, y = p.vars("real", "x", "y")
     p.assume(x <= y, "h1")
@@ -180,7 +180,7 @@ h2: (x >= y) & (y >= z)
 
 **Python code**:
 ```
-def min_max_exercise():
+def min_max_exercise() -> ProofAssistant:
     p = ProofAssistant()
     x, y = p.vars("real", "x", "y")
     p.begin_proof(Min(x,y) <= Max(x,y))
@@ -205,7 +205,7 @@ y: real
 
 **Python code**:
 ```
-def trivial_exercise():
+def trivial_exercise() -> ProofAssistant:
     p = ProofAssistant()
     x = p.var("real", "x")
     p.assume(x>0, "h")
@@ -231,7 +231,7 @@ h: x > 0
 
 **Python code**:
 ```
-def positive_exercise():
+def positive_exercise() -> ProofAssistant:
     p = ProofAssistant()
     x = p.var("real", "x")
     p.assume(x>0, "h")
@@ -257,7 +257,7 @@ h: x > 0
 
 **Python code**:
 ```
-def nonnegative_exercise():
+def nonnegative_exercise() -> ProofAssistant:
     p = ProofAssistant()
     x = p.var("real", "x")
     p.assume(x>=0, "h")
@@ -283,7 +283,7 @@ h: x >= 0
 
 **Python code**:
 ```
-def loglinarith_exercise():
+def loglinarith_exercise() -> ProofAssistant:
     p = ProofAssistant()
     k, N = p.vars("pos_int", "k", "N")
     x, y = p.vars("pos_real", "x", "y")
@@ -315,7 +315,7 @@ h2: y < 3*N*k
 
 **Python code**:
 ```
-def loglinarith_hard_exercise():
+def loglinarith_hard_exercise() -> ProofAssistant:
     p = ProofAssistant()
     N = p.var("pos_int", "N")
     x, y = p.vars("pos_real", "x", "y")
@@ -346,7 +346,7 @@ h2: y < 3*N + 4
 
 **Python code**:
 ```
-def amgm_exercise():
+def amgm_exercise() -> ProofAssistant:
     p = ProofAssistant()
     x, y = p.vars("nonneg_real", "x", "y")
     p.begin_proof(2*x*y <= x**2 + y**2)
@@ -371,7 +371,7 @@ y: nonneg_real
 
 **Python code**:
 ```
-def bracket_submult_exercise():
+def bracket_submult_exercise() -> ProofAssistant:
     p = ProofAssistant()
     x, y = p.vars("real", "x", "y") 
     p.begin_proof(lesssim(bracket(x*y), bracket(x)*bracket(y)))
@@ -396,7 +396,7 @@ y: real
 
 **Python code**:
 ```
-def littlewood_paley_exercise():
+def littlewood_paley_exercise() -> ProofAssistant:
     p = ProofAssistant()
     N_1, N_2, N_3 = p.vars("order", "N_1", "N_2", "N_3")
     p.assume(LittlewoodPaley(N_1,N_2,N_3), "h")
@@ -424,7 +424,7 @@ h: LittlewoodPaley(N_1, N_2, N_3)
 
 **Python code**:
 ```
-def complex_littlewood_paley_exercise():
+def complex_littlewood_paley_exercise() -> ProofAssistant:
     p = ProofAssistant()
     N_1, N_2, N_3 = p.vars("order", "N_1", "N_2", "N_3")
     L_1, L_2, L_3 = p.vars("order", "L_1", "L_2", "L_3")
@@ -465,7 +465,7 @@ hlower: Max(L_1, L_2, L_3) >= N_1*N_2*N_3
 
 **Python code**:
 ```
-def subst_example():
+def subst_example() -> ProofAssistant:
     p = ProofAssistant()
     x, y, z, w = p.vars("real", "x", "y", "z", "w")
     p.assume(Eq(x,z**2), "hx")
@@ -496,7 +496,7 @@ hy: Eq(y, w**2)
 
 **Python code**:
 ```
-def subst_all_example():
+def subst_all_example() -> ProofAssistant:
     p = ProofAssistant()
     N = p.var("pos_int", "N")
     x, y, z = p.vars("real", "x", "y", "z")
@@ -586,3 +586,33 @@ y: real
 ```
 
 **Hint**: Use `SimpAll()` with the `use_sympy` flag set to `True`.
+
+
+## Calc example
+
+**Informal version** If $x < 4$ and $y \geq 4$, then $x < y$.
+
+**Python code**:
+```
+def calc_example() -> ProofAssistant:
+    p = ProofAssistant()
+    x, y = p.vars("real", "x", "y")
+    p.assume(x < 4, "hx")
+    p.assume(y >= 4, "hy")
+    p.begin_proof(x < y)
+    return p
+```
+
+**In an interactive Python environment**:
+```
+>>> from estimates.main import *
+>>> p = calc_example()
+Starting proof.  Current proof state:
+x: real
+y: real
+hx: x < 4
+hy: y >= 4
+|- x < y
+```
+
+**Hint**: While this can be one-shotted by `Linarith()`, one can also split using `Calc()` followed by `SimpAll()`.

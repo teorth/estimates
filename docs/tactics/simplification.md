@@ -63,3 +63,38 @@ Goal solved!
 Proof complete!
 ```
 
+## `Calc( *args : str | Expr )`
+
+Breaks up a relational inequality goal into a chain of relational inequality subgoals, where the relation operators and intermediate terms are passed as alternating arguments to `Calc`.  For instance, if the goal is `x < y`, and `Calc( "<", z, "<=", w, "==")` is called, then the goal is split into three subgoals `x < z`, `z <= w`, `w == y`.  Of course, the relations have to be compatible in the sense that the subgoals imply the original goal.
+
+```
+>>> from estimates.main import *
+>>> p = calc_example()
+Starting proof.  Current proof state:
+x: real
+y: real
+hx: x < 4
+hy: y >= 4
+|- x < y
+>>> p.use(Calc("<", 4, "<="))
+Split into goals x < 4, 4 <= y.
+2 goals remaining.
+>>> print(p)
+Proof Assistant is in tactic mode.  Current proof state:
+x: real
+y: real
+hx: x < 4
+hy: y >= 4
+|- x < 4
+This is goal 1 of 2.
+>>> p.next_goal()
+Moved to goal 2 of 2.
+>>> print(p)     
+Proof Assistant is in tactic mode.  Current proof state:
+x: real
+y: real
+hx: x < 4
+hy: y >= 4
+|- 4 <= y
+This is goal 2 of 2.
+```

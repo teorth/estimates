@@ -1,4 +1,4 @@
-from sympy import Basic, Eq, Max, Min, Not, false, simplify, true
+from sympy import Basic, Eq, Max, Min, Not, false, simplify, true, Expr
 from sympy.logic.boolalg import Boolean
 from sympy.core.relational import (
     GreaterThan,
@@ -8,6 +8,7 @@ from sympy.core.relational import (
     StrictGreaterThan,
     StrictLessThan,
 )
+from sympy.core.sympify import sympify
 
 from estimates.basic import Type, new_var, typeof
 from estimates.order_of_magnitude import OrderMax, OrderMin, Theta
@@ -333,3 +334,140 @@ class IsNonzero(Tactic):
 
     def __str__(self) -> str:
         return f"is_nonzero {self.name}"
+
+
+class Calc(Tactic):
+    """
+    Splits an inequality goal into two or more subgoals, which chain together to recover the main goal.
+    """
+
+    relations : list[str]   # The list of relation operators ("<=", "==", etc.) used in the calc block
+    terms : list[Expr]      # The list of terms used in the calc block
+    name : str              # The name of the tactic call
+
+    def __init__(self, *args: str|Expr) -> None:
+        """
+        Initialize a calc block with an alternating list of terms and relations.  For instance, 
+        `Calc("<=", y, "<", "z", "==")` would convert a goal `x <= w` to three subgoals `x <= y`, `y < z`, and `z == w`. 
+        """
+        if len(args) % 2 == 0:
+            raise ValueError("Calc block must have an odd number of arguments.")
+        self.relations = []
+        self.terms = []
+        self.name = "calc _"
+
+        for n in range(len(args)):
+            if n % 2 == 0:   # this is a relation operator
+                assert isinstance(args[n], str), f"Argument {args[n]} must be a string."
+                assert args[n] in {"<=", "<", "==", ">=", ">", "!="}, f"Argument {args[n]} must be one of <, <=, >, >=, ==, !=."
+                self.relations.append(args[n])
+                self.name += " " + args[n]
+            else:  # this is a term
+                arg = sympify(args[n])
+                assert isinstance(arg, Expr), f"Argument {arg} must be a sympy expression."
+                self.terms.append(arg)
+                self.name += " " + str(arg)
+        self.name += " _"
+
+    def activate(self, state: ProofState) -> list[ProofState]:
+        """
+        Activate the calc block.  This will split the goal into subgoals.
+        """
+        goal = state.goal
+        assert isinstance(goal, Relational), f"Goal {goal} is not a relational expression."
+
+        outcomes = set()
+        # create the set of desirable outcomes (-1 is "less than", 0 is "equal to", 1 is "greater than")
+        match goal.rel_op:
+            case "<":
+                outcomes = {-1}
+            case "<=":
+                outcomes = {0, -1}
+            case ">":
+                outcomes = {1}
+            case ">=":
+                outcomes = {0, 1}
+            case "==":
+                outcomes = {0}
+            case "!=":
+                outcomes = {-1, 1}
+
+        # now, create the set of actual possible outcomes coming from iterating through the calc block
+        actual_outcomes = {0}
+        for n in range(len(self.relations)):
+            new_outcomes = set()
+            for outcome in actual_outcomes:
+                match self.relations[n]:
+                    case "<":
+                        match outcome:
+                            case -1:
+                                new_outcomes.update({-1})
+                            case 0:
+                                new_outcomes.update({-1})
+                            case 1:
+                                new_outcomes.update({-1,0,1})
+                    case "<=":
+                        match outcome:
+                            case -1:
+                                new_outcomes.update({-1})
+                            case 0:
+                                new_outcomes.update({-1,0})
+                            case 1:
+                                new_outcomes.update({-1,0,1})
+                    case ">":
+                        match outcome:
+                            case -1:
+                                new_outcomes.update({-1,0,1})
+                            case 0:
+                                new_outcomes.update({1})
+                            case 1:
+                                new_outcomes.update({1})
+                    case ">=":
+                        match outcome:
+                            case -1:
+                                new_outcomes.update({-1,0,1})
+                            case 0:
+                                new_outcomes.update({0,1})
+                            case 1:
+                                new_outcomes.update({1})
+                    case "==":
+                        new_outcomes.add(outcome)
+                    case "!=":
+                        match outcome:
+                            case -1:
+                                new_outcomes.update({-1,0,1})
+                            case 0:
+                                new_outcomes.update({-1,1})
+                            case 1:
+                                new_outcomes.update({-1,0,1})
+            actual_outcomes = new_outcomes
+
+        assert actual_outcomes.issubset(outcomes), f"Calc block {self.name} will not imply the goal {goal}."
+
+        # now, create the new goals
+        new_states = []
+        lhs = goal.args[0]
+        goals = []
+        for n in range(len(self.relations)):
+            if n < len(self.terms):
+                rhs = self.terms[n]
+            else:
+                rhs = goal.args[1]
+            new_state = state.copy()
+            new_state.set_goal(Rel(lhs, rhs, self.relations[n]))
+            new_states.append(new_state)
+            lhs = rhs
+            goals.append(new_state.goal)
+        if len(self.relations) == 1:
+            if new_states[0].goal == goal:
+                print(f"No change to goal.")
+            else:
+                print(f"Goal strengthened to {new_states[0].goal}.")
+        else:
+            print(f"Split into goals " + ", ".join([str(g) for g in goals]) + ".")
+        return new_states
+
+    def __str__(self) -> str:
+        return self.name
+
+                
