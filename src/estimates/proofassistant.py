@@ -99,6 +99,7 @@ class ProofAssistant:
                 "Cannot get proof state in assumption mode.  Please switch to tactic mode."
             )
         else:
+            assert self.current_node is not None, "Current node is not initialized."
             return self.current_node.proof_state
 
     def get_hypothesis(self, name: str) -> Basic:
@@ -179,14 +180,16 @@ class ProofAssistant:
 
     def current_proof_state(self) -> ProofState:
         """Return the current proof state."""
+        assert self.current_node is not None, "Current node is not initialized."
         return self.current_node.proof_state
 
-    def current_goal(self) -> str:
+    def current_goal(self) -> Basic:
         """Return the current goal."""
-        return self.current_node.proof_state.goal
+        return self.current_proof_state().goal
 
     def current_hypotheses(self) -> dict[str, Basic]:
         """Return the current hypotheses."""
+        assert self.current_node is not None, "Current node is not initialized."
         return self.current_node.proof_state.hypotheses
 
     def abandon_proof(self) -> None:
@@ -235,6 +238,7 @@ class ProofAssistant:
 
     def status(self) -> None:
         """Print the current status of the proof."""
+        assert self.proof_tree is not None, "Proof tree is not initialized."
         n = self.proof_tree.num_sorries()
         if n == 0:
             print("Proof complete!")
@@ -248,6 +252,8 @@ class ProofAssistant:
         if not (isinstance(tactic, Tactic)):
             raise ValueError(f"Tactic {tactic} is not a valid tactic.")
         if self.mode == "tactic":
+            assert self.proof_tree is not None, "Proof tree is not initialized."
+            assert self.current_node is not None, "Current node is not initialized."
             if not self.current_node.use_tactic(tactic):
                 return  # Tactic did nothing, so don't change the current node
             self.status()
@@ -265,6 +271,13 @@ class ProofAssistant:
             raise ValueError(
                 "Cannot apply tactics in assumption mode.  Please switch to tactic mode."
             )
+        
+    def all_goals_use(self, tactic: Tactic) -> None:
+        """Apply a tactic to all the goals in the proof tree."""
+        assert self.proof_tree is not None, "Proof tree is not initialized."
+        for node in self.proof_tree.list_sorries():
+            node.use_tactic(tactic)
+            self.status()
 
     def use_lemma(self, lemma: Lemma, name: str = "this") -> None:
         """Apply a lemma to the current proof state."""
@@ -273,6 +286,7 @@ class ProofAssistant:
     def set_current_node(self, node: ProofTree) -> None:
         """Set the current node to a given node in the proof tree."""
         if self.mode == "tactic":
+            assert self.proof_tree is not None, "Proof tree is not initialized."
             if node in self.proof_tree.list_sorries():
                 self.current_node = node
                 _, num_before, num_after = self.proof_tree.count_sorries(
@@ -290,6 +304,8 @@ class ProofAssistant:
     def next_goal(self) -> None:
         """Move to the next goal in the proof tree."""
         if self.mode == "tactic":
+            assert self.proof_tree is not None, "Proof tree is not initialized."
+            assert self.current_node is not None, "Current node is not initialized."
             _, _, after = self.proof_tree.find_sorry(self.current_node)
             if after is not None:
                 self.set_current_node(after)
@@ -301,6 +317,8 @@ class ProofAssistant:
     def previous_goal(self) -> None:
         """Move to the previous goal in the proof tree."""
         if self.mode == "tactic":
+            assert self.proof_tree is not None, "Proof tree is not initialized."
+            assert self.current_node is not None, "Current node is not initialized."
             _, before, _ = self.proof_tree.find_sorry(self.current_node)
             if before is not None:
                 self.set_current_node(before)
@@ -312,6 +330,7 @@ class ProofAssistant:
     def first_goal(self) -> None:
         """Move to the first goal in the proof tree."""
         if self.mode == "tactic":
+            assert self.proof_tree is not None, "Proof tree is not initialized."
             first = self.proof_tree.first_sorry()
             if first is not None:
                 self.set_current_node(first)
@@ -323,6 +342,7 @@ class ProofAssistant:
     def last_goal(self) -> None:
         """Move to the last goal in the proof tree."""
         if self.mode == "tactic":
+            assert self.proof_tree is not None, "Proof tree is not initialized."
             last = self.proof_tree.last_sorry()
             if last is not None:
                 self.set_current_node(last)
@@ -334,6 +354,7 @@ class ProofAssistant:
     def go_back(self) -> None:
         """Move back a node in the proof tree."""
         if self.mode == "tactic":
+            assert self.current_node is not None, "Current node is not initialized."
             if self.current_node.parent is not None:
                 self.set_current_node(self.current_node.parent)
                 print("Moved back a step in the proof.")
@@ -345,6 +366,7 @@ class ProofAssistant:
     def go_forward(self, case: int = 1) -> None:
         """Move forward a node in the proof tree."""
         if self.mode == "tactic":
+            assert self.current_node is not None, "Current node is not initialized."
             if len(self.current_node.children) == 0:
                 print("There are no more steps in this branch of the proof.")
             elif case > len(self.current_node.children):
@@ -369,6 +391,7 @@ class ProofAssistant:
     def undo(self) -> None:
         """Undo the last step in the proof tree."""
         if self.mode == "tactic":
+            assert self.current_node is not None, "Current node is not initialized."
             if self.current_node.parent is not None:
                 self.set_current_node(self.current_node.parent)
                 print(f"Undid previous tactic ({self.current_node.tactic}).")
@@ -381,6 +404,7 @@ class ProofAssistant:
 
     def list_goals(self) -> None:
         """Print all the goals in the proof tree."""
+        assert self.proof_tree is not None, "Proof tree is not initialized."
         N = self.proof_tree.num_sorries()
         count = 1
         for node in self.proof_tree.list_sorries():
@@ -404,7 +428,9 @@ class ProofAssistant:
         else:
             output = "Proof Assistant is in tactic mode.  Current proof state:\n"
             output += str(self.current_proof_state())
+            assert self.current_node is not None, "Current node is not initialized."
             if self.current_node.tactic is None:
+                assert self.proof_tree is not None, "Proof tree is not initialized."
                 count = self.proof_tree.num_sorries()
                 if count > 1:
                     _, before, _ = self.proof_tree.count_sorries(self.current_node)
