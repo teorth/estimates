@@ -87,7 +87,7 @@ h2: R | S
 |- (P & R) | (P & S) | (Q & R) | (Q & S)
 ```
 
-**Hint**: use the `Cases()` and `SimpAll()` tactics.
+**Hint**: use the `Cases()` and `SimpAll()` tactics.  One can also use the `all_goals_use()` method.
 
 ## Pigeonhole principle exercise
 

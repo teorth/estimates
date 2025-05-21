@@ -1,6 +1,16 @@
-# List of tactics
+# Tactics
 
-Tactics are methods to transform a given proof state into zero or more further proof states.  They will normally be called by the `use()` method of `ProofAssistant`.
+Tactics are methods to transform a given proof state into zero or more further proof states.  Tactics are used via the following methods (for a given `ProofAssistant` `p`):
+
+## `p.use(tactic:Tactic)`
+
+Apply a tactic to the current goal, which typically will be built as via constructor from one of the subclasses of `Tactic`.  Note: if one has somehow navigated (e.g., via `p.go_back()`) to a node in the proof tree that was already treated by some existing tactic, then `p.use()` will overwrite that tactic with a new one.
+
+## `p.all_goals_use(tactic:Tactic)`
+
+Apply a tactic to all "sorried" goals.
+
+# List of tactics
 
 The proof assistant is designed to be easily extensible by the addition of further tactics. Please feel free to suggest or contribute ideas for such tactics.
 
@@ -15,8 +25,12 @@ The list of tactics is loosely organized into categories:
 
 ## `UseLemma(name:str, lemma:Lemma)`
 
-Invokes a lemma and places it as a hypothesis under the name `name`.
+A tactic that invokes a lemma and places it as a hypothesis under the name `name`.
 
-One can use `p.use_lemma(lemma, name)` as a synonym for `p.use(UseLemma(name,lemma))`.  In that case, `name` will default to `this`.
+## `p.use_lemma(lemma:Lemma, name:str)`
+
+A synonym for `p.use(UseLemma(name,lemma))`.  In that case, `name` will default to `this`.
+
+# List of lemmas
 
 For a list of lemmas, see [this page](lemmas.md).

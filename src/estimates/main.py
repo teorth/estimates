@@ -61,9 +61,7 @@ def case_split_exercise() -> ProofAssistant:
 def case_split_solution() -> None:
     p = case_split_exercise()
     p.use(Cases("h1"))
-    p.use(SimpAll())
-    p.use(SimpAll())
-
+    p.all_goals_use(SimpAll())
 
 def split_exercise() -> ProofAssistant:
     p = ProofAssistant()
@@ -79,9 +77,8 @@ def split_solution() -> None:
     p.use(SplitHyp("h1"))
     p.use(SplitHyp("h2"))
     p.use(SplitGoal())
-    p.use(Linarith())
-    p.use(Linarith())
-
+    p.all_goals_use(Linarith())
+ 
 
 def pigeonhole_exercise() -> ProofAssistant:
     p = ProofAssistant()
