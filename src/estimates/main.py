@@ -325,11 +325,11 @@ def complex_littlewood_paley_solution() -> None:
     """This is a bit faster than brute force Cases + LogLinarith as the SubstAll and SimpAll reduces the complexity slightly."""
     p = complex_littlewood_paley_exercise()
     p.use(Cases("hN"))
-    for i in range(3):
+    for _ in range(3):
         p.use(SubstAll("hN"))
         p.use(SimpAll())
         p.use(Cases("hL"))
-        for j in range(3):
+        for _ in range(3):
             p.use(SubstAll("hL"))
             p.use(SimpAll())
             p.use(LogLinarith())

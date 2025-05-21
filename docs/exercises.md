@@ -457,7 +457,7 @@ hlower: Max(L_1, L_2, L_3) >= N_1*N_2*N_3
 |- Max(Theta(1), N_2**2)**1/4*Max(Theta(1), N_1**2)**-1/8*L_1**-1/2*L_2**-1/2*Min(L_1, L_2, L_3)**1/2*N**-1*N_1**1/2*N_2**1/2*N_3**1/2 <= Theta(1)
 ```
 
-**Hint**: Brute force case splitting and `LogLinarith()` will work, but requires about a minute of CPU.  More intelligent splitting will cut down the runtime.
+**Hint**: Brute force case splitting and `LogLinarith()` will work, but requires about a minute of CPU.  Applying `SubstAll()` and `SimpAll()` before `LogLinarith()` will speed things up somewhat. More intelligent splitting will cut down the runtime further.
 
 ## Substitution example
 
