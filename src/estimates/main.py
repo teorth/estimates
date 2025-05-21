@@ -62,7 +62,7 @@ def case_split_solution() -> None:
     p = case_split_exercise()
     p.use(Cases("h1"))
     p.use(SimpAll())
-    p.use(SimpAll(repeat=True)) # The second case is non-deterministic, and can require one or more iterations to close
+    p.use(SimpAll())
 
 
 def split_exercise() -> ProofAssistant:

@@ -115,12 +115,8 @@ def simp(goal: Basic, hypotheses:set[Basic] = set(), use_sympy = False) -> Basic
         print(f"Simplified {goal} to False using {hypotheses}.")
         return false
 
-    for hyp in hypotheses:
-        if isinstance(hyp,Boolean):
-            # If a hypothesis is a boolean, we can use it to simplify the goal further.
-            new_goal = new_goal.subs(hyp, True)
-            if isinstance(hyp, Not):
-                new_goal = new_goal.subs(hyp.args[0], False)
+    # TODO: this is recursive also, and may be merged with rsimp
+    new_goal = makeSimplestGoal(new_goal, hypotheses)
 
     new_goal = rsimp(new_goal, hypotheses, use_sympy)
 
@@ -128,6 +124,18 @@ def simp(goal: Basic, hypotheses:set[Basic] = set(), use_sympy = False) -> Basic
         print(f"Simplified {goal} to {new_goal} using {hypotheses}.")
     return new_goal
 
+def makeSimplestGoal(goal, hypotheses):
+    new_goal = goal
+    for hyp in hypotheses:
+        if isinstance(hyp,Boolean):
+            # If a hypothesis is a boolean, we can use it to simplify the goal further.
+            new_goal = new_goal.subs(hyp, True)
+            if isinstance(hyp, Not):
+                new_goal = new_goal.subs(hyp.args[0], False)
+    if new_goal != goal:
+        return makeSimplestGoal(new_goal, hypotheses)
+    else:
+        return goal
 
 class SimpAll(Tactic):
     """
