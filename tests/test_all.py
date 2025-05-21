@@ -17,7 +17,6 @@ class TestAll(object):
         captured = capsys.readouterr()
         assert "Feasible with the following values:" in captured.out
 
-    @pytest.mark.skip(reason="https://github.com/teorth/estimates/issues/13")
     def test_case_split_solution(self, capsys):
         case_split_solution()
         self.proof_complete(capsys)
