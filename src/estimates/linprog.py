@@ -170,23 +170,3 @@ def feasibility(inequalities: list[Inequality]) -> tuple[bool, dict]:
         raise ValueError(
             f"Farkas lemma violation!  Problem is neither feasible nor infeasible. Inequalities: {inequalities}"
         )
-
-
-def verbose_feasibility(inequalities: list[Inequality]) -> bool:
-    """Test via dual linear programming if a list of inequalities is feasible, outputting a certificate in both cases."""
-    print("Checking feasibility of the following inequalities:")
-    for ineq in inequalities:
-        print(ineq)
-
-    outcome, dict = feasibility(inequalities)
-    if outcome:
-        print("Feasible with the following values:")
-        for var, value in dict.items():
-            print(f"{var} = {value}")
-        return True
-    else:
-        print("Infeasible by summing the following:")
-        for ineq, coeff in dict.items():
-            if coeff != Fraction(0, 1):
-                print(f"{ineq} multiplied by {coeff}")
-        return False
