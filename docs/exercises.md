@@ -578,7 +578,7 @@ def sympy_simplify_example() -> ProofAssistant:
 **In an interactive Python environment**:
 ```
 >>> from estimates.main import *
->>> p = sympy_simplify_exercise()
+>>> p = sympy_simplify_example()
 Starting proof.  Current proof state:
 x: real
 y: real
