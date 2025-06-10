@@ -9,6 +9,6 @@ Under project directory, run:
 
 ## Notes
 
-It can take several minutes to run the tests, as `complex_littlewood_paley_solution` takes long.
+It can take some seconds to run the tests, as `complex_littlewood_paley_solution` takes longer.
 
 Currently solution output may differ because of the non-deterministic ordered data structure, tests only check if output contains characteristic substring like "Proof complete!" for now.

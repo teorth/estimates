@@ -121,8 +121,7 @@ class Linarith(Tactic):
                 print("Feasible with the following values:")
                 for var, value in dict.items():
                     print(f"{var} = {value}")
-            else:
-                print("Linear arithmetic was unable to prove goal.")
+            print("Linear arithmetic was unable to prove goal.")
             return [state.copy()]
         else:
             if self.verbose:
