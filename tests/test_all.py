@@ -15,7 +15,7 @@ class TestAll(object):
     def test_linarith_failure_example(self, capsys):
         linarith_failure_example()
         captured = capsys.readouterr()
-        assert "Feasible with the following values:" in captured.out
+        assert captured.out.endswith("Linear arithmetic was unable to prove goal.\n")
 
     def test_case_split_solution(self, capsys):
         case_split_solution()
