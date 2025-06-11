@@ -2,7 +2,9 @@ from fractions import Fraction
 from numbers import Rational
 from typing import Literal
 
-from z3 import Real, Solver, Sum, sat
+from sympy import Pow
+
+from z3 import Real, Solver, Sum, sat, simplify
 
 # exact linear programming tools.
 
@@ -170,3 +172,10 @@ def feasibility(inequalities: list[Inequality]) -> tuple[bool, dict]:
         raise ValueError(
             f"Farkas lemma violation!  Problem is neither feasible nor infeasible. Inequalities: {inequalities}"
         )
+
+def is_valid_counterexample(dict):
+    for var, value in dict.items():
+        if isinstance(var, Pow) and var.base in dict:
+            if simplify(dict[var.base] ** var.exp != value):
+                return False
+    return True
