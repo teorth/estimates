@@ -14,7 +14,7 @@ from sympy import (
 from sympy.core.relational import Relational
 
 from estimates.basic import Type
-from estimates.linprog import Inequality, feasibility
+from estimates.linprog import Inequality, feasibility, is_valid_counterexample
 from estimates.proofstate import ProofState
 from estimates.tactic import Tactic
 
@@ -118,10 +118,14 @@ class Linarith(Tactic):
                 print("Checking feasibility of the following inequalities:")
                 for ineq in inequalities:
                     print(ineq)
-                print("Feasible with the following values:")
-                for var, value in dict.items():
-                    print(f"{var} = {value}")
-            print("Linear arithmetic was unable to prove goal.")
+
+                if is_valid_counterexample(dict):
+                    print("Feasible with the following values:")
+                    for var, value in dict.items():
+                        print(f"{var} = {value}")
+                    print("The counterexample proves the goal to be false.")
+                else:
+                    print("Linear arithmetic was unable to prove goal.")
             return [state.copy()]
         else:
             if self.verbose:
