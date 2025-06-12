@@ -12,10 +12,19 @@ class TestAll(object):
         linarith_solution()
         self.proof_complete(capsys)
 
-    def test_linarith_failure_example(self, capsys):
+    def test_linarith_false_goal_example(self, capsys):
         linarith_failure_example()
         captured = capsys.readouterr()
         assert captured.out.endswith("The counterexample proves the goal to be false.\n")
+
+    def test_linarith_failure_example(self, capsys):
+        p = ProofAssistant()
+        x = p.var("pos_real", "x")
+        p.assume(x < 2, "h1")
+        p.begin_proof(x ** 2 < 3)
+        p.use(Linarith(verbose=True))
+        captured = capsys.readouterr()
+        assert captured.out.endswith("Linear arithmetic was unable to prove goal.\n")
 
     def test_case_split_solution(self, capsys):
         case_split_solution()
