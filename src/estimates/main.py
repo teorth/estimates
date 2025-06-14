@@ -93,6 +93,19 @@ def pigeonhole_solution() -> None:
     p.use(SplitHyp("h"))
     p.use(Linarith())
 
+def trichotomy_exercise() -> ProofAssistant:
+    p = ProofAssistant()
+    x, y = p.vars("real", "x", "y")
+    p.begin_proof((x < y) | Eq(x,y) | (x > y))
+    return p
+
+def trichotomy_solution() -> None:
+    p = trichotomy_exercise()
+    p.use(Contrapose())
+    p.use(SplitHyp())
+    p.use(Linarith())
+
+
 def ineq_exercise() -> ProofAssistant:
     p = ProofAssistant()
     x, y = p.vars("real", "x", "y")

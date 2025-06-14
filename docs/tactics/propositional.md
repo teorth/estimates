@@ -207,6 +207,27 @@ Goal solved by linear arithmetic!
 Proof complete!
 ```
 
+Second example:
+```
+>>> from estimates.main import *              
+>>> p = trichotomy_exercise()
+Starting proof.  Current proof state:
+x: real
+y: real
+|- Eq(x, y) | (x > y) | (x < y)
+>>> p.use(Contrapose())
+Proving Eq(x, y) | (x > y) | (x < y) by contradiction.
+1 goal remaining.
+>>> p.use(SplitHyp())
+Splitting this: (x >= y) & (x <= y) & Ne(x, y) into x >= y, x <= y, Ne(x, y).
+1 goal remaining.
+>>> p.use(Linarith())
+Appending scenario (x < y, x <= y, Type((x,)), x >= y, Type((y,)))
+Appending scenario (y < x, x <= y, Type((x,)), x >= y, Type((y,)))
+Goal solved by linear arithmetic!
+Proof complete!
+```
+
 ## `Trivial()`
 
 Closes a goal if it follows immediately from the hypotheses.

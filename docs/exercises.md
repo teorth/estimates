@@ -116,6 +116,30 @@ h: x + y > 5
 
 **Hint**: Use the tactics `Contrapose()`, `SplitHyp()`, and `Linarith()`.
 
+## Trichotomy exercise
+
+**Informal version** If $x,y$ are real numbers, show that either $x>y$, $x=y$, or $x<y$.
+
+**Python code**:
+```
+def trichotomy_exercise() -> ProofAssistant:
+    p = ProofAssistant()
+    x, y = p.vars("real", "x", "y")
+    p.begin_proof((x < y) | Eq(x,y) | (x > y))
+    return p
+```
+
+**In an interactive Python environment**:
+```
+>>> p = trichotomy_exercise()
+Starting proof.  Current proof state:
+x: real
+y: real
+|- Eq(x, y) | (x > y) | (x < y)
+```
+
+**Hint**: This is similar to the previous exercise, except that one can use the default hypothesis `this`.
+
 ## Inequality exercise
 
 **Informal version** If $x,y$ are real numbers with $x \leq y$ and $y \leq x$, then $x=y$.

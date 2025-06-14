@@ -164,7 +164,7 @@ class Contrapose(Tactic):
             print(f"Proving {state.goal} by contradiction.")
             newstate = state.copy()
             newstate.set_goal(false)
-            newstate.hypotheses[self.h] = Not(state.goal)
+            newstate.hypotheses[self.h] = simplify_logic(Not(state.goal), force=True)
             return [newstate]
 
     def __str__(self) -> str:

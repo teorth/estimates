@@ -18,6 +18,8 @@ from estimates.linprog import Inequality, feasibility, is_valid_counterexample
 from estimates.proofstate import ProofState
 from estimates.tactic import Tactic
 
+from itertools import product
+
 
 class Linarith(Tactic):
     """A tactic to try to establish a goal via linear arithmetic.  Inspired by the linarith tactic in Lean."""
@@ -32,22 +34,24 @@ class Linarith(Tactic):
         # First, gather all the hypotheses that can generate inequalities.
         hypotheses = set()
         for hypothesis in state.list_hypotheses(variables=True):
+            hypotheses.add(hypothesis)
+        hypotheses.add(Not(state.goal))
+
+        # Next, extract the inequality (or pair of possible inequalities) from this list.
+        options = []
+        for hypothesis in hypotheses:
             if isinstance(
                 hypothesis,
                 Eq | LessThan | StrictLessThan | GreaterThan | StrictGreaterThan | Type,
             ):
-                hypotheses.add(hypothesis)
+                options.append([hypothesis])
+            elif isinstance(hypothesis, Ne):
+                options.append([StrictLessThan(hypothesis.args[0], hypothesis.args[1]), StrictLessThan(hypothesis.args[1], hypothesis.args[0])])
 
-        # the different hypothesis scenarios to consider.  Usually it is just one scenario, but when trying to prove an equality, there are two counterfactorial scenarios to consider, depending on whether the LHS is greater than or less than the RHS.
-        scenarios = [hypotheses]
-        if isinstance(
-            state.goal, Ne | LessThan | StrictLessThan | GreaterThan | StrictGreaterThan
-        ):
-            scenarios[0].add(Not(state.goal))
-        elif isinstance(state.goal, Eq):
-            scenarios.append(hypotheses.copy())
-            scenarios[0].add(StrictLessThan(state.goal.args[0], state.goal.args[1]))
-            scenarios[1].add(StrictLessThan(state.goal.args[1], state.goal.args[0]))
+        # Next, build the scenarios out of the options.
+        scenarios = []
+        for choice in product(*options):
+            scenarios.append(set(choice))
 
         found_counterexample = False
         proofs = []
@@ -126,6 +130,8 @@ class Linarith(Tactic):
                     print("The counterexample proves the goal to be false.")
                 else:
                     print("Linear arithmetic was unable to prove goal.")
+            else:
+                print("Linear arithmetic was unable to prove goal.")
             return [state.copy()]
         else:
             if self.verbose:
