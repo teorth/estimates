@@ -38,6 +38,10 @@ class Let(Tactic):
     def __str__(self) -> str:
         return f"let {self.name} := {self.expr}"
 
+    label = "Let"
+    description = "Introduce a new variable, defined to equal a given expression."
+    arguments = ["variables", "expressions"]
+
 
 class Set(Tactic):
     """
@@ -75,6 +79,10 @@ class Set(Tactic):
 
     def __str__(self) -> str:
         return f"set {self.name} := {self.expr}"
+
+    label = "Set"
+    description = "Introduce a new variable, defined to equal a given expression, then substitute all instances of that expression with the variable."
+    arguments = ["variables", "expressions"]
 
 
 class Subst(Tactic):
@@ -150,6 +158,10 @@ class Subst(Tactic):
         else:
             return f"subst {name} at {self.target}"
 
+    label = "Substitute"
+    description = "Use an existing equality hypothesis to substitute all instances of one side with the other in the goal or a specified hypothesis."
+    arguments = ["hypotheses"]
+
 
 class SubstAll(Tactic):
     """
@@ -216,3 +228,7 @@ class SubstAll(Tactic):
     def __str__(self) -> str:
         name = "<-" + str(self.hyp) if self.reversed else str(self.hyp)
         return f"subst_all {name}"
+
+    label = "Substitute all"
+    description = "Use an existing equality hypothesis to substitute all instances of one side with the other in the goal and all other hypotheses."
+    arguments = ["hypotheses"]

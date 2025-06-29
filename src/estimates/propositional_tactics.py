@@ -138,6 +138,10 @@ class SplitGoal(Tactic):
 
     def __str__(self) -> str:
         return "split_goal"
+    
+    label = "Split goal"
+    description = "Split the goal into its conjuncts.  If the goal is a conjunction, split the goal into one goal for each conjunct."
+    arguments = []
 
 
 class Contrapose(Tactic):
@@ -172,6 +176,10 @@ class Contrapose(Tactic):
             return "contrapose"
         else:
             return "contrapose " + self.h
+    
+    label = "Contrapositive"
+    description = 'If the hypothesis is a proposition, replace the goal with the negation of the hypothesis, and the hypothesis with the negation of the goal.  Otherwise, this becomes a proof by contradiction, adding the negation of the goal as a hypothesis, and "false" as the goal.'
+    arguments = ["hypotheses", "this"]
 
 
 class SplitHyp(Tactic):
@@ -215,6 +223,10 @@ class SplitHyp(Tactic):
                 return "split_hyp " + self.h
             else:
                 return "split_hyp " + self.h + " " + ", ".join(self.names)
+    
+    label = "Split hypothesis"
+    description = "Split a hypothesis into its conjuncts.  If the hypothesis is a conjunction, split the hypothesis into one hypothesis for each conjunct.  The new hypotheses will be named according to the names supplied in the constructor."
+    arguments = ["hypotheses", "this"]
 
 
 class Cases(Tactic):
@@ -246,6 +258,10 @@ class Cases(Tactic):
 
     def __str__(self) -> str:
         return "cases " + self.h
+    
+    label = "Cases"
+    description = "Split a hypothesis into its disjuncts.  If the hypothesis is a disjunction, split the hypothesis into one goal for each disjunct."
+    arguments = ["hypotheses"]
 
 
 class ByCases(Tactic):
@@ -278,6 +294,10 @@ class ByCases(Tactic):
         else:
             return "by_cases " + describe(self.name, self.statement)
 
+    label = "By cases"
+    description = "Split into two cases, depending on whether an assertion is true or false."
+    arguments = ["expressions"]
+
 
 class Option(Tactic):
     """
@@ -302,6 +322,10 @@ class Option(Tactic):
 
     def __str__(self) -> str:
         return "option " + str(self.n)
+
+    label = "Option"
+    description = "If the goal is a disjunction, replace it with one of its disjuncts."
+    arguments = []
 
 
 class Claim(Tactic):
@@ -345,3 +369,7 @@ class Claim(Tactic):
             return "claim " + str(self.expr)
         else:
             return "claim " + self.name + ": " + str(self.expr)
+    
+    label = "Claim"
+    description = "Similar to the `have` tactic in Lean.  Add a subgoal to prove, and then prove the original goal assuming the subgoal."
+    arguments = ["expressions"]
