@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+from abc import ABC, abstractmethod
 from sympy import Basic, Eq, S
 from fractions import Fraction
 
@@ -5,21 +8,48 @@ from estimates.basic import describe, is_defined
 from estimates.proofstate import ProofState
 from estimates.tactic import Tactic
 
-
-class Lemma:
+class Lemma(ABC):
     """A base class for a lemma object, to be used by the use_lemma() method."""
 
-    def __init__(self, *args) -> None:
-        self.name = "Unimplemented"
-
+    @abstractmethod
     def apply(self, state: ProofState) -> Basic:
         """
         Return the sympy proposition that the lemma proves, using hypotheses from the proof state as needed to justify the hypotheses of the lemma and the well-definedness of all expressions.
         """
-        raise NotImplementedError("This method should be implemented in a subclass.")
+        ...
 
-    def __str__(self) -> str:
-        return self.name
+    @abstractmethod
+    def __str__(self) -> str: ...
+
+    # Required properties for estimates-ui webapp integration
+    
+    @property
+    @abstractmethod
+    def label(self) -> str:
+        """
+        Short display name for the lemma button in the webapp UI.
+        Should be concise (1-3 words) and user-friendly.
+        """
+        ...
+    
+    @property
+    @abstractmethod
+    def description(self) -> str:
+        """
+        User-facing explanation of what this lemma does.
+        Displayed as tooltip/help text in the webapp interface.
+        """
+        ...
+    
+    @property
+    @abstractmethod
+    def arguments(self) -> list[str]:
+        """
+        Input types this lemma accepts from the webapp.
+        Determines which UI input fields are shown to the user.
+        Valid options: variables, hypotheses, verbose, this, expressions
+        """
+        ...
 
 
 class UseLemma(Tactic):
@@ -72,6 +102,10 @@ class Amgm(Lemma):
 
     def __str__(self) -> str:
         return "am_gm(" + ", ".join(str(x) for x in self.vars) + ")"
+    
+    label = "AM-GM Inequality"
+    description = "The arithmetic mean-geometric mean inequality, can be applied to expressions of the form `a**2 + b**2 + ... + z**2`."
+    arguments = ["expressions"]
 
 
 class Rfl(Lemma):
@@ -90,3 +124,7 @@ class Rfl(Lemma):
 
     def __str__(self) -> str:
         return f"rfl({self.expr})"
+    
+    label = "Reflexivity"
+    description = "The reflexive axiom: any expression is equal to itself."
+    arguments = ["expressions"]
