@@ -154,3 +154,7 @@ class Linarith(Tactic):
 
     def __str__(self) -> str:
         return "linarith"
+    
+    label = "Linear arithmetic"
+    description = "A tactic to try to establish a goal via linear arithmetic.  Inspired by the linarith tactic in Lean."
+    arguments = ["verbose"]

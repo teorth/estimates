@@ -42,6 +42,10 @@ class UseLemma(Tactic):
     def __str__(self) -> str:
         return f"{self.hyp} := {self.lemma}"
 
+    label = "Use lemma"
+    description = "Apply a lemma to the current proof state."
+    arguments = ["hypotheses"]
+
 
 class Amgm(Lemma):
     """

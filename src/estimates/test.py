@@ -45,3 +45,7 @@ class Trivial(Tactic):
 
     def __str__(self) -> str:
         return "trivial"
+    
+    label = "Trivial"
+    description = "A tactic to prove a goal that is trivially true, can be applied to any goal."
+    arguments = []

@@ -84,6 +84,10 @@ class ApplyTheta(Tactic):
         else:
             return f"{self.newhyp} := apply_theta {self.hyp}"
 
+    label = "Apply Theta"
+    description = "Apply the Theta function to a hypothesis to get its asymptotic form."
+    arguments = ["hypotheses"]
+
 
 def extract_monomials(expr: Basic) -> dict[Basic, Fraction]:
     """
@@ -418,3 +422,7 @@ class LogLinarith(Tactic):
             return "log_linarith!"
         else:
             return "log_linarith"
+    
+    label = "Log linear arithmetic"
+    description = "A tactic to establish a goal via logarithmic linear arithmetic for asymptotic inequalities."
+    arguments = ["verbose"]

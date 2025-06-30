@@ -183,6 +183,10 @@ class SimpAll(Tactic):
 
     def __str__(self) -> str:
         return "simp_all"
+    
+    label = "Simplify"
+    description = "Simplifies each hypothesis using other hypotheses, then the goal using the hypothesis."
+    arguments = []
 
 
 class IsPositive(Tactic):
@@ -237,6 +241,10 @@ class IsPositive(Tactic):
     def __str__(self) -> str:
         return f"is_positive {self.name}"
 
+    label = "Make positive"
+    description = "Make a variable positive by searching for hypotheses that imply positivity."
+    arguments = ["variables", "this"]
+
 
 class IsNonnegative(Tactic):
     """
@@ -290,6 +298,10 @@ class IsNonnegative(Tactic):
     def __str__(self) -> str:
         return f"is_nonnegative {self.name}"
 
+    label = "Make nonnegative"
+    description = "Make a variable nonnegative by searching for hypotheses that imply nonnegativity."
+    arguments = ["variables", "this"]
+
 
 class IsNonzero(Tactic):
     """
@@ -342,6 +354,10 @@ class IsNonzero(Tactic):
 
     def __str__(self) -> str:
         return f"is_nonzero {self.name}"
+
+    label = "Make nonzero"
+    description = "Make a variable nonzero by searching for hypotheses that imply nonvanishing."
+    arguments = ["variables", "this"]
 
 
 class Calc(Tactic):
@@ -477,5 +493,9 @@ class Calc(Tactic):
 
     def __str__(self) -> str:
         return self.name
+
+    label = "Calc"
+    description = "Split an inequality goal into two or more subgoals, which chain together to recover the main goal."
+    arguments = ["expressions"]
 
                 
