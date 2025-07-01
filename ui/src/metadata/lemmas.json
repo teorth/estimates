@@ -1,0 +1,16 @@
+[
+  {
+    "id": "Amgm",
+    "label": "AM-GM Inequality",
+    "description": "The arithmetic mean-geometric mean inequality, can be applied to expressions of the form `a**2 + b**2 + ... + z**2`.",
+    "className": "Amgm",
+    "arguments": ["expressions"]
+  },
+  {
+    "id": "Rfl",
+    "label": "Reflexivity",
+    "description": "The reflexive axiom: any expression is equal to itself.",
+    "className": "Rfl",
+    "arguments": ["expressions"]
+  }
+]
