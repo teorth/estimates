@@ -1,0 +1,11 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+body {
+  font-family: "Geist", sans-serif;
+}
+
+code,
+pre {
+  font-family: "Geist Mono", monospace;
+}

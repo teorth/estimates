@@ -1,0 +1,142 @@
+[
+  {
+    "id": "Trivial",
+    "label": "Trivial",
+    "description": "A tactic to prove a goal that is trivially true, can be applied to any goal.",
+    "className": "Trivial",
+    "arguments": []
+  },
+  {
+    "id": "Linarith",
+    "label": "Linear arithmetic",
+    "description": "A tactic to try to establish a goal via linear arithmetic.  Inspired by the linarith tactic in Lean.",
+    "className": "Linarith",
+    "arguments": ["verbose"]
+  },
+  {
+    "id": "ApplyTheta",
+    "label": "Apply Theta",
+    "description": "Apply the Theta function to a hypothesis to get its asymptotic form.",
+    "className": "ApplyTheta",
+    "arguments": ["hypotheses"]
+  },
+  {
+    "id": "LogLinarith",
+    "label": "Log linear arithmetic",
+    "description": "A tactic to establish a goal via logarithmic linear arithmetic for asymptotic inequalities.",
+    "className": "LogLinarith",
+    "arguments": ["verbose"]
+  },
+  {
+    "id": "SplitGoal",
+    "label": "Split goal",
+    "description": "Split the goal into its conjuncts.  If the goal is a conjunction, split the goal into one goal for each conjunct.",
+    "className": "SplitGoal",
+    "arguments": []
+  },
+  {
+    "id": "Contrapose",
+    "label": "Contrapositive",
+    "description": "If the hypothesis is a proposition, replace the goal with the negation of the hypothesis, and the hypothesis with the negation of the goal.  Otherwise, this becomes a proof by contradiction, adding the negation of the goal as a hypothesis, and \"false\" as the goal.",
+    "className": "Contrapose",
+    "arguments": ["hypotheses", "this"]
+  },
+  {
+    "id": "SplitHyp",
+    "label": "Split hypothesis",
+    "description": "Split a hypothesis into its conjuncts.  If the hypothesis is a conjunction, split the hypothesis into one hypothesis for each conjunct.  The new hypotheses will be named according to the names supplied in the constructor.",
+    "className": "SplitHyp",
+    "arguments": ["hypotheses", "this"]
+  },
+  {
+    "id": "Cases",
+    "label": "Cases",
+    "description": "Split a hypothesis into its disjuncts.  If the hypothesis is a disjunction, split the hypothesis into one goal for each disjunct.",
+    "className": "Cases",
+    "arguments": ["hypotheses"]
+  },
+  {
+    "id": "ByCases",
+    "label": "By cases",
+    "description": "Split into two cases, depending on whether an assertion is true or false.",
+    "className": "ByCases",
+    "arguments": ["expressions"]
+  },
+  {
+    "id": "Option",
+    "label": "Option",
+    "description": "If the goal is a disjunction, replace it with one of its disjuncts.",
+    "className": "Option",
+    "arguments": []
+  },
+  {
+    "id": "Claim",
+    "label": "Claim",
+    "description": "Similar to the `have` tactic in Lean.  Add a subgoal to prove, and then prove the original goal assuming the subgoal.",
+    "className": "Claim",
+    "arguments": ["expressions"]
+  },
+  {
+    "id": "SimpAll",
+    "label": "Simplify",
+    "description": "Simplifies each hypothesis using other hypotheses, then the goal using the hypothesis.",
+    "className": "SimpAll",
+    "arguments": []
+  },
+  {
+    "id": "IsPositive",
+    "label": "Make positive",
+    "description": "Make a variable positive by searching for hypotheses that imply positivity.",
+    "className": "IsPositive",
+    "arguments": ["variables", "this"]
+  },
+  {
+    "id": "IsNonnegative",
+    "label": "Make nonnegative",
+    "description": "Make a variable nonnegative by searching for hypotheses that imply nonnegativity.",
+    "className": "IsNonnegative",
+    "arguments": ["variables", "this"]
+  },
+  {
+    "id": "IsNonzero",
+    "label": "Make nonzero",
+    "description": "Make a variable nonzero by searching for hypotheses that imply nonvanishing.",
+    "className": "IsNonzero",
+    "arguments": ["variables", "this"]
+  },
+  {
+    "id": "Calc",
+    "label": "Calc",
+    "description": "Split an inequality goal into two or more subgoals, which chain together to recover the main goal.",
+    "className": "Calc",
+    "arguments": ["expressions"]
+  },
+  {
+    "id": "Let",
+    "label": "Let",
+    "description": "Introduce a new variable, defined to equal a given expression.",
+    "className": "Let",
+    "arguments": ["variables", "expressions"]
+  },
+  {
+    "id": "Set",
+    "label": "Set",
+    "description": "Introduce a new variable, defined to equal a given expression, then substitute all instances of that expression with the variable.",
+    "className": "Set",
+    "arguments": ["variables", "expressions"]
+  },
+  {
+    "id": "Subst",
+    "label": "Substitute",
+    "description": "Use an existing equality hypothesis to substitute all instances of one side with the other in the goal or a specified hypothesis.",
+    "className": "Subst",
+    "arguments": ["hypotheses"]
+  },
+  {
+    "id": "SubstAll",
+    "label": "Substitute all",
+    "description": "Use an existing equality hypothesis to substitute all instances of one side with the other in the goal and all other hypotheses.",
+    "className": "SubstAll",
+    "arguments": ["hypotheses"]
+  }
+]

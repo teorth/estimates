@@ -1,0 +1,56 @@
+name: Github Pages
+
+on:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+          
+      - name: Clone the estimates repo
+        run: |
+          git clone https://github.com/teorth/estimates.git
+
+      - name: Build the wheel for the estimates repo
+        run: |
+          rm estimates/pyproject.toml
+          cp ui/estimates-pyodide-pyproject.toml estimates/pyproject.toml
+          cd estimates
+          uv build --wheel --python 3.12
+
+      - name: Build tactics and lemmas
+        run: |
+          uv run --python 3.13 --with git+https://github.com/teorth/estimates ui/build_tactics_lemmas.py
+
+      - name: Build Vite app
+        run: |
+          cd ui
+          npm install
+          npm run build
+
+      - name: Copy wheels to dist
+        run: |
+          cp ui/public/coi-serviceworker.js ui/dist/assets/
+          cp estimates/dist/estimates-0.1.0-py3-none-any.whl ui/dist/estimates-0.3.0-py3-none-any.whl
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: ui/dist
+          branch: gh-pages
+          clean: true
