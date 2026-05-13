@@ -176,6 +176,6 @@ def feasibility(inequalities: list[Inequality]) -> tuple[bool, dict]:
 def is_valid_counterexample(dict):
     for var, value in dict.items():
         if isinstance(var, Pow) and var.base in dict:
-            if simplify(dict[var.base] ** var.exp != value):
+            if simplify(dict[var.base] ** var.exp) != value:
                 return False
     return True
