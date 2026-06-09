@@ -61,7 +61,7 @@ def case_split_exercise() -> ProofAssistant:
 def case_split_solution() -> None:
     p = case_split_exercise()
     p.use(Cases("h1"))
-    p.all_goals_use(SimpAll())
+    p.all_goals_use(SimpAll(repeat=True))
 
 def split_exercise() -> ProofAssistant:
     p = ProofAssistant()
