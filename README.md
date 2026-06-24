@@ -358,7 +358,6 @@ y: nonneg_real
 |- 2*x*y <= x**2 + y**2
 >>> x,y = p.get_vars("x","y")
 >>> p.use_lemma(Amgm(x**2,y**2))
->>> p.use_lemma(Amgm(x**2,y**2))
 Applying lemma am_gm(x**2, y**2) to conclude this: x*y <= x**2/2 + y**2/2.
 1 goal remaining.
 >>> p.use(Linarith())
