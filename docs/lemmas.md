@@ -10,7 +10,7 @@ The reflexive axiom `expr = expr`.
 
 ## Amgm(x_1, ..., x_n)
 
-The arithmetic mean-geometric mean inequality $(x_1 \dots X_n)^{1/n} \leq \frac{x_1+\dots+x_n}{2}$.  Needs the $x_i$ to be non-negative in order to be applied.
+The arithmetic mean-geometric mean inequality $(x_1 \dots x_n)^{1/n} \leq \frac{x_1+\dots+x_n}{n}$.  Needs the $x_i$ to be non-negative in order to be applied.
 
 Example:
 ```
