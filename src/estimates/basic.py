@@ -92,13 +92,13 @@ def new_var(type: str, name: str) -> Expr:
             return OrderSymbol(name)
         case _:
             raise ValueError(
-                f"Unknown type {type}.  Currently accepted types: 'int', 'pos_int', 'nonneg_int', `nonzero_int`, 'real', 'pos_real', 'nonneg_real', 'nonzero_real', 'rat', 'pos_rat`, 'nonneg_rat', 'nonzero_rat', 'complex', 'nonzero_complex', 'bool', 'order'."
+                f"Unknown type {type}.  Currently accepted types: 'int', 'pos_int', 'nonneg_int', 'nonzero_int', 'real', 'pos_real', 'nonneg_real', 'nonzero_real', 'rat', 'pos_rat', 'nonneg_rat', 'nonzero_rat', 'complex', 'nonzero_complex', 'bool', 'order'."
             )
 
 
 class Type(Basic):
     """
-    A bare‐bones SymPy object to capture the "type" of of other SymPy expressions.  Used here to encode variable declarations: "x : int", for instance, is encoded as "x : Type(Symbol("x", integer=True))".
+    A bare‐bones SymPy object to capture the "type" of other SymPy expressions.  Used here to encode variable declarations: "x : int", for instance, is encoded as "x : Type(Symbol("x", integer=True))".
     """
 
     def __new__(cls, *args):
