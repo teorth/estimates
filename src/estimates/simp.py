@@ -20,9 +20,11 @@ from estimates.bounded import is_fixed, is_bounded
 #  The simplifier
 
 
-def rsimp(goal: Basic, hypotheses: set[Basic] = set(), use_sympy = False) -> Basic:
+def rsimp(goal: Basic, hypotheses: set[Basic] | None = None, use_sympy = False) -> Basic:
     """
     Recursively simplifies the goal using a set of hypotheses.  If `use_sympy` is True, it uses sympy's simplifier."""
+    if hypotheses is None:
+        hypotheses = set()
 
     new_args = [rsimp(arg, hypotheses) for arg in goal.args]
 
@@ -90,10 +92,12 @@ def rsimp(goal: Basic, hypotheses: set[Basic] = set(), use_sympy = False) -> Bas
         return goal.func(*new_args).doit()
 
 
-def simp(goal: Basic, hypotheses:set[Basic] = set(), use_sympy = False) -> Basic:
+def simp(goal: Basic, hypotheses: set[Basic] | None = None, use_sympy = False) -> Basic:
     """
     Simplifies the goal using the hypothesis.  If `use_sympy` is True, it uses sympy's simplifier.
     """
+    if hypotheses is None:
+        hypotheses = set()
 
     if isinstance(goal, Type):
         # do not attempt to simplify variable declarations.  This is done by a separate tactic.

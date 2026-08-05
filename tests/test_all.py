@@ -110,3 +110,12 @@ class TestAll(object):
     def test_sympy_simplify_solution(self, capsys):
         sympy_simplify_solution()
         self.proof_complete(capsys)
+
+    def test_no_mutable_hypothesis_defaults(self):
+        """is_fixed/is_bounded/simp/rsimp must not share a mutable default set."""
+        from estimates.bounded import is_fixed, is_bounded
+        from estimates.simp import simp, rsimp
+        assert is_fixed.__defaults__ == (None,)
+        assert is_bounded.__defaults__ == (None,)
+        assert simp.__defaults__[0] is None
+        assert rsimp.__defaults__[0] is None

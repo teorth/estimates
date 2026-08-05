@@ -44,10 +44,12 @@ class Bounded(Boolean):
     def __repr__(self) -> str:
         return self.name
 
-def is_fixed(expr: Expr, hypotheses:set[Basic] = set()) -> bool:
+def is_fixed(expr: Expr, hypotheses: set[Basic] | None = None) -> bool:
     """
     Check if an expression is fixed, given a set of hypotheses.  Only the hypotheses that are IsFixed objects will be used to determine if the expression is fixed.
     """
+    if hypotheses is None:
+        hypotheses = set()
 
     if expr.is_number:
         return True   # numerical quantities are always fixed
@@ -65,10 +67,12 @@ def is_fixed(expr: Expr, hypotheses:set[Basic] = set()) -> bool:
 
     return False
 
-def is_bounded(expr: Expr, hypotheses:set[Basic] = set()) -> bool:
+def is_bounded(expr: Expr, hypotheses: set[Basic] | None = None) -> bool:
     """
     Check if an expression is bounded, given a set of hypotheses.  Only the hypotheses that are IsFixed or IsBounded objects will be used to determine if the expression is bounded.
     """
+    if hypotheses is None:
+        hypotheses = set()
 
     if expr.is_number:
         return True   # numerical quantities are always bounded
