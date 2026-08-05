@@ -110,3 +110,16 @@ class TestAll(object):
     def test_sympy_simplify_solution(self, capsys):
         sympy_simplify_solution()
         self.proof_complete(capsys)
+
+    def test_bycases_requires_defined(self):
+        """ByCases must reject free symbols not declared in the proof state."""
+        from sympy import Symbol
+        p = ProofAssistant()
+        x = p.var("pos_real", "x")
+        p.begin_proof(x > 0)
+        w = Symbol("w", real=True)
+        try:
+            p.use(ByCases(w > 1, "h"))
+            assert False, "expected ValueError"
+        except ValueError as e:
+            assert "not defined" in str(e)

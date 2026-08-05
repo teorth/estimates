@@ -275,6 +275,10 @@ class ByCases(Tactic):
     def activate(self, state: ProofState) -> list[ProofState]:
         if not isinstance(self.statement, Boolean):
             raise ValueError(f"{self.statement!s} is not a proposition.")
+        if not is_defined(self.statement, state.get_all_vars()):
+            raise ValueError(
+                f"{self.statement!s} is not defined in the current proof state."
+            )
         name = state.new(self.name)
         new_states = []
         new_state = state.copy()
