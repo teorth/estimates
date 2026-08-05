@@ -110,3 +110,22 @@ class TestAll(object):
     def test_sympy_simplify_solution(self, capsys):
         sympy_simplify_solution()
         self.proof_complete(capsys)
+
+    def test_go_forward_messages(self, capsys):
+        """go_forward should interpolate case counts in messages."""
+        from sympy import Or, Eq
+        p = ProofAssistant()
+        x = p.var("real", "x")
+        p.assume(Or(Eq(x, 0), Eq(x, 1), Eq(x, 2), Eq(x, 3)), "h")
+        p.begin_proof(x >= 0)
+        p.use(Cases("h"))
+        p.go_back()
+        capsys.readouterr()
+        p.go_forward(99)
+        out = capsys.readouterr().out
+        assert "{len(" not in out
+        assert "4 cases" in out
+        p.go_forward(4)
+        out = capsys.readouterr().out
+        assert "{case}" not in out
+        assert "case 4" in out

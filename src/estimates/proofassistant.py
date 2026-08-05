@@ -297,7 +297,7 @@ class ProofAssistant:
                 )
             else:
                 self.current_node = node
-                print(f'Moved to a proof state currently handled by "{node.tactic}").')
+                print(f'Moved to a proof state currently handled by "{node.tactic}".')
         else:
             raise ValueError("Cannot set current node in assumption mode.")
 
@@ -371,7 +371,7 @@ class ProofAssistant:
                 print("There are no more steps in this branch of the proof.")
             elif case > len(self.current_node.children):
                 print(
-                    "There are only {len(self.current_node.children)} cases after this step of the proof."
+                    f"There are only {len(self.current_node.children)} cases after this step of the proof."
                 )
             else:
                 self.set_current_node(self.current_node.children[case - 1])
@@ -384,7 +384,7 @@ class ProofAssistant:
                 elif case == 3:
                     print("Moved forward to the third case of this step in the proof.")
                 else:
-                    print("Moved forward to case {case} of this step in the proof.")
+                    print(f"Moved forward to case {case} of this step in the proof.")
         else:
             raise ValueError("Cannot move forward in assumption mode.")
 
