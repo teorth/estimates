@@ -218,7 +218,7 @@ class SubstAll(Tactic):
                 )
         newstate.set_goal(newtarget)
 
-        if newstate == state:
+        if newstate.eq(state):
             print("Substitution had no effect.")
         if newtarget == true:
             print("Goal proved!")

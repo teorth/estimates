@@ -110,3 +110,13 @@ class TestAll(object):
     def test_sympy_simplify_solution(self, capsys):
         sympy_simplify_solution()
         self.proof_complete(capsys)
+
+    def test_substall_no_effect_message(self, capsys):
+        """SubstAll should report when substitution changes nothing."""
+        p = ProofAssistant()
+        x, y, z = p.var("real", "x"), p.var("real", "y"), p.var("real", "z")
+        p.assume(Eq(x, y), "h")
+        p.begin_proof(z > 0)
+        p.use(SubstAll("h"))
+        out = capsys.readouterr().out
+        assert "Substitution had no effect." in out
