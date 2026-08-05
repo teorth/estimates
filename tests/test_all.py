@@ -110,3 +110,7 @@ class TestAll(object):
     def test_sympy_simplify_solution(self, capsys):
         sympy_simplify_solution()
         self.proof_complete(capsys)
+
+    def test_apply_theta_str(self):
+        from estimates.log_linarith import ApplyTheta
+        assert str(ApplyTheta("h")) == "apply_theta h"
