@@ -220,7 +220,7 @@ class IsPositive(Tactic):
             newvar = new_var("pos_real", name)
         else:
             raise ValueError(
-                f"INCONSISTENCY: {name}:{typeof} was somehow proven positive, which is impossible."
+                f"INCONSISTENCY: {name}:{typeof(var)} was somehow proven positive, which is impossible."
             )
 
         print(f"{name} is now of type {typeof(newvar)}.")
@@ -277,7 +277,7 @@ class IsNonnegative(Tactic):
             newvar = new_var("nonneg_real", name)
         else:
             raise ValueError(
-                f"INCONSISTENCY: {name}:{typeof} was somehow proven nonnegative, which is impossible."
+                f"INCONSISTENCY: {name}:{typeof(var)} was somehow proven nonnegative, which is impossible."
             )
 
         print(f"{name} is now of type {typeof(newvar)}.")
@@ -334,7 +334,7 @@ class IsNonzero(Tactic):
             newvar = new_var("nonzero_real", name)
         else:
             raise ValueError(
-                f"INCONSISTENCY: {name}:{typeof} was somehow proven positive, which is impossible."
+                f"INCONSISTENCY: {name}:{typeof(var)} was somehow proven nonzero, which is impossible."
             )
 
         print(f"{name} is now of type {typeof(newvar)}.")

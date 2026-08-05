@@ -110,3 +110,14 @@ class TestAll(object):
     def test_sympy_simplify_solution(self, capsys):
         sympy_simplify_solution()
         self.proof_complete(capsys)
+
+    def test_type_tactic_inconsistency_messages(self):
+        """Inconsistency errors should call typeof(var), and IsNonzero should say nonzero."""
+        import inspect
+        from estimates.simp import IsNonzero, IsPositive, IsNonnegative
+        src = inspect.getsource(IsNonzero.activate)
+        assert "typeof(var)" in src
+        assert "proven nonzero" in src
+        assert "proven positive" not in src
+        assert "typeof(var)" in inspect.getsource(IsPositive.activate)
+        assert "typeof(var)" in inspect.getsource(IsNonnegative.activate)
