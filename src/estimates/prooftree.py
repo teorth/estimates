@@ -32,6 +32,11 @@ class ProofTree:
 
     def use_tactic(self, tactic: Tactic) -> bool:
         """Apply a tactic to the proof state and create child nodes for each resulting proof state."""
+        # Do not re-apply tactics to nodes that already have a proof step; that
+        # would overwrite the tactic and append extra sorry children, reopening
+        # completed (or partially progressed) subgoals.
+        if self.tactic is not None:
+            return False
         proof_state_list = tactic.activate(self.proof_state)
         if len(proof_state_list) == 1 and proof_state_list[0].eq(self.proof_state):
             return False  # This tactic did nothing, so don't add a child node
