@@ -178,8 +178,8 @@ def max_objects(expr: Basic) -> set[Basic]:
         return set()
 
 
-def min_objects(expr: Basic) -> list[Basic]:
-    """Returns a list of the objects in the expression that are of type OrderMin."""
+def min_objects(expr: Basic) -> set[Basic]:
+    """Returns a set of the objects in the expression that are of type OrderMin."""
     if isinstance(expr, OrderMin):
         objects = {expr}
         for arg in expr.args:

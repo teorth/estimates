@@ -110,3 +110,12 @@ class TestAll(object):
     def test_sympy_simplify_solution(self, capsys):
         sympy_simplify_solution()
         self.proof_complete(capsys)
+
+    def test_min_objects_returns_set(self):
+        """min_objects is annotated/implemented as a set, not a list."""
+        from estimates.log_linarith import min_objects
+        from estimates.order_of_magnitude import OrderMin, Theta
+        from sympy import symbols
+        x, y = symbols("x y", positive=True)
+        objs = min_objects(OrderMin(Theta(x), Theta(y)))
+        assert isinstance(objs, set)
