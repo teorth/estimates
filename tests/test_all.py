@@ -110,3 +110,12 @@ class TestAll(object):
     def test_sympy_simplify_solution(self, capsys):
         sympy_simplify_solution()
         self.proof_complete(capsys)
+
+    def test_theta_abs_nonnegative(self):
+        """Theta(Abs(n)) must not become Undefined when positivity is unknown."""
+        from sympy import Abs, Symbol
+        from estimates.order_of_magnitude import Theta, Undefined
+        n = Symbol("n", integer=True)
+        t = Theta(Abs(n))
+        assert not isinstance(t, Undefined)
+        assert str(t).startswith("Theta")

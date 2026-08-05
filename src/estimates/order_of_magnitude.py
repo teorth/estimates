@@ -116,7 +116,13 @@ class Theta(OrderOfMagnitude, Expr):
         if isinstance(expr, OrderOfMagnitude):
             return expr
 
-        if not expr.is_positive:
+        # Abs(x) is nonnegative but sympy often leaves .is_positive as None (zero possible).
+        # Still a valid order of magnitude when not identically zero.
+        if expr.is_positive:
+            pass
+        elif expr.is_nonnegative is True and expr.is_zero is not True:
+            pass
+        else:
             print(f"Warning: a non-positive argument {expr!s} was passed to Theta.")
             return Undefined()
 
