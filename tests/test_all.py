@@ -110,3 +110,15 @@ class TestAll(object):
     def test_sympy_simplify_solution(self, capsys):
         sympy_simplify_solution()
         self.proof_complete(capsys)
+
+    def test_loglinarith_greaterthan_not_reversed(self, capsys):
+        """x > y must not prove Theta(y) >= Theta(x)."""
+        from estimates.order_of_magnitude import Theta
+        p = ProofAssistant()
+        x, y = p.var("pos_real", "x"), p.var("pos_real", "y")
+        p.assume(x > y, "h")
+        p.begin_proof(Theta(y) >= Theta(x))
+        p.use(LogLinarith())
+        out = capsys.readouterr().out
+        assert "Proof complete!" not in out
+        assert "unable to prove goal" in out

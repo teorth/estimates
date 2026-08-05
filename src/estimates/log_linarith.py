@@ -296,10 +296,12 @@ class LogLinarith(Tactic):
                             )
                         ]
                     elif isinstance(hypothesis, GreaterThan | StrictGreaterThan):
+                        # Keep argument order (same as LessThan -> "<="); swapping
+                        # both sides and using ">=" inverted the relation.
                         newhypotheses = [
                             Rel(
-                                Theta(hypothesis.args[1]),
                                 Theta(hypothesis.args[0]),
+                                Theta(hypothesis.args[1]),
                                 ">=",
                             )
                         ]
