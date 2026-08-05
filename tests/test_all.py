@@ -110,3 +110,12 @@ class TestAll(object):
     def test_sympy_simplify_solution(self, capsys):
         sympy_simplify_solution()
         self.proof_complete(capsys)
+
+    def test_asymp_not_tautology(self):
+        """asymp on plain reals must not collapse to True via Undefined==Undefined."""
+        from sympy import Symbol
+        from estimates.order_of_magnitude import asymp
+        a, b = Symbol("a", real=True), Symbol("b", real=True)
+        r = asymp(a, b)
+        assert r is not True
+        assert r != True

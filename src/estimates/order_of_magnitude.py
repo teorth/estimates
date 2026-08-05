@@ -409,7 +409,7 @@ def gg(expr1: Expr, expr2: Expr) -> Relational:
     """
     The formal assertion that expr1 is asymptotically much greater than expr2.
     """
-    return Theta(expr1) > Theta(abs(expr2))
+    return Theta(abs(expr1)) > Theta(abs(expr2))
 
 
 Expr.gg = gg
@@ -419,7 +419,7 @@ def gtrsim(expr1: Expr, expr2: Expr) -> Relational:
     """
     The formal assertion that expr1 is greater than or comparable to expr2.
     """
-    return Theta(expr1) >= Theta(abs(expr2))
+    return Theta(abs(expr1)) >= Theta(abs(expr2))
 
 
 Expr.gtrsim = gtrsim
@@ -429,7 +429,9 @@ def asymp(expr1: Expr, expr2: Expr) -> Relational:
     """
     The formal assertion that expr1 is asymptotically equivalent to expr2.
     """
-    return Eq(Theta(expr1), Theta(expr2))
+    # Wrap abs like ll/lesssim. evaluate=False so Undefined≠Undefined does not
+    # collapse to True when Theta rejects a non-positive argument.
+    return Eq(Theta(abs(expr1)), Theta(abs(expr2)), evaluate=False)
 
 
 Expr.asymp = asymp
