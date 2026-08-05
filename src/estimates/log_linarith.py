@@ -259,19 +259,18 @@ class LogLinarith(Tactic):
                     hypothesis.args[1], OrderOfMagnitude
                 ):
                     if isinstance(hypothesis, Ne):
+                        # Disjuncts for product(*inequality_lists); both must be Rel, not a nested list.
                         newhypotheses = [
                             Rel(
                                 Theta(hypothesis.args[0]),
                                 Theta(hypothesis.args[1]),
                                 "<",
                             ),
-                            [
-                                Rel(
-                                    Theta(hypothesis.args[0]),
-                                    Theta(hypothesis.args[1]),
-                                    ">",
-                                )
-                            ],
+                            Rel(
+                                Theta(hypothesis.args[0]),
+                                Theta(hypothesis.args[1]),
+                                ">",
+                            ),
                         ]
                     else:
                         newhypotheses = [hypothesis]

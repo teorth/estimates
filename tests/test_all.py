@@ -110,3 +110,14 @@ class TestAll(object):
     def test_sympy_simplify_solution(self, capsys):
         sympy_simplify_solution()
         self.proof_complete(capsys)
+
+    def test_loglinarith_ne_orders(self, capsys):
+        """Ne between orders must not crash LogLinarith."""
+        from sympy import Ne
+        p = ProofAssistant()
+        X, Y = p.var("order", "X"), p.var("order", "Y")
+        p.assume(Ne(X, Y), "h")
+        p.begin_proof(X <= Y)
+        p.use(LogLinarith())
+        # Should run without AttributeError; may or may not solve.
+        assert True
