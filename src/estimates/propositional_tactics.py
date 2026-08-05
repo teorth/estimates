@@ -35,20 +35,26 @@ def get_conjuncts(expr: Basic) -> Sequence[Basic] | None:
     if isinstance(expr, And):
         return expr.args
     elif isinstance(expr, Eq):
-        if isinstance(expr.args[1], Max | OrderMax):
+        lhs, rhs = expr.args
+        # Max(y,z) = x is the same as x = Max(y,z); normalize Max/Min to the RHS.
+        if isinstance(lhs, Max | OrderMax | Min | OrderMin) and not isinstance(
+            rhs, Max | OrderMax | Min | OrderMin
+        ):
+            return get_conjuncts(Eq(rhs, lhs, evaluate=False))
+        if isinstance(rhs, Max | OrderMax):
             # x = Max(y,z) can be split into x >= y, x >= z, and (x == y) | (x == z)
             disjuncts = []
-            for arg in expr.args[1].args:
-                conjuncts.append(expr.args[0] >= arg)
-                disjuncts.append(Eq(expr.args[0], arg))
+            for arg in rhs.args:
+                conjuncts.append(lhs >= arg)
+                disjuncts.append(Eq(lhs, arg))
             conjuncts.append(Or(*disjuncts))
             return conjuncts
-        elif isinstance(expr.args[1], Min | OrderMin):
+        elif isinstance(rhs, Min | OrderMin):
             # x = Min(y,z) can be split into x <= y, x <= z, and (x == y) | (x == z)
             disjuncts = []
-            for arg in expr.args[1].args:
-                conjuncts.append(expr.args[0] <= arg)
-                disjuncts.append(Eq(expr.args[0], arg))
+            for arg in rhs.args:
+                conjuncts.append(lhs <= arg)
+                disjuncts.append(Eq(lhs, arg))
             conjuncts.append(Or(*disjuncts))
             return conjuncts
     elif isinstance(expr, LessThan | StrictLessThan):

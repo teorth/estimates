@@ -110,3 +110,14 @@ class TestAll(object):
     def test_sympy_simplify_solution(self, capsys):
         sympy_simplify_solution()
         self.proof_complete(capsys)
+
+    def test_eq_max_lhs_conjuncts(self):
+        """Max(y, z) = x should split like x = Max(y, z)."""
+        from sympy import Max, Min, symbols, Eq
+        from estimates.propositional_tactics import get_conjuncts
+        x, y, z = symbols("x y z", real=True)
+        rhs = get_conjuncts(Eq(x, Max(y, z)))
+        lhs = get_conjuncts(Eq(Max(y, z), x))
+        assert lhs is not None and rhs is not None
+        assert len(lhs) == len(rhs)
+        assert get_conjuncts(Eq(Min(y, z), x)) is not None
