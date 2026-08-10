@@ -1,5 +1,6 @@
 from fractions import Fraction
 
+from sympy import S
 from sympy.core.expr import Expr
 from sympy.logic.boolalg import BooleanFunction
 
@@ -9,14 +10,15 @@ from estimates.order_of_magnitude import Theta, asymp
 
 
 def sqrt(x: Expr) -> Expr:
-    return x ** Fraction(1, 2)
+    # Sympify so numeric literals stay in exact SymPy arithmetic (not float).
+    return S(x) ** Fraction(1, 2)
 
 
 def bracket(x: Expr) -> Expr:
     """
     The "Japanese bracket" notation.
     """
-    return sqrt(1 + abs(x) ** 2)
+    return sqrt(1 + abs(S(x)) ** 2)
 
 
 class LittlewoodPaley(BooleanFunction):
