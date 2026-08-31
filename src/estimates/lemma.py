@@ -104,7 +104,7 @@ class Amgm(Lemma):
         return "am_gm(" + ", ".join(str(x) for x in self.vars) + ")"
     
     label = "AM-GM Inequality"
-    description = "The arithmetic mean-geometric mean inequality, can be applied to expressions of the form `a**2 + b**2 + ... + z**2`."
+    description = "The arithmetic mean-geometric mean inequality (x₁⋯xₙ)^{1/n} ≤ (x₁+⋯+xₙ)/n. Requires nonnegative expressions."
     arguments = ["expressions"]
 
 
