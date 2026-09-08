@@ -22,13 +22,14 @@ from estimates.bounded import is_fixed, is_bounded
 
 def rsimp(goal: Basic, hypotheses: set[Basic] = set(), use_sympy = False) -> Basic:
     """
-    Recursively simplifies the goal using a set of hypotheses.  If `use_sympy` is True, it uses sympy's simplifier."""
-
-    new_args = [rsimp(arg, hypotheses) for arg in goal.args]
+    Recursively simplifies the goal using a set of hypotheses.  If `use_sympy` is True, it uses sympy's simplifier on this node before simplifying subterms with the same flag.
+    """
 
     if use_sympy:  # Use sympy's simplifier.  Note that this may have unwanted behavior.
         goal = simplify(goal)
         hypotheses = {simplify(hyp) for hyp in hypotheses}
+
+    new_args = [rsimp(arg, hypotheses, use_sympy) for arg in goal.args]
 
     if goal in hypotheses:
         return true
@@ -92,7 +93,8 @@ def rsimp(goal: Basic, hypotheses: set[Basic] = set(), use_sympy = False) -> Bas
 
 def simp(goal: Basic, hypotheses:set[Basic] = set(), use_sympy = False) -> Basic:
     """
-    Simplifies the goal using the hypothesis.  If `use_sympy` is True, it uses sympy's simplifier.
+    Simplifies the goal using the hypothesis.  If `use_sympy` is True, it uses sympy's simplifier
+    and rsimp walks subterms with the same flag.
     """
 
     if isinstance(goal, Type):
