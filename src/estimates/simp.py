@@ -1,4 +1,4 @@
-from sympy import Basic, Eq, Max, Min, Not, false, simplify, true, Expr
+from sympy import Basic, Eq, Ne, Max, Min, Not, false, simplify, true, Expr
 from sympy.logic.boolalg import Boolean
 from sympy.core.relational import (
     GreaterThan,
@@ -322,7 +322,7 @@ class IsNonzero(Tactic):
             print(f"{name} is already a nonzero type.")
             return [state.copy()]
 
-        if not state.test(var != 0):
+        if not state.test(Ne(var, 0)):
             print(f"Cannot prove {name} is nonzero.")
             return [state.copy()]
 
