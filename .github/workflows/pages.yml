@@ -17,7 +17,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: '22'
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
@@ -40,7 +40,7 @@ jobs:
       - name: Build Vite app
         run: |
           cd ui
-          npm install
+          npm ci
           npm run build
 
       - name: Copy wheels to dist
