@@ -137,6 +137,7 @@ class ProofTree:
         before = None
         after = None
         found_target = False
+        first_sorry = None
         for child in self.children:
             found, last_before, first_after = child.find_sorry(target)
             if found:
@@ -145,12 +146,14 @@ class ProofTree:
                     before = last_before
                 after = first_after
             else:
+                if first_sorry is None:
+                    first_sorry = first_after
                 if found_target:
                     if after is None:
                         after = first_after
-                else:
+                elif last_before is not None:
                     before = last_before
-        return (found_target, before, after)
+        return (found_target, before, after if found_target else first_sorry)
 
     def count_sorries(self, target: ProofTree) -> tuple[bool, int, int]:
         """
@@ -158,15 +161,7 @@ class ProofTree:
         Also returns whether the target was found in the tree.
         """
         if self == target:
-            before = 0
-            after = 0
-            for child in self.children:
-                found, before_count, after_count = child.count_sorries(target)
-                if found:
-                    after += after_count
-                else:
-                    before += before_count
-            return True, before, after
+            return True, 0, sum(child.num_sorries() for child in self.children)
         if self.tactic is None:
             return False, 1, 1
         before = 0
@@ -183,7 +178,7 @@ class ProofTree:
                     after += after_count
                 else:
                     before += before_count
-        return (found_target, before, after)
+        return (found_target, before, after if found_target else before)
 
     def __str__(self) -> str:
         return self.rstr_join()
