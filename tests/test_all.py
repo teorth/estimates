@@ -110,3 +110,20 @@ class TestAll(object):
     def test_sympy_simplify_solution(self, capsys):
         sympy_simplify_solution()
         self.proof_complete(capsys)
+
+    def test_simpall_repeat_terminates(self, capsys):
+        """SimpAll(repeat=True) must stop when a full pass is a no-op."""
+        from sympy import Or, Not
+
+        p = ProofAssistant()
+        P = p.var("bool", "P")
+        Q = p.var("bool", "Q")
+        R = p.var("bool", "R")
+        p.assume(Or(P, Q), "h1")
+        p.assume(Not(P), "h2")
+        p.begin_proof(R)
+        p.use(SimpAll(repeat=True))
+        captured = capsys.readouterr()
+        assert "Simplified P | Q to Q" in captured.out
+        # Must return without hanging; goal R remains.
+        assert "Proof complete!" not in captured.out

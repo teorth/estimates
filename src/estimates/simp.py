@@ -150,7 +150,11 @@ class SimpAll(Tactic):
         newstate = state.copy()
 
         while True:
-            for name, hyp in state.hypotheses.items():
+            prev = newstate.copy()
+            # Iterate the current simplified state, not the original `state`.
+            # Otherwise repeat=True never stabilizes: each pass re-reads the
+            # pre-simp hypotheses, so newstate never equals state again.
+            for name, hyp in list(newstate.hypotheses.items()):
                 other_hypotheses = set()
                 for other_name, other_hyp in newstate.hypotheses.items():
                     if other_name != name:  # Cannot use a hypothesis to simplify itself!
@@ -176,8 +180,8 @@ class SimpAll(Tactic):
             if not self.repeat:
                 break
 
-            if newstate.eq(state):
-                break  # if repeat is True, we keep simplifying until the goal stabilizes
+            if newstate.eq(prev):
+                break  # if repeat is True, we keep simplifying until a full pass is a no-op
     
         return [newstate]
 
