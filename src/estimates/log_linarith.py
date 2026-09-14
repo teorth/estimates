@@ -296,10 +296,12 @@ class LogLinarith(Tactic):
                             )
                         ]
                     elif isinstance(hypothesis, GreaterThan | StrictGreaterThan):
+                        # Match ApplyTheta: keep argument order and use ">=".
+                        # Swapping args here previously made a > b imply Theta(b) >= Theta(a).
                         newhypotheses = [
                             Rel(
-                                Theta(hypothesis.args[1]),
                                 Theta(hypothesis.args[0]),
+                                Theta(hypothesis.args[1]),
                                 ">=",
                             )
                         ]

@@ -110,3 +110,24 @@ class TestAll(object):
     def test_sympy_simplify_solution(self, capsys):
         sympy_simplify_solution()
         self.proof_complete(capsys)
+
+    def test_loglinarith_gt_does_not_flip(self, capsys):
+        """a > b must not prove a ≲ b (regression for swapped Theta args)."""
+        p = ProofAssistant()
+        a = p.var("pos_real", "a")
+        b = p.var("pos_real", "b")
+        p.assume(a > b, "h")
+        p.begin_proof(lesssim(a, b))
+        p.use(LogLinarith())
+        captured = capsys.readouterr()
+        assert "Proof complete!" not in captured.out
+        assert "unable to prove goal" in captured.out
+
+    def test_loglinarith_gt_proves_gtrsim(self, capsys):
+        p = ProofAssistant()
+        a = p.var("pos_real", "a")
+        b = p.var("pos_real", "b")
+        p.assume(a > b, "h")
+        p.begin_proof(gtrsim(a, b))
+        p.use(LogLinarith())
+        self.proof_complete(capsys)
