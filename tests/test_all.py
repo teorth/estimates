@@ -110,3 +110,17 @@ class TestAll(object):
     def test_sympy_simplify_solution(self, capsys):
         sympy_simplify_solution()
         self.proof_complete(capsys)
+
+    def test_loglinarith_order_ne_does_not_crash(self, capsys):
+        """Ne on orders must not nest a Rel inside a list (AttributeError)."""
+        from sympy import Ne
+
+        p = ProofAssistant()
+        A = p.var("order", "A")
+        B = p.var("order", "B")
+        p.assume(Ne(A, B), "h")
+        p.begin_proof(A < B)
+        p.use(LogLinarith())
+        captured = capsys.readouterr()
+        assert "AttributeError" not in captured.out
+        assert "unable to prove goal" in captured.out

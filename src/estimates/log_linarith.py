@@ -259,19 +259,21 @@ class LogLinarith(Tactic):
                     hypothesis.args[1], OrderOfMagnitude
                 ):
                     if isinstance(hypothesis, Ne):
+                        # One disjunction: Theta(A) < Theta(B) or Theta(A) > Theta(B).
+                        # Do not wrap the second Rel in a nested list — inequality_of
+                        # expects a Relational, and product() already treats the
+                        # outer list as a disjunction.
                         newhypotheses = [
                             Rel(
                                 Theta(hypothesis.args[0]),
                                 Theta(hypothesis.args[1]),
                                 "<",
                             ),
-                            [
-                                Rel(
-                                    Theta(hypothesis.args[0]),
-                                    Theta(hypothesis.args[1]),
-                                    ">",
-                                )
-                            ],
+                            Rel(
+                                Theta(hypothesis.args[0]),
+                                Theta(hypothesis.args[1]),
+                                ">",
+                            ),
                         ]
                     else:
                         newhypotheses = [hypothesis]
