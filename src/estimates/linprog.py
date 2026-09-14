@@ -51,6 +51,12 @@ class Inequality:
                 return f"{coeffs_str} = {self.rhs}"
 
 
+def _z3_linear(z3_variables, coeffs):
+    """Build a Z3 sum; empty coeff dicts become 0 (bare Sum() is invalid)."""
+    if not coeffs:
+        return 0
+    return Sum(*[z3_variables[var] * coeff for var, coeff in coeffs.items()])
+
 def ineq_variables(inequalities: list[Inequality]) -> set:
     """
     Return the set of variables in a list of inequalities.
@@ -79,52 +85,27 @@ def feasibility(inequalities: list[Inequality]) -> tuple[bool, dict]:
         match ineq.sense:
             case "leq":
                 s.add(
-                    Sum(
-                        *[
-                            z3_variables[var] * coeff
-                            for var, coeff in ineq.coeffs.items()
-                        ]
-                    )
+                    _z3_linear(z3_variables, ineq.coeffs)
                     <= ineq.rhs
                 )
             case "lt":
                 s.add(
-                    Sum(
-                        *[
-                            z3_variables[var] * coeff
-                            for var, coeff in ineq.coeffs.items()
-                        ]
-                    )
+                    _z3_linear(z3_variables, ineq.coeffs)
                     < ineq.rhs
                 )
             case "geq":
                 s.add(
-                    Sum(
-                        *[
-                            z3_variables[var] * coeff
-                            for var, coeff in ineq.coeffs.items()
-                        ]
-                    )
+                    _z3_linear(z3_variables, ineq.coeffs)
                     >= ineq.rhs
                 )
             case "gt":
                 s.add(
-                    Sum(
-                        *[
-                            z3_variables[var] * coeff
-                            for var, coeff in ineq.coeffs.items()
-                        ]
-                    )
+                    _z3_linear(z3_variables, ineq.coeffs)
                     > ineq.rhs
                 )
             case "eq":
                 s.add(
-                    Sum(
-                        *[
-                            z3_variables[var] * coeff
-                            for var, coeff in ineq.coeffs.items()
-                        ]
-                    )
+                    _z3_linear(z3_variables, ineq.coeffs)
                     == ineq.rhs
                 )
 
