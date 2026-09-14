@@ -80,7 +80,7 @@ class ApplyTheta(Tactic):
 
     def __str__(self) -> str:
         if self.newhyp is None:
-            return f"apply_theta {self.hyp})"
+            return f"apply_theta {self.hyp}"
         else:
             return f"{self.newhyp} := apply_theta {self.hyp}"
 
