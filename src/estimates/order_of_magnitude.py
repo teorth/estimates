@@ -262,18 +262,44 @@ class OrderMul(OrderOfMagnitude, Expr):
     def __new__(cls, *args):
         # TODO: respect sympy's evaluate flag
 
-        newargs = [Theta(arg) for arg in args]
+        # Numeric factors only affect the formal sign: positive constants are
+        # Theta(1) (absorbed), and a negative factor matches __neg__ via FormalSub.
+        # Passing negatives through Theta(...) previously produced Undefined (⊥).
+        sign = 1
+        newargs = []
+        for arg in args:
+            if isinstance(arg, OrderOfMagnitude):
+                newargs.append(arg)
+                continue
+            if isinstance(arg, Undefined):
+                return Undefined()
+            sarg = sympify(arg)
+            if sarg.is_number:
+                if sarg.is_zero:
+                    return Undefined()
+                if sarg.is_negative:
+                    sign = -sign
+                # nonzero numeric constants do not change order of magnitude
+                continue
+            wrapped = Theta(sarg)
+            if isinstance(wrapped, Undefined):
+                return Undefined()
+            newargs.append(wrapped)
+
         if len(newargs) == 0:
-            return Theta(1)
-        if len(newargs) == 1:
+            result = Theta(1)
+        elif len(newargs) == 1:
             # if there's only one argument, just return it
-            return newargs[0]
+            result = newargs[0]
+        else:
+            # TODO: canonically sort arguments to increase ability to gather terms
+            obj = Expr.__new__(cls, *newargs)
+            obj.name = "*".join([str(arg) for arg in newargs])
+            result = obj
 
-        # TODO: canonically sort arguments to increase ability to gather terms
-
-        obj = Expr.__new__(cls, *newargs)
-        obj.name = "*".join([str(arg) for arg in newargs])
-        return obj
+        if sign < 0:
+            return FormalSub(0, result)
+        return result
 
     def doit(self,**hints):
         # flatten nested OrderMuls
