@@ -236,7 +236,7 @@ def loglinarith_hard_solution2() -> None:
     p.use(LogLinarith())
 
 
-def loglinarith_imposssible_example() -> ProofAssistant:
+def loglinarith_impossible_example() -> ProofAssistant:
     p = ProofAssistant()
     N = p.var("pos_int", "N")
     x, y = p.vars("pos_real", "x", "y")
@@ -246,8 +246,12 @@ def loglinarith_imposssible_example() -> ProofAssistant:
     return p
 
 
+# Keep the old misspelling as an alias for existing docs/call sites.
+loglinarith_imposssible_example = loglinarith_impossible_example
+
+
 def loglinarith_failure_example() -> None:
-    p = loglinarith_imposssible_example()
+    p = loglinarith_impossible_example()
     p.use(LogLinarith(verbose=True))
 
 

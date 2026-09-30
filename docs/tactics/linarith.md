@@ -40,7 +40,7 @@ z: pos_real
 h1: x < 2*y
 h2: y < 3*z + 1
 |- x < 7*z + 2
->>> p.use(Linarith(verbose=true))
+>>> p.use(Linarith(verbose=True))
 Checking feasibility of the following inequalities:
 1*z > 0
 1*x + -7*z >= 2
@@ -67,7 +67,7 @@ z: pos_real
 h1: x < 2*y
 h2: y < 3*z + 1
 |- x < 7*z
->>> p.use(Linarith(verbose=true))
+>>> p.use(Linarith(verbose=True))
 Checking feasibility of the following inequalities:
 1*x + -7*z >= 0
 1*x > 0
@@ -84,14 +84,14 @@ Linear arithmetic was unable to prove goal.
 >>>
 ```
 
-## `LogLinarith(verbose = False, splitmax = True)`
+## `LogLinarith(verbose = False, split_max = True)`
 
-Similar to `Linarith()`, but now applies to order of magnitude inequalities rather than inequalities regarding real numbers; and uses multiplicative operations rather than additive ones.  Additive relations between order of magnitudes (which are converted to `OrderMax` expressions) are case split, unless `splitmax' is set to `False`.  (Caution: splitting maxmima (and minima) means that the run time of this method increases exponentially with the number of additions/maxima/minima present.)
+Similar to `Linarith()`, but now applies to order of magnitude inequalities rather than inequalities regarding real numbers; and uses multiplicative operations rather than additive ones.  Additive relations between order of magnitudes (which are converted to `OrderMax` expressions) are case split, unless `split_max` is set to `False`.  (Caution: splitting maxima (and minima) means that the run time of this method increases exponentially with the number of additions/maxima/minima present.)
 
 Example:
 ```
 >>> from estimates.main import *
->>> p = loglinarith_imposssible_example()
+>>> p = loglinarith_impossible_example()
 Starting proof.  Current proof state:
 N: pos_int
 x: pos_real

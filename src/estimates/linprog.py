@@ -4,7 +4,7 @@ from typing import Literal
 
 from sympy import Pow
 
-from z3 import Real, Solver, Sum, sat, simplify
+from z3 import Real, Solver, Sum, is_true, sat, simplify
 
 # exact linear programming tools.
 
@@ -173,9 +173,16 @@ def feasibility(inequalities: list[Inequality]) -> tuple[bool, dict]:
             f"Farkas lemma violation!  Problem is neither feasible nor infeasible. Inequalities: {inequalities}"
         )
 
-def is_valid_counterexample(dict):
-    for var, value in dict.items():
-        if isinstance(var, Pow) and var.base in dict:
-            if simplify(dict[var.base] ** var.exp) != value:
+def is_valid_counterexample(assignment: dict) -> bool:
+    """Check that powered variables match their bases in a Z3 model assignment.
+
+    Z3's ``!=`` / ``==`` return BoolRef objects; using them in a Python ``if``
+    raises ``Z3Exception: Symbolic expressions cannot be cast to concrete
+    Boolean values``. Use ``is_true`` for a concrete check instead.
+    """
+    for var, value in assignment.items():
+        if isinstance(var, Pow) and var.base in assignment:
+            computed = simplify(assignment[var.base] ** var.exp)
+            if not is_true(simplify(computed == value)):
                 return False
     return True

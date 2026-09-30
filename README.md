@@ -139,7 +139,7 @@ z: pos_real
 h1: x < 2*y
 h2: y < 3*z + 1
 |- x < 7*z
->>> p.use(Linarith(verbose=true))
+>>> p.use(Linarith(verbose=True))
 Checking feasibility of the following inequalities:
 1*x + -7*z >= 0
 1*x > 0
