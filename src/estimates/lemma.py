@@ -85,7 +85,7 @@ class Amgm(Lemma):
     def __init__(self, *vars: Basic) -> None:
         assert len(vars) > 0, "At least one variable is required."
         self.vars = [S(x) for x in vars]
-        for x in vars:
+        for x in self.vars:
             assert x.is_nonnegative, f"{x} must be a nonnegative expression."
 
     def apply(self, state: ProofState) -> Basic:
