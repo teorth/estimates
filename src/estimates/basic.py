@@ -41,7 +41,7 @@ def typeof(obj: Basic) -> str:
         else:
             return "real"
     elif obj.is_complex:
-        if obj.is_nonzero:
+        if obj.is_zero is False:
             return "nonzero_complex"
         return "complex"
     elif obj.is_Boolean:
@@ -85,7 +85,7 @@ def new_var(type: str, name: str) -> Expr:
         case "complex":
             return Symbol(name, complex=True)
         case "nonzero_complex":
-            return Symbol(name, complex=True, nonzero=True)
+            return Symbol(name, complex=True, zero=False)
         case "bool":
             return Proposition(name)
         case "order":
