@@ -40,7 +40,9 @@ class Linarith(Tactic):
         # Next, extract the inequality (or pair of possible inequalities) from this list.
         options = []
         for hypothesis in hypotheses:
-            if isinstance(
+            if hypothesis == false:
+                options.append([false])
+            elif isinstance(
                 hypothesis,
                 Eq | LessThan | StrictLessThan | GreaterThan | StrictGreaterThan | Type,
             ):
