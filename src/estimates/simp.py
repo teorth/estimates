@@ -466,7 +466,8 @@ class Calc(Tactic):
                                 new_outcomes.update({-1,0,1})
             actual_outcomes = new_outcomes
 
-        assert actual_outcomes.issubset(outcomes), f"Calc block {self.name} will not imply the goal {goal}."
+        if not actual_outcomes.issubset(outcomes):
+            raise ValueError(f"Calc block {self.name} will not imply the goal {goal}.")
 
         # now, create the new goals
         new_states = []
