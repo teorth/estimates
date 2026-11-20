@@ -254,6 +254,11 @@ class ProofAssistant:
         if self.mode == "tactic":
             assert self.proof_tree is not None, "Proof tree is not initialized."
             assert self.current_node is not None, "Current node is not initialized."
+            if self.current_node.tactic is not None:
+                print(
+                    "This step already has a tactic. Undo it before applying another."
+                )
+                return
             if not self.current_node.use_tactic(tactic):
                 return  # Tactic did nothing, so don't change the current node
             self.status()
