@@ -52,7 +52,8 @@ class ApplyTheta(Tactic):
         if isinstance(hyp_statement, Ne):
             raise ValueError("Unequalities do not have useful asymptotic forms.")
         elif isinstance(hyp_statement, Eq):
-            new_rel_op = "="
+            # SymPy rejects "="; equality is "==".
+            new_rel_op = "=="
         elif isinstance(hyp_statement, LessThan | StrictLessThan):
             new_rel_op = (
                 "<="  # Asymptotically, strict inequalities become non-strict ones.
@@ -308,7 +309,7 @@ class LogLinarith(Tactic):
                             Rel(
                                 Theta(hypothesis.args[0]),
                                 Theta(hypothesis.args[1]),
-                                "=",
+                                "==",
                             )
                         ]
                     else:
